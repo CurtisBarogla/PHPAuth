@@ -1,0 +1,33 @@
+{
+	"name" : "barogla/security",
+	"description" : "Security Component - Zoe",
+	"type" : "library",
+	"license" : "MIT",
+	"minimum-stability" : "stable",
+	"homepage" : "https://github.com/CurtisBarogla/Security",
+	"authors" : [{
+			"name" : "CurtisBarogla",
+			"email" : "curtis_barogla@outlook.fr"
+		}
+	],
+	"autoload" : {
+		"psr-4" : {
+			"Zoe\\Component\\Security\\" : "src",
+			"ZoeTest\\Component\\Security\\" : "tests"
+		},
+		"exclude-from-classmap" : [
+			"tests"
+		]
+	},
+	"require" : {
+		"php" : ">= 7.1"
+	},
+	"keywords" : [
+		"security"
+	],
+	"extra" : {
+		"branch-alias" : {
+			"dev-master" : "2.0-dev"
+		}
+	}
+}
