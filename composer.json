@@ -7,7 +7,8 @@
 	"homepage" : "https://github.com/CurtisBarogla/Security",
 	"authors" : [{
 			"name" : "CurtisBarogla",
-			"email" : "curtis_barogla@outlook.fr"
+			"email" : "curtis_barogla@outlook.fr",
+			"role" : "T.B."
 		}
 	],
 	"autoload" : {
@@ -29,5 +30,8 @@
 		"branch-alias" : {
 			"dev-master" : "2.0-dev"
 		}
+	},
+	"require-dev" : {
+		"barogla/internal" : "dev-master"
 	}
 }
