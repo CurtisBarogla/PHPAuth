@@ -16,7 +16,7 @@ use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 
 /**
- * Storage for user
+ * Responsible to storing user data during the session duration
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
