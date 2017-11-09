@@ -36,7 +36,7 @@ class StorableUserTest extends TestCase
     public function testCreateFromUser(): void
     {
         // not root
-        $user = new User("foo", "bar");
+        $user = new User("foo", "bar", []);
         $user->addRole("foo")->addAttribute("foo", "bar");
         
         $storedUser = StorableUser::createFromUser($user);
@@ -47,7 +47,7 @@ class StorableUserTest extends TestCase
         $this->assertFalse($storedUser->isRoot());
         
         // root
-        $user = new User("foo", "bar", true);
+        $user = new User("foo", "bar", [], true);
         $storedUser = StorableUser::createFromUser($user);
         
         $this->assertTrue($storedUser->isRoot());

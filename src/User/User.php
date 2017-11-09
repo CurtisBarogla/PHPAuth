@@ -65,14 +65,20 @@ class User implements UserInterface
      *   User name
      * @param string $password
      *   User password
+     * @param array $roles
+     *   User roles
      * @param bool $isRoot
      *   If the user is root
+     * @param array|null $attributes
+     *   User attributes
      */
-    public function __construct(string $name, string $password, bool $isRoot = false)
+    public function __construct(string $name, string $password, array $roles = [], bool $isRoot = false, ?array $attributes = null)
     {
         $this->name = $name;
         $this->password = $password;
+        $this->roles = $roles;
         $this->isRoot = $isRoot;
+        $this->attributes = $attributes;
     }
     
     /**

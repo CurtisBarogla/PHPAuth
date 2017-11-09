@@ -102,7 +102,7 @@ class UserTest extends TestCase
         
         $this->assertFalse($user->isRoot());
         
-        $user = new User("foo", "bar", true);
+        $user = new User("foo", "bar", [], true);
         
         $this->assertTrue($user->isRoot());
     }
