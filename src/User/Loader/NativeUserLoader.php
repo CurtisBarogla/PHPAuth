@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Loader;
+namespace Zoe\Component\Security\User\Loader;
 
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
@@ -45,7 +45,7 @@ class NativeUserLoader implements UserLoaderInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\Loader\UserLoaderInterface::loadUser()
+     * @see \Zoe\Component\Security\User\Loader\UserLoaderInterface::loadUser()
      */
     public function loadUser(UserInterface $user): UserInterface
     {

@@ -13,8 +13,8 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Loader;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\Loader\NativeUserLoader;
-use Zoe\Component\Security\Loader\UserLoaderInterface;
+use Zoe\Component\Security\User\Loader\NativeUserLoader;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\User;
 
@@ -30,7 +30,7 @@ class NativeUserLoaderTest extends TestCase
 {
     
     /**
-     * @see \Zoe\Component\Security\Loader\NativeUserLoader
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader
      */
     public function testInterface(): void
     {
@@ -39,7 +39,7 @@ class NativeUserLoaderTest extends TestCase
     }
     
     /**
-     * @see \Zoe\Component\Security\Loader\NativeUserLoader::loadUser()
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
      */
     public function testErrorWhenNotFoundedUserIsGiven(): void
     {
@@ -53,7 +53,7 @@ class NativeUserLoaderTest extends TestCase
     }
     
     /**
-     * @see \Zoe\Component\Security\Loader\NativeUserLoader::loadUser()
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
      */
     public function testLoadUser(): void
     {

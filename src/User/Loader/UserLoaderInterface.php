@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Loader;
+namespace Zoe\Component\Security\User\Loader;
 
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\UserInterface;
