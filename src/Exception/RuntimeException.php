@@ -13,7 +13,7 @@ declare(strict_types = 1);
 namespace Zoe\Component\Internal\Exception;
 
 /**
- * RunetimeException Security component
+ * RuntimeException Security component
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
