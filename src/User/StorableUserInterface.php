@@ -22,6 +22,13 @@ interface StorableUserInterface
 {
     
     /**
+     * Identifier to identified the user into a store
+     *
+     * @var string
+     */
+    public const USER_STORE_IDENTIFIER = "USER_ID";
+    
+    /**
      * Get the user identifier
      * 
      * @return string
