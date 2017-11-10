@@ -18,7 +18,7 @@ namespace Zoe\Component\Security\Exception;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class AuthentificationFailedException extends \Exception
+class AuthenticationFailedException extends \Exception
 {
     //
 }

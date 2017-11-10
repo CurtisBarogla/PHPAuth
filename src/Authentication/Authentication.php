@@ -10,15 +10,15 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Authentification;
+namespace Zoe\Component\Security\Authentication;
 
+use Zoe\Component\Security\Storage\UserStorageInteface;
+use Zoe\Component\Security\User\StorableUser;
+use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\Storage\UserStorageInteface;
-use Zoe\Component\Security\Authentification\Strategy\AuthentificationStrategyInterface;
-use Zoe\Component\Security\User\StorableUserInterface;
-use Zoe\Component\Security\User\StorableUser;
-use Zoe\Component\Security\Exception\AuthentificationFailedException;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Exception\AuthenticationFailedException;
 
 /**
  * Basic AuthentificationInterface implementation.
@@ -27,7 +27,7 @@ use Zoe\Component\Security\Exception\AuthentificationFailedException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class Authentification implements AuthentificationInterface
+class Authentication implements AuthenticationInterface
 {
     
     /**
@@ -47,7 +47,7 @@ class Authentification implements AuthentificationInterface
     /**
      * Strategy used to authenticate user
      * 
-     * @var AuthentificationStrategyInterface
+     * @var AuthenticationStrategyInterface
      */
     private $strategy;
     
@@ -58,10 +58,10 @@ class Authentification implements AuthentificationInterface
      *   Responsible to load user
      * @param UserStorageInteface $storage
      *   Responsible to store founded user
-     * @param AuthentificationStrategyInterface $strategy
+     * @param AuthenticationStrategyInterface $strategy
      *   Strategy handling authentification
      */
-    public function __construct(UserLoaderInterface $loader, UserStorageInteface $storage, AuthentificationStrategyInterface $strategy)
+    public function __construct(UserLoaderInterface $loader, UserStorageInteface $storage, AuthenticationStrategyInterface $strategy)
     {
         $this->loader = $loader;
         $this->storage = $storage;
@@ -70,14 +70,14 @@ class Authentification implements AuthentificationInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\Authentification\AuthentificationInterface::authenticate()
+     * @see \Zoe\Component\Security\Authentication\AuthenticationInterface::authenticate()
      */
     public function authenticate(UserInterface $user): void
     {
         $loadedUser = $this->loader->loadUser($user);
 
         if(!$this->strategy->process($loadedUser, $user))
-            throw new AuthentificationFailedException(\sprintf("This user '%s' cannot be authenticated",
+            throw new AuthenticationFailedException(\sprintf("This user '%s' cannot be authenticated",
                 $user->getName()));
         
         $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));

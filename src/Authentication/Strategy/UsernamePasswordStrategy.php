@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Authentification\Strategy;
+namespace Zoe\Component\Security\Authentication\Strategy;
 
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
@@ -21,7 +21,7 @@ use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class UsernamePasswordStrategy implements AuthentificationStrategyInterface
+class UsernamePasswordStrategy implements AuthenticationStrategyInterface
 {
     
     /**
@@ -44,7 +44,7 @@ class UsernamePasswordStrategy implements AuthentificationStrategyInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\Authentification\Strategy\AuthentificationStrategyInterface::process()
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */
     public function process(UserInterface $loadedUser, UserInterface $user): bool
     {

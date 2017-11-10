@@ -10,11 +10,11 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Authentification;
+namespace Zoe\Component\Security\Authentication;
 
 use Zoe\Component\Security\User\UserInterface;
-use Zoe\Component\Security\Exception\AuthentificationFailedException;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\Exception\AuthenticationFailedException;
 
 /**
  * Responsible to authenticate user and store it
@@ -22,7 +22,7 @@ use Zoe\Component\Security\Exception\UserNotFoundException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-interface AuthentificationInterface
+interface AuthenticationInterface
 {
     
     /**
@@ -31,7 +31,7 @@ interface AuthentificationInterface
      * @param UserInterface $user
      *   User to authenticate
      *   
-     * @throws AuthentificationFailedException
+     * @throws AuthenticationFailedException
      *   When the given has been found, but is invalid
      * @throws UserNotFoundException
      *   When the given user is not setted

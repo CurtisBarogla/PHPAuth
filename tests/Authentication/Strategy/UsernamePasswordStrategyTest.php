@@ -10,12 +10,12 @@ declare(strict_types = 1);
  *
  */
 
-namespace ZoeTest\Component\Security\Authentification\Strategy;
+namespace ZoeTest\Component\Security\Authentication\Strategy;
 
 use PHPUnit\Framework\TestCase;
 use Zoe\Component\Internal\ReflectionTrait;
-use Zoe\Component\Security\Authentification\Strategy\AuthentificationStrategyInterface;
-use Zoe\Component\Security\Authentification\Strategy\UsernamePasswordStrategy;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
 use Zoe\Component\Security\User\UserInterface;
 
@@ -33,17 +33,17 @@ class UsernamePasswordStrategyTest extends TestCase
     use ReflectionTrait;
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Strategy\UsernamePasswordStrategy
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy
      */
     public function testInterface(): void
     {
         $strategy = new UsernamePasswordStrategy($this->getMockedEncoder("foo", "bar", false));
         
-        $this->assertInstanceOf(AuthentificationStrategyInterface::class, $strategy);
+        $this->assertInstanceOf(AuthenticationStrategyInterface::class, $strategy);
     }
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Strategy\UsernamePasswordStrategy::process()
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
      */
     public function testProcess(): void
     {

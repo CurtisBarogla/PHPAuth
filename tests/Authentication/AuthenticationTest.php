@@ -10,21 +10,21 @@ declare(strict_types = 1);
  *
  */
 
-namespace ZoeTest\Component\Security\Authentification;
+namespace ZoeTest\Component\Security\Authentication;
 
 use PHPUnit\Framework\TestCase;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 use Zoe\Component\Internal\ReflectionTrait;
-use Zoe\Component\Security\Authentification\Strategy\AuthentificationStrategyInterface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Storage\UserStorageInteface;
 use Zoe\Component\Security\User\User;
 use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\Authentification\Authentification;
-use Zoe\Component\Security\Exception\AuthentificationFailedException;
+use Zoe\Component\Security\Authentication\Authentication;
+use Zoe\Component\Security\Exception\AuthenticationFailedException;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\StorableUser;
-use Zoe\Component\Security\Authentification\AuthentificationInterface;
+use Zoe\Component\Security\Authentication\AuthenticationInterface;
 
 /**
  * Authentification testcase
@@ -34,23 +34,23 @@ use Zoe\Component\Security\Authentification\AuthentificationInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class AuthentificationTest extends TestCase
+class AuthenticationTest extends TestCase
 {
     
     use ReflectionTrait;
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Authentification
+     * @see \Zoe\Component\Security\Authentication\Authentication
      */
     public function testInterface(): void
     {
-        $mock = $this->getMockBuilder(Authentification::class)->disableOriginalConstructor()->setMethods(["authenticate"])->getMock();
+        $mock = $this->getMockBuilder(Authentication::class)->disableOriginalConstructor()->setMethods(["authenticate"])->getMock();
         
-        $this->assertInstanceOf(AuthentificationInterface::class, $mock);
+        $this->assertInstanceOf(AuthenticationInterface::class, $mock);
     }
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Authentification::authenticate()
+     * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
     public function testAuthenticate(): void
     {
@@ -65,7 +65,7 @@ class AuthentificationTest extends TestCase
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser))
             ->will($this->returnValue(null));
         
-        $authentification = new Authentification($loader, $store, $strategy);
+        $authentification = new Authentication($loader, $store, $strategy);
         
         $this->assertNull($authentification->authenticate(new User("bar", "foo")));
     }
@@ -73,7 +73,7 @@ class AuthentificationTest extends TestCase
     /**_____EXCEPTIONS_____**/
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Authentification::authenticate()
+     * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
     public function testExceptionWhenLoaderDoesNotFoundAUser(): void
     {
@@ -84,16 +84,16 @@ class AuthentificationTest extends TestCase
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->throwException(new UserNotFoundException()));
         $strategy = $this->getMockedAuthentificationStrategy(new User("foo", "bar"), new User("foo", "bar"), true);
         
-        $authentification = new Authentification($loader, $store, $strategy);
+        $authentification = new Authentication($loader, $store, $strategy);
         $authentification->authenticate(new User("bar", "foo"));
     }
     
     /**
-     * @see \Zoe\Component\Security\Authentification\Authentification::authenticate()
+     * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
     public function testExceptionWhenProcessFails(): void
     {
-        $this->expectException(AuthentificationFailedException::class);
+        $this->expectException(AuthenticationFailedException::class);
         $this->expectExceptionMessage("This user 'bar' cannot be authenticated");
         
         $loadedUser = new User("foo", "bar");
@@ -103,7 +103,7 @@ class AuthentificationTest extends TestCase
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->returnValue($loadedUser));
         $strategy = $this->getMockedAuthentificationStrategy($loadedUser, new User("bar", "foo"), false);
         
-        $authentification = new Authentification($loader, $store, $strategy);
+        $authentification = new Authentication($loader, $store, $strategy);
         $authentification->authenticate(new User("bar", "foo"));
     }
     
@@ -141,10 +141,10 @@ class AuthentificationTest extends TestCase
         UserInterface $user,
         bool $strategyResult): \PHPUnit_Framework_MockObject_MockObject
     {
-        $reflection = new \ReflectionClass(AuthentificationStrategyInterface::class);
+        $reflection = new \ReflectionClass(AuthenticationStrategyInterface::class);
         $methods = $this->reflection_extractMethods($reflection);
         
-        $mock = $this->getMockBuilder(AuthentificationStrategyInterface::class)->setMethods($methods)->getMock();
+        $mock = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods($methods)->getMock();
         $mock->method("process")->with($loadedUser, $user)->will($this->returnValue($strategyResult));
         
         return $mock;

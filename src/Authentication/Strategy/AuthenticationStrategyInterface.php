@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Security\Authentification\Strategy;
+namespace Zoe\Component\Security\Authentication\Strategy;
 
 use Zoe\Component\Security\User\UserInterface;
 
@@ -20,7 +20,7 @@ use Zoe\Component\Security\User\UserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-interface AuthentificationStrategyInterface
+interface AuthenticationStrategyInterface
 {
     
     /**
