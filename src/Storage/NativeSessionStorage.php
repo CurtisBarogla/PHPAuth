@@ -14,6 +14,7 @@ namespace Zoe\Component\Security\Storage;
 
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\Exception\LogicException;
 
 /**
  * Use native Session ($_SESSION) array as storage
@@ -74,14 +75,12 @@ class NativeSessionStorage implements UserStorageInteface
     }
 
     /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\Storage\UserStorageInteface::deleteUser()
+     * @throws LogicException
+     *   Cannot call delete user on native storage as php clear the session on expire
      */
     public function deleteUser(string $userIdentifier): void
     {
-        $this->checkUserIdentifier($userIdentifier);
-            
-        unset($this->session[$userIdentifier]);
+        throw new LogicException("Cannot delete user from this storage as php is responsible to expire invalids sessions");
     }
 
     /**
@@ -90,8 +89,8 @@ class NativeSessionStorage implements UserStorageInteface
      */
     public function refreshUser(string $userIdentifier, StorableUserInterface $user): void
     {
-        $this->deleteUser($userIdentifier);
-
+        $this->checkUserIdentifier($userIdentifier);
+        
         $this->addUser($userIdentifier, $user);
     }
     

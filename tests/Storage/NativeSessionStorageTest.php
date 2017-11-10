@@ -19,6 +19,7 @@ use Zoe\Component\Security\Storage\UserStorageInteface;
 use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\StorableUserInterface;
+use Zoe\Component\Security\Exception\LogicException;
 
 /**
  * NativeSessionStorage testcase
@@ -75,14 +76,11 @@ class NativeSessionStorageTest extends TestCase
      */
     public function testDeleteUser(): void
     {
-        $reflection = null;
-        $store = null;
-        $store = $this->getReflectiveStore($reflection, $store);
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage("Cannot delete user from this storage as php is responsible to expire invalids sessions");
         
-        $store->addUser("foo", new StorableUser("foo", [], []));
-        $this->assertCount(1, $this->reflection_getPropertyValue($store, $reflection, "session"));
-        $this->assertNull($store->deleteUser("foo"));
-        $this->assertCount(0, $this->reflection_getPropertyValue($store, $reflection, "session"));
+        $store = new NativeSessionStorage();
+        $store->deleteUser("foo");
     }
     
     /**
@@ -108,14 +106,6 @@ class NativeSessionStorageTest extends TestCase
     public function testExceptionGetUserWhenInvalid(): void
     {
         $this->doTestException("getUser", "foo");
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\Storage\NativeSessionStorage::deleteUser()
-     */
-    public function testExceptionDeleteUserWhenInvalid(): void
-    {
-        $this->doTestException("deleteUser", "foo");
     }
     
     /**
