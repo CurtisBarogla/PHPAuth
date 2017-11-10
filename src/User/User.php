@@ -20,7 +20,7 @@ use Zoe\Component\Security\Exception\InvalidUserAttributeException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class User implements UserInterface
+final class User implements UserInterface
 {
     
     /**
