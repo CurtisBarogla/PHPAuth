@@ -39,7 +39,7 @@ class NativePasswordEncoder implements PasswordEncoderInterface
     private $algorithm;
     
     /**
-     * Current valids algorithm for password_hash
+     * Current valid algorithms for password_hash
      * 
      * @var array
      */

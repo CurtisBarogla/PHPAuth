@@ -21,7 +21,7 @@ use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterfa
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
 
 /**
- * Basic AuthentificationInterface implementation.
+ * Basic AuthenticationInterface implementation.
  * Authenticate users from UserLoader through various strategies and store results into UserStorage
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
@@ -52,14 +52,14 @@ class Authentication implements AuthenticationInterface
     private $strategy;
     
     /**
-     * Initialize the authentification process
+     * Initialize the authentication process
      * 
      * @param UserLoaderInterface $loader
      *   Responsible to load user
      * @param UserStorageInteface $storage
      *   Responsible to store founded user
      * @param AuthenticationStrategyInterface $strategy
-     *   Strategy handling authentification
+     *   Strategy handling authentication
      */
     public function __construct(UserLoaderInterface $loader, UserStorageInteface $storage, AuthenticationStrategyInterface $strategy)
     {

@@ -27,9 +27,9 @@ use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\Authentication\AuthenticationInterface;
 
 /**
- * Authentification testcase
+ * Authentication testcase
  * 
- * @see \Zoe\Component\Security\Authentification\Authentification
+ * @see \Zoe\Component\Security\Authentication\Authentication
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
@@ -59,15 +59,15 @@ class AuthenticationTest extends TestCase
         $store = $this->getMockedStorage();
         $loader = $this->getMockedLoader();
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->returnValue($loadedUser));
-        $strategy = $this->getMockedAuthentificationStrategy($loadedUser, new User("bar", "foo"), true);
+        $strategy = $this->getMockedAuthenticationStrategy($loadedUser, new User("bar", "foo"), true);
         $store
             ->method("addUser")
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser))
             ->will($this->returnValue(null));
         
-        $authentification = new Authentication($loader, $store, $strategy);
+        $authentication = new Authentication($loader, $store, $strategy);
         
-        $this->assertNull($authentification->authenticate(new User("bar", "foo")));
+        $this->assertNull($authentication->authenticate(new User("bar", "foo")));
     }
     
     /**_____EXCEPTIONS_____**/
@@ -82,10 +82,10 @@ class AuthenticationTest extends TestCase
         $store = $this->getMockedStorage();
         $loader = $this->getMockedLoader();
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->throwException(new UserNotFoundException()));
-        $strategy = $this->getMockedAuthentificationStrategy(new User("foo", "bar"), new User("foo", "bar"), true);
+        $strategy = $this->getMockedAuthenticationStrategy(new User("foo", "bar"), new User("foo", "bar"), true);
         
-        $authentification = new Authentication($loader, $store, $strategy);
-        $authentification->authenticate(new User("bar", "foo"));
+        $authentication = new Authentication($loader, $store, $strategy);
+        $authentication->authenticate(new User("bar", "foo"));
     }
     
     /**
@@ -101,10 +101,10 @@ class AuthenticationTest extends TestCase
         $store = $this->getMockedStorage();
         $loader = $this->getMockedLoader();
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->returnValue($loadedUser));
-        $strategy = $this->getMockedAuthentificationStrategy($loadedUser, new User("bar", "foo"), false);
+        $strategy = $this->getMockedAuthenticationStrategy($loadedUser, new User("bar", "foo"), false);
         
-        $authentification = new Authentication($loader, $store, $strategy);
-        $authentification->authenticate(new User("bar", "foo"));
+        $authentication = new Authentication($loader, $store, $strategy);
+        $authentication->authenticate(new User("bar", "foo"));
     }
     
     /**
@@ -124,7 +124,7 @@ class AuthenticationTest extends TestCase
     }
     
     /**
-     * Get a mocked authentification strategy
+     * Get a mocked authentication strategy
      * 
      * @param UserInterface $loadedUser
      *   User 1
@@ -136,7 +136,7 @@ class AuthenticationTest extends TestCase
      * @return \PHPUnit_Framework_MockObject_MockObject
      *   Mocked strategy
      */
-    private function getMockedAuthentificationStrategy(
+    private function getMockedAuthenticationStrategy(
         UserInterface $loadedUser,
         UserInterface $user,
         bool $strategyResult): \PHPUnit_Framework_MockObject_MockObject

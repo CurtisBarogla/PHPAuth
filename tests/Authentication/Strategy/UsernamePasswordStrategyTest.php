@@ -22,7 +22,7 @@ use Zoe\Component\Security\User\UserInterface;
 /**
  * UsernamePasswordStrategy testcase
  * 
- * @see \Zoe\Component\Security\Authentification\Strategy\UsernamePasswordStrategy
+ * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
