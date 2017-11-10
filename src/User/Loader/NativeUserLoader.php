@@ -58,7 +58,7 @@ class NativeUserLoader implements UserLoaderInterface
         $roles = $this->users[$name]["roles"] ?? [];
         $root = $this->users[$name]["root"] ?? false;
         
-        return new User($name, $user->getPassword(), $roles, $root, $attributes);
+        return new User($name, $this->users[$name]["password"], $roles, $root, $attributes);
     }
 
 }

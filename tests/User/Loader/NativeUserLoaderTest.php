@@ -74,7 +74,7 @@ class NativeUserLoaderTest extends TestCase
         
         $loader = new NativeUserLoader($users);
         $this->assertEquals($expectedUser1, $loader->loadUser(new User("foo", "bar")));
-        $this->assertEquals($expectedUser2, $loader->loadUser(new User("bar", "foo")));
+        $this->assertEquals($expectedUser2, $loader->loadUser(new User("bar", "bar")));
     }
     
 }
