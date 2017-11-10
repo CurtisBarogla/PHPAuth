@@ -122,6 +122,17 @@ class StorableUser implements StorableUserInterface
     }
     
     /**
+     * Output user name
+     *
+     * @return string
+     *   User name
+     */
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+    
+    /**
      * Set the stored user as root
      */
     private function setRoot(): void

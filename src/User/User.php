@@ -191,5 +191,16 @@ class User implements UserInterface
     {
         return isset($this->attributes[$name]);
     }
+    
+    /**
+     * Output user name
+     * 
+     * @return string
+     *   User name
+     */
+    public function __toString(): string
+    {
+        return $this->name;
+    }
 
 }

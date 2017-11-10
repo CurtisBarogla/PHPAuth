@@ -53,4 +53,16 @@ class StorableUserTest extends TestCase
         $this->assertTrue($storedUser->isRoot());
     }
     
+    /**
+     * @see \Zoe\Component\Security\User\StorableUser::__toString()
+     */
+    public function test__toString(): void
+    {
+        $this->expectOutputString("foo");
+        
+        $user = new StorableUser("foo", [], null);
+        
+        echo $user;
+    }
+    
 }

@@ -160,6 +160,18 @@ class UserTest extends TestCase
         $this->assertTrue($user->hasAttribute("foo"));
     }
     
+    /**
+     * @see \Zoe\Component\Security\User\User::__toString()
+     */
+    public function test__toString(): void
+    {
+        $this->expectOutputString("foo");
+        
+        $user = new User("foo", "bar");
+        
+        echo $user;
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**
