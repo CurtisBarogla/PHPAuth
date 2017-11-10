@@ -58,7 +58,7 @@ class NativeSessionStorage implements UserStorageInteface
     public function addUser(string $userIdentifier, StorableUserInterface $user): void
     {
         if($this->refresh)
-            \session_regenerate_id();
+            session_regenerate_id();
         
         $this->session[$userIdentifier] = $user;
     }
