@@ -21,7 +21,7 @@
     <filter>
         <whitelist>
             <directory>./src</directory>
-            <directory>./tests/Helpers/Traits</directory>
+            <file>./tests/SecurityTestCase.php</file>
         </whitelist>
     </filter>
     
