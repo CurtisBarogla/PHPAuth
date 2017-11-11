@@ -60,5 +60,14 @@ class NativeUserLoader implements UserLoaderInterface
         
         return new User($name, $this->users[$name]["password"], $roles, $root, $attributes);
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\Loader\UserLoaderInterface::identify()
+     */
+    public function identify(): string
+    {
+        return "NativeUser";
+    }
 
 }

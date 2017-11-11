@@ -77,4 +77,14 @@ class NativeUserLoaderTest extends TestCase
         $this->assertEquals($expectedUser2, $loader->loadUser(new User("bar", "bar")));
     }
     
+    /**
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::identify()
+     */
+    public function testIdentify(): void
+    {
+        $loader = new NativeUserLoader([]);
+        
+        $this->assertSame("NativeUser", $loader->identify());
+    }
+    
 }

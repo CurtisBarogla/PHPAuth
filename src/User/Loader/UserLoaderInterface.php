@@ -39,4 +39,12 @@ interface UserLoaderInterface
      */
     public function loadUser(UserInterface $user): UserInterface;
     
+    /**
+     * Set an identifier for the loader
+     * 
+     * @return string
+     *   Identifier for the loader
+     */
+    public function identify(): string;
+    
 }
