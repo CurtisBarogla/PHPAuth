@@ -50,6 +50,19 @@ class AuthenticationTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Authentication\Authentication::setStorage()
+     */
+    public function testSetStorage(): void
+    {
+        $store = $this->getMockedStorage();
+        $loader = $this->getMockedLoader();
+        $strategy = $this->getMockedAuthenticationStrategy(new User("foo", "foo"), new User("foo", "foo"), true);
+        
+        $authentication = new Authentication($loader, $strategy);
+        $this->assertNull($authentication->setStorage($store));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
     public function testAuthenticate(): void
@@ -65,7 +78,8 @@ class AuthenticationTest extends TestCase
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser))
             ->will($this->returnValue(null));
         
-        $authentication = new Authentication($loader, $store, $strategy);
+        $authentication = new Authentication($loader, $strategy);
+        $authentication->setStorage($store);
         
         $this->assertNull($authentication->authenticate(new User("bar", "foo")));
     }
@@ -84,7 +98,7 @@ class AuthenticationTest extends TestCase
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->throwException(new UserNotFoundException()));
         $strategy = $this->getMockedAuthenticationStrategy(new User("foo", "bar"), new User("foo", "bar"), true);
         
-        $authentication = new Authentication($loader, $store, $strategy);
+        $authentication = new Authentication($loader, $strategy);
         $authentication->authenticate(new User("bar", "foo"));
     }
     
@@ -103,7 +117,7 @@ class AuthenticationTest extends TestCase
         $loader->method("loadUser")->with(new User("bar", "foo"))->will($this->returnValue($loadedUser));
         $strategy = $this->getMockedAuthenticationStrategy($loadedUser, new User("bar", "foo"), false);
         
-        $authentication = new Authentication($loader, $store, $strategy);
+        $authentication = new Authentication($loader, $strategy);
         $authentication->authenticate(new User("bar", "foo"));
     }
     

@@ -56,16 +56,24 @@ class Authentication implements AuthenticationInterface
      * 
      * @param UserLoaderInterface $loader
      *   Responsible to load user
-     * @param UserStorageInteface $storage
-     *   Responsible to store founded user
      * @param AuthenticationStrategyInterface $strategy
      *   Strategy handling authentication
      */
-    public function __construct(UserLoaderInterface $loader, UserStorageInteface $storage, AuthenticationStrategyInterface $strategy)
+    public function __construct(UserLoaderInterface $loader, AuthenticationStrategyInterface $strategy)
     {
         $this->loader = $loader;
-        $this->storage = $storage;
         $this->strategy = $strategy;
+    }
+    
+    /**
+     * Set the storage for storage an authenticated user
+     * 
+     * @param UserStorageInteface $storage
+     *   User storage instance
+     */
+    public function setStorage(UserStorageInteface $storage): void
+    {
+        $this->storage = $storage;
     }
     
     /**
