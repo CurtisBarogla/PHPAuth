@@ -12,19 +12,18 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\Authentication;
 
-use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Internal\ReflectionTrait;
-use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
-use Zoe\Component\Security\User\UserInterface;
-use Zoe\Component\Security\Storage\UserStorageInteface;
-use Zoe\Component\Security\User\User;
-use Zoe\Component\Security\Exception\UserNotFoundException;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Authentication\Authentication;
-use Zoe\Component\Security\Exception\AuthenticationFailedException;
-use Zoe\Component\Security\User\StorableUserInterface;
-use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\Authentication\AuthenticationInterface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\Storage\UserStorageInteface;
+use Zoe\Component\Security\User\StorableUser;
+use Zoe\Component\Security\User\StorableUserInterface;
+use Zoe\Component\Security\User\User;
+use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 
 /**
  * Authentication testcase
@@ -34,10 +33,8 @@ use Zoe\Component\Security\Authentication\AuthenticationInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class AuthenticationTest extends TestCase
+class AuthenticationTest extends SecurityTestCase
 {
-    
-    use ReflectionTrait;
     
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication

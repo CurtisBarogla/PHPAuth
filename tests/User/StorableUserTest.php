@@ -12,12 +12,20 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\User;
 
-use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\User;
 
-class StorableUserTest extends TestCase
+/**
+ * StorableUser testcase
+ * 
+ * @see \Zoe\Component\Security\User\StorableUser
+ * 
+ * @author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
+class StorableUserTest extends SecurityTestCase
 {
     
     /**

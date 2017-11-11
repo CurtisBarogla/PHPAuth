@@ -12,7 +12,7 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\User;
 
-use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Exception\InvalidUserAttributeException;
 use Zoe\Component\Security\User\User;
 use Zoe\Component\Security\User\UserInterface;
@@ -25,7 +25,7 @@ use Zoe\Component\Security\User\UserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class UserTest extends TestCase
+class UserTest extends SecurityTestCase
 {
     
     /**

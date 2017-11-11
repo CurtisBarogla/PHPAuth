@@ -19,15 +19,14 @@ namespace Zoe\Component\Security\Storage {
 
 namespace ZoeTest\Component\Security\Storage {
 
-    use PHPUnit\Framework\TestCase;
-    use Zoe\Component\Internal\ReflectionTrait;
+    use ZoeTest\Component\Security\SecurityTestCase;
+    use Zoe\Component\Security\Exception\LogicException;
+    use Zoe\Component\Security\Exception\UserNotFoundException;
     use Zoe\Component\Security\Storage\NativeSessionStorage;
     use Zoe\Component\Security\Storage\UserStorageInteface;
     use Zoe\Component\Security\User\StorableUser;
-    use Zoe\Component\Security\Exception\UserNotFoundException;
     use Zoe\Component\Security\User\StorableUserInterface;
-    use Zoe\Component\Security\Exception\LogicException;
-    
+                    
     /**
      * NativeSessionStorage testcase
      * 
@@ -36,10 +35,8 @@ namespace ZoeTest\Component\Security\Storage {
      * @author CurtisBarogla <curtis_barogla@outlook.fr>
      *
      */
-    class NativeSessionStorageTest extends TestCase
+    class NativeSessionStorageTest extends SecurityTestCase
     {
-        
-        use ReflectionTrait;
         
         /**
          * @see \Zoe\Component\Security\Storage\NativeSessionStorage

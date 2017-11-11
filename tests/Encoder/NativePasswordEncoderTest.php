@@ -12,7 +12,7 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\Encoder;
 
-use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Encoder\NativePasswordEncoder;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
 use Zoe\Component\Security\Exception\InvalidArgumentException;
@@ -25,7 +25,7 @@ use Zoe\Component\Security\Exception\InvalidArgumentException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class NativePasswordEncoderTest extends TestCase
+class NativePasswordEncoderTest extends SecurityTestCase
 {
     
     /**

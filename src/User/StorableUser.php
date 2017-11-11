@@ -26,28 +26,28 @@ class StorableUser implements StorableUserInterface
      * 
      * @var string
      */
-    private $name;
+    protected $name;
     
     /**
      * User attributes
      * 
      * @var array|null
      */
-    private $attributes;
+    protected $attributes;
     
     /**
      * Roles user
      * 
      * @var array
      */
-    private $roles = [];
+    protected $roles = [];
     
     /**
      * Is root
      * 
      * @var bool
      */
-    private $isRoot = false;
+    protected $isRoot = false;
 
     /**
      * Initialize a storable user

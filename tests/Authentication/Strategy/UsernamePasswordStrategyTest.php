@@ -12,12 +12,11 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\Authentication\Strategy;
 
-use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
-use Zoe\Component\Security\User\UserInterface;
 
 /**
  * UsernamePasswordStrategy testcase
@@ -27,7 +26,7 @@ use Zoe\Component\Security\User\UserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class UsernamePasswordStrategyTest extends TestCase
+class UsernamePasswordStrategyTest extends SecurityTestCase
 {
     
     use ReflectionTrait;
@@ -51,13 +50,13 @@ class UsernamePasswordStrategyTest extends TestCase
 
         $strategy = new UsernamePasswordStrategy($mock);
         
-        $this->assertTrue($strategy->process($this->getMockedUser("foo"), $this->getMockedUser("foo")));
+        $this->assertTrue($strategy->process($this->getMockedUser("bar", "foo"), $this->getMockedUser("bar", "foo")));
         
         $mock = $this->getMockedEncoder("foo", "bar", false);
 
         $strategy = new UsernamePasswordStrategy($mock);
         
-        $this->assertFalse($strategy->process($this->getMockedUser("bar"), $this->getMockedUser("foo")));
+        $this->assertFalse($strategy->process($this->getMockedUser("bar", "bar"), $this->getMockedUser("foo", "foo")));
         
     }
     
@@ -81,26 +80,6 @@ class UsernamePasswordStrategyTest extends TestCase
     {
         $mock = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
         $mock->method("compare")->with($comparedPassword, $encodedPassword)->will($this->returnValue($result));
-        
-        return $mock;
-    }
-    
-    /**
-     * Get a mocked user
-     * 
-     * @param string $password
-     *   Password to get from getPassword method
-     *   
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     *   Mocked UserInterface
-     */
-    private function getMockedUser(string $password): \PHPUnit_Framework_MockObject_MockObject
-    {
-        $reflection = new \ReflectionClass(UserInterface::class);
-        $methods = $this->reflection_extractMethods($reflection);
-        
-        $mock = $this->getMockBuilder(UserInterface::class)->setMethods($methods)->getMock();
-        $mock->method("getPassword")->will($this->returnValue($password));
         
         return $mock;
     }

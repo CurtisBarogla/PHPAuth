@@ -12,11 +12,11 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\Loader;
 
-use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\User\Loader\NativeUserLoader;
-use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\User;
+use Zoe\Component\Security\User\Loader\NativeUserLoader;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 
 /**
  * NativeUserLoader testcase
@@ -26,7 +26,7 @@ use Zoe\Component\Security\User\User;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class NativeUserLoaderTest extends TestCase
+class NativeUserLoaderTest extends SecurityTestCase
 {
     
     /**
