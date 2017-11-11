@@ -80,7 +80,7 @@ class NativeSessionStorage implements UserStorageInteface
      */
     public function deleteUser(string $userIdentifier): void
     {
-        throw new LogicException("Cannot delete user from this storage as php is responsible to expire invalids sessions");
+        throw new LogicException("Cannot delete user from this storage as php is responsible to expire invalid sessions");
     }
 
     /**

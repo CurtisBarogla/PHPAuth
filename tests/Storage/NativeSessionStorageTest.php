@@ -83,7 +83,7 @@ namespace ZoeTest\Component\Security\Storage {
         public function testDeleteUser(): void
         {
             $this->expectException(LogicException::class);
-            $this->expectExceptionMessage("Cannot delete user from this storage as php is responsible to expire invalids sessions");
+            $this->expectExceptionMessage("Cannot delete user from this storage as php is responsible to expire invalid sessions");
             
             $store = new NativeSessionStorage();
             $store->deleteUser("foo");
