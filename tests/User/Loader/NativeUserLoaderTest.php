@@ -48,7 +48,7 @@ class NativeUserLoaderTest extends SecurityTestCase
         
         $users = [];
         $loader = new NativeUserLoader($users);
-        $user = new User("foo", "bar");
+        $user = $this->getMockedUser("foo", "bar");
         $loader->loadUser($user);
     }
     
