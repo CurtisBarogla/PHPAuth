@@ -72,4 +72,13 @@ interface UserStorageInteface
      */
     public function refreshUser(string $userIdentifier, StorableUserInterface $user): void;
     
+    /**
+     * Check if a user is present into the storage for the given identifier
+     * 
+     * @param string $userIdentifier
+     *   True if a user is stored for the given identifier. False otherwise
+     * @return bool
+     */
+    public function hasUser(string $userIdentifier): bool;
+    
 }

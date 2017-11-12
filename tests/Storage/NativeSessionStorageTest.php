@@ -101,6 +101,19 @@ namespace ZoeTest\Component\Security\Storage {
             $this->assertEquals($expected, $store->getUser("foo"));
         }
         
+        /**
+         * @see \Zoe\Component\Security\Storage\NativeSessionStorage::hasUser()
+         */
+        public function testHasUser(): void
+        {
+            $store = $this->getReflectiveStore();
+            
+            $this->assertFalse($store->hasUser("foo"));
+            $store->addUser("foo", new StorableUser("foo", [], null));
+            
+            $this->assertTrue($store->hasUser("foo"));
+        }
+        
                         /**_____EXCEPTION_____**/
         
         /**

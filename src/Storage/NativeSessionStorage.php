@@ -95,6 +95,15 @@ class NativeSessionStorage implements UserStorageInteface
     }
     
     /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Storage\UserStorageInteface::hasUser()
+     */
+    public function hasUser(string $userIdentifier): bool
+    {
+        return isset($this->session[$userIdentifier]);
+    }
+    
+    /**
      * Check if a user is stored
      * 
      * @param string $identifier
