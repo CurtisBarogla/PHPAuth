@@ -75,9 +75,9 @@ class Authentication implements AuthenticationInterface, UserStorageAwareInterfa
                 $user->getName()));
         
         try {
-            $this->storage->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+            $this->getStorage()->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
         } catch (UserNotFoundException $e) {
-            $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+            $this->getStorage()->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
         }
     }
 
