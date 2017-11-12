@@ -12,13 +12,14 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Authentication;
 
-use Zoe\Component\Security\Storage\UserStorageInteface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\Storage\UserStorageAwareInterface;
+use Zoe\Component\Security\Storage\UserStorageTrait;
 use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
-use Zoe\Component\Security\Exception\AuthenticationFailedException;
 
 /**
  * Basic AuthenticationInterface implementation.
@@ -27,8 +28,10 @@ use Zoe\Component\Security\Exception\AuthenticationFailedException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class Authentication implements AuthenticationInterface
+class Authentication implements AuthenticationInterface, UserStorageAwareInterface
 {
+    
+    use UserStorageTrait;
     
     /**
      * User loader
@@ -36,13 +39,6 @@ class Authentication implements AuthenticationInterface
      * @var UserLoaderInterface
      */
     private $loader;
-    
-    /**
-     * User storage
-     * 
-     * @var UserStorageInteface
-     */
-    private $storage;
     
     /**
      * Strategy used to authenticate user
@@ -63,17 +59,6 @@ class Authentication implements AuthenticationInterface
     {
         $this->loader = $loader;
         $this->strategy = $strategy;
-    }
-    
-    /**
-     * Set the storage for storage an authenticated user
-     * 
-     * @param UserStorageInteface $storage
-     *   User storage instance
-     */
-    public function setStorage(UserStorageInteface $storage): void
-    {
-        $this->storage = $storage;
     }
     
     /**

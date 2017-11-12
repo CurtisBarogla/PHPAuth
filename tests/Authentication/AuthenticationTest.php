@@ -48,7 +48,7 @@ class AuthenticationTest extends SecurityTestCase
     public function testSetStorage(): void
     {
         $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader($this->getMockedUser("foo", "bar"));
+        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
         $strategy = $this->getMockedAuthenticateStrategy();
         
         $authentication = new Authentication($loader, $strategy);
@@ -62,7 +62,7 @@ class AuthenticationTest extends SecurityTestCase
     {
         $store = $this->getMockedStorage();
         $strategy = $this->getMockedAuthenticateStrategy($this->getMockedUser("foo", "bar"), $this->getMockedUser("foo", "bar"), true);
-        $loader = $this->getMockedUserLoader($this->getMockedUser("foo", "bar"));
+        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
         $store
             ->method("addUser")
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($this->getMockedUser("foo", "bar")))
@@ -84,7 +84,7 @@ class AuthenticationTest extends SecurityTestCase
         $this->expectException(UserNotFoundException::class);
         
         $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader($this->getMockedUser("foo", "bar"), true);
+        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"), true);
         $strategy = $this->getMockedAuthenticateStrategy($this->getMockedUser("foo", "bar"), $this->getMockedUser("foo", "bar"), true);
         
         $authentication = new Authentication($loader, $strategy);
@@ -100,7 +100,7 @@ class AuthenticationTest extends SecurityTestCase
         $this->expectExceptionMessage("This user 'foo' cannot be authenticated");
 
         $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader($this->getMockedUser("foo", "bar"));
+        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
         $strategy = $this->getMockedAuthenticateStrategy($this->getMockedUser("foo", "bar"), $this->getMockedUser("foo", "bar"), false);
         
         $authentication = new Authentication($loader, $strategy);
