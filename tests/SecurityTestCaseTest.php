@@ -39,7 +39,7 @@ class SecurityTestCaseTest extends TestCase
         $this->expectException(UserNotFoundException::class);
         
         $user = new User("foo", "bar");
-        $loader = (new SecurityTestCase())->getMockedUserLoader($user, true);
+        $loader = (new SecurityTestCase())->getMockedUserLoader("foo", $user, true);
         $loader->loadUser($user);
     }
     
@@ -51,11 +51,13 @@ class SecurityTestCaseTest extends TestCase
         $user1 = new User("foo", "bar");
         $user2 = new User("foo", "bar", ["role1", "role2"], true, ["foo" => "bar"]);
         
-        $loader1 = (new SecurityTestCase())->getMockedUserLoader($user1);
+        $loader1 = (new SecurityTestCase())->getMockedUserLoader("foo", $user1);
         $this->assertSame($user1, $loader1->loadUser($user1));
+        $this->assertSame("foo", $loader1->identify());
         
-        $loader2 = (new SecurityTestCase())->getMockedUserLoader($user1, false, $user2);
+        $loader2 = (new SecurityTestCase())->getMockedUserLoader("bar", $user1, false, $user2);
         $this->assertSame($user2, $loader2->loadUser($user1));
+        $this->assertSame("bar", $loader2->identify());
     }
     
     /**

@@ -57,6 +57,8 @@ class SecurityTestCase extends TestCase
      * Get a mocked user loader.
      * Set userReturned to null to throw the excepted when an user is cannot be loaded
      * 
+     * @param string $loaderIdentifier
+     *   Loader name
      * @param UserInterface $user
      *   User to load
      * @param bool $throwException
@@ -68,6 +70,7 @@ class SecurityTestCase extends TestCase
      *   Mocked UserLoaderInterface with a user return or an exception thrown
      */
     public function getMockedUserLoader(
+        string $loaderIdentifier,
         UserInterface $user, 
         bool $throwException = false,
         ?UserInterface $userReturned = null): \PHPUnit_Framework_MockObject_MockObject
@@ -76,6 +79,8 @@ class SecurityTestCase extends TestCase
         $methods = $this->reflection_extractMethods($reflection);
         
         $mock = $this->getMockBuilder(UserLoaderInterface::class)->setMethods($methods)->disableOriginalConstructor()->getMock();
+        
+        $mock->method("identify")->will($this->returnValue($loaderIdentifier));
         
         if($throwException) {
             $mock->method("loadUser")->with($user)->will($this->throwException(new UserNotFoundException()));
