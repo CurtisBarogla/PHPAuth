@@ -50,6 +50,11 @@ class CollectionAuthenticationTest extends SecurityTestCase
             ->getMock();
         $store
             ->expects($this->once())
+            ->method("refreshUser")
+            ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($user))
+            ->will($this->throwException(new UserNotFoundException()));
+        $store
+            ->expects($this->once())
             ->method("addUser")
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($user))
             ->will($this->returnValue(null));

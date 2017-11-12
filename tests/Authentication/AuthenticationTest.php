@@ -64,6 +64,12 @@ class AuthenticationTest extends SecurityTestCase
         $strategy = $this->getMockedAuthenticateStrategy($this->getMockedUser("foo", "bar"), $this->getMockedUser("foo", "bar"), true);
         $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
         $store
+            ->expects($this->once())
+            ->method("refreshUser")
+            ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($this->getMockedUser("foo", "bar")))
+            ->will($this->throwException(new UserNotFoundException()));
+        $store
+            ->expects($this->once())
             ->method("addUser")
             ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($this->getMockedUser("foo", "bar")))
             ->will($this->returnValue(null));

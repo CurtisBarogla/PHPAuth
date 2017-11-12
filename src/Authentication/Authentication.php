@@ -20,6 +20,7 @@ use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use Zoe\Component\Security\Exception\UserNotFoundException;
 
 /**
  * Basic AuthenticationInterface implementation.
@@ -73,7 +74,11 @@ class Authentication implements AuthenticationInterface, UserStorageAwareInterfa
             throw new AuthenticationFailedException(\sprintf("This user '%s' cannot be authenticated",
                 $user->getName()));
         
-        $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        try {
+            $this->storage->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        } catch (UserNotFoundException $e) {
+            $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        }
     }
 
 }

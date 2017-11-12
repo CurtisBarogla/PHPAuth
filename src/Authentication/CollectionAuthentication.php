@@ -18,6 +18,7 @@ use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Collection\User\UserLoaderCollection;
 use Zoe\Component\Security\Collection\Strategy\AuthenticationStrategyCollection;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\StorableUser;
 
@@ -72,7 +73,11 @@ class CollectionAuthentication implements AuthenticationInterface, UserStorageAw
             throw new AuthenticationFailedException(\sprintf("This user '%s' cannot be authenticated",
                 $user->getName()));
             
-        $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        try {
+            $this->storage->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        } catch (UserNotFoundException $e) {
+            $this->storage->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));
+        }
     }
     
 }
