@@ -41,6 +41,7 @@ class NativeSessionStorage implements UserStorageInteface
     
     /**
      * Initialize the store
+     * Session MUST be active
      * 
      * @param bool $refresh
      *   Set to true to refresh the session id when a user is added or refreshed
@@ -58,7 +59,7 @@ class NativeSessionStorage implements UserStorageInteface
     public function addUser(string $userIdentifier, StorableUserInterface $user): void
     {
         if($this->refresh)
-            session_regenerate_id();
+            \session_regenerate_id();
         
         $this->session[$userIdentifier] = $user;
     }
