@@ -59,6 +59,8 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
             elseif ($process === AuthenticationStrategyInterface::FAIL) {
                 $processed++;
                 $error++;
+            } else if ($process === AuthenticationStrategyInterface::SUCCESS) {
+                $processed++;   
             } else {
                 throw new \UnexpectedValueException(\sprintf("Invalid return value on '%s' strategy",
                     \get_class($strategy)));

@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace ZoeTest\Component\Security\Loader;
+namespace ZoeTest\Component\Security\User\Loader;
 
 use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Exception\UserNotFoundException;
