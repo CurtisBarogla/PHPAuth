@@ -14,13 +14,13 @@ namespace Zoe\Component\Security\Authentication;
 
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\Storage\UserStorageAwareInterface;
 use Zoe\Component\Security\Storage\UserStorageTrait;
 use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\Exception\UserNotFoundException;
 
 /**
  * Basic AuthenticationInterface implementation.
@@ -69,10 +69,20 @@ class Authentication implements AuthenticationInterface, UserStorageAwareInterfa
     public function authenticate(UserInterface $user): void
     {
         $loadedUser = $this->loader->loadUser($user);
-
-        if(!$this->strategy->process($loadedUser, $user))
-            throw new AuthenticationFailedException(\sprintf("This user '%s' cannot be authenticated",
-                $user->getName()));
+  
+        switch ($this->strategy->process($loadedUser, $user)) {
+            case AuthenticationStrategyInterface::SUCCESS:
+            case AuthenticationStrategyInterface::SHUNT_ON_SUCCESS:
+                break;
+            case AuthenticationStrategyInterface::SKIP:
+            case AuthenticationStrategyInterface::FAIL:
+                throw new AuthenticationFailedException(\sprintf("This user '%s' cannot be authenticated",
+                    $user->getName()));
+                break;
+            default:
+                throw new \UnexpectedValueException(\sprintf("Invalid return value on '%s' strategy",
+                    \get_class($this->strategy)));
+        }
         
         try {
             $this->getStorage()->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($loadedUser));

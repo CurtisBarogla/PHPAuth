@@ -35,13 +35,13 @@ class SecurityTestCase extends TestCase
      * 
      * @param string $name
      *   Name returned by getName
-     * @param string $password
+     * @param string|null $password
      *   Password returned by getPassword
      * 
      * @return \PHPUnit_Framework_MockObject_MockObject
      *   Mocked user
      */
-    public function getMockedUser(string $name, string $password): \PHPUnit_Framework_MockObject_MockObject
+    public function getMockedUser(string $name, ?string $password): \PHPUnit_Framework_MockObject_MockObject
     {
         $reflection = new \ReflectionClass(UserInterface::class);
         $methods = $this->reflection_extractMethods($reflection);
@@ -102,7 +102,7 @@ class SecurityTestCase extends TestCase
      *   User 1 passed to process method or null to pass process method mock
      * @param UserInterface|null $user2
      *   User 2 passed to process method or null to pass process method mock
-     * @param bool|null $result
+     * @param int|null $result
      *   Result of the process method or null to pass process method mock
      * 
      * @return \PHPUnit_Framework_MockObject_MockObject
@@ -111,7 +111,7 @@ class SecurityTestCase extends TestCase
     public function getMockedAuthenticateStrategy(
         ?UserInterface $user1 = null, 
         ?UserInterface $user2 = null,
-        ?bool $result = null): \PHPUnit_Framework_MockObject_MockObject
+        ?int $result = null): \PHPUnit_Framework_MockObject_MockObject
     {
         $reflection = new \ReflectionClass(AuthenticationStrategyInterface::class);
         $methods = $this->reflection_extractMethods($reflection);

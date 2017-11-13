@@ -17,6 +17,14 @@ use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\User\User;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 
+/**
+ * SecurityTestCast testcase
+ * 
+ * @see \ZoeTest\Component\Security\SecurityTestCase
+ * 
+ * @author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
 class SecurityTestCaseTest extends TestCase
 {
     
@@ -29,6 +37,9 @@ class SecurityTestCaseTest extends TestCase
         
         $this->assertSame("foo", $user->getName());
         $this->assertSame("bar", $user->getPassword());
+        
+        $user = (new SecurityTestCase())->getMockedUser("foo", null);
+        $this->assertNull($user->getPassword()); 
     }
     
     /**
@@ -68,14 +79,20 @@ class SecurityTestCaseTest extends TestCase
         $user1 = new User("foo", "bar");
         $user2 = new User("foo", "bar");
         
-        $strategy1 = (new SecurityTestCase())->getMockedAuthenticateStrategy();
-        $this->assertInstanceOf(AuthenticationStrategyInterface::class, $strategy1);
+        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy();
+        $this->assertInstanceOf(AuthenticationStrategyInterface::class, $strategy);
         
-        $strategy2 = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, true);
-        $this->assertTrue($strategy2->process($user1, $user2));
+        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SUCCESS);
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $strategy->process($user1, $user2));
         
-        $strategy3 = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, false);
-        $this->assertFalse($strategy3->process($user1, $user2));
+        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::FAIL);
+        $this->assertSame(AuthenticationStrategyInterface::FAIL, $strategy->process($user1, $user2));
+        
+        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS);
+        $this->assertSame(AuthenticationStrategyInterface::SHUNT_ON_SUCCESS, $strategy->process($user1, $user2));
+        
+        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SKIP);
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user1, $user2));
     }
     
 }
