@@ -46,9 +46,12 @@ class UsernamePasswordStrategy implements AuthenticationStrategyInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */
-    public function process(UserInterface $loadedUser, UserInterface $user): bool
+    public function process(UserInterface $loadedUser, UserInterface $user): int
     {
-        return $this->encoder->compare($user->getPassword(), $loadedUser->getPassword());
+        if(null === $user->getPassword() || null === $loadedUser->getPassword())
+            return self::SKIP;
+        
+        return (true === $this->encoder->compare($user->getPassword(), $loadedUser->getPassword())) ? self::SUCCESS : self::FAIL;
     }
     
 }

@@ -63,7 +63,7 @@ final class User implements UserInterface
      * 
      * @param string $name
      *   User name
-     * @param string $password
+     * @param string|null $password
      *   User password
      * @param array $roles
      *   User roles
@@ -72,7 +72,7 @@ final class User implements UserInterface
      * @param array|null $attributes
      *   User attributes
      */
-    public function __construct(string $name, string $password, array $roles = [], bool $isRoot = false, ?array $attributes = null)
+    public function __construct(string $name, ?string $password, array $roles = [], bool $isRoot = false, ?array $attributes = null)
     {
         $this->name = $name;
         $this->password = $password;
@@ -94,7 +94,7 @@ final class User implements UserInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\UserInterface::getPassword()
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

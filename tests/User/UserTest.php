@@ -56,6 +56,10 @@ class UserTest extends SecurityTestCase
         $user = new User("foo", "bar");
         
         $this->assertSame("bar", $user->getPassword());
+        
+        $user = new User("foo", null);
+        
+        $this->assertNull($user->getPassword());
     }
     
     /**

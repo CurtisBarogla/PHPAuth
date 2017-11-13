@@ -34,10 +34,10 @@ interface UserInterface
     /**
      * Get the user password
      * 
-     * @return string
+     * @return string|null
      *   User password
      */
-    public function getPassword(): string;
+    public function getPassword(): ?string;
     
     /**
      * Get all roles for the user

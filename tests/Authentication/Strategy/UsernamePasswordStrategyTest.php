@@ -50,14 +50,34 @@ class UsernamePasswordStrategyTest extends SecurityTestCase
 
         $strategy = new UsernamePasswordStrategy($mock);
         
-        $this->assertTrue($strategy->process($this->getMockedUser("bar", "foo"), $this->getMockedUser("bar", "foo")));
+        $this->assertSame(
+            AuthenticationStrategyInterface::SUCCESS, 
+            $strategy->process($this->getMockedUser("bar", "foo"), $this->getMockedUser("bar", "foo")));
         
         $mock = $this->getMockedEncoder("foo", "bar", false);
 
         $strategy = new UsernamePasswordStrategy($mock);
         
-        $this->assertFalse($strategy->process($this->getMockedUser("bar", "bar"), $this->getMockedUser("foo", "foo")));
+        $this->assertSame(
+            AuthenticationStrategyInterface::FAIL, 
+            $strategy->process($this->getMockedUser("bar", "bar"), $this->getMockedUser("foo", "foo")));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
+     */
+    public function testProcessWhenUserPasswordIsNull(): void
+    {
+        $mock = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
         
+        $strategy = new UsernamePasswordStrategy($mock);
+        $this->assertSame(
+            AuthenticationStrategyInterface::SKIP, 
+            $strategy->process($this->getMockedUser("foo", null), $this->getMockedUser("foo", "bar")));
+        
+        $this->assertSame(
+            AuthenticationStrategyInterface::SKIP,
+            $strategy->process($this->getMockedUser("foo", "foo"), $this->getMockedUser("foo", null)));
     }
     
     /**
