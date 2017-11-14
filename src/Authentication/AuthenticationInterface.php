@@ -13,6 +13,9 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Authentication;
 
 use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Exception\LogicException;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
 
@@ -24,6 +27,23 @@ use Zoe\Component\Security\Exception\AuthenticationFailedException;
  */
 interface AuthenticationInterface
 {
+    
+    /**
+     * Change behaviour of the authentication process.
+     * Result MUST be immutable
+     *
+     * @param UserLoaderInterface|null $loader
+     *   New UserLoader
+     * @param AuthenticationStrategyInterface|null $strategy
+     *   New AuthenticationStrategy
+     *
+     * @return AuthenticationInterface
+     *   New instance of AuthenticationInterface implementation (immutable)
+     *
+     * @throws LogicException
+     *   When both UserLoader and AuthenticateStrategy are null
+     */
+    public function switch(?UserLoaderInterface $loader, ?AuthenticationStrategyInterface $strategy): AuthenticationInterface;
     
     /**
      * Authenticate a user and store it

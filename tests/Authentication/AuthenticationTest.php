@@ -13,13 +13,16 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Authentication;
 
 use ZoeTest\Component\Security\SecurityTestCase;
+use ZoeTest\Component\Security\Fixtures\Authentication\AuthenticationStrategyFixture;
+use ZoeTest\Component\Security\Fixtures\Authentication\UserLoaderFixture;
 use Zoe\Component\Security\Authentication\Authentication;
 use Zoe\Component\Security\Authentication\AuthenticationInterface;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\Exception\LogicException;
 use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\Storage\UserStorageInteface;
-use Zoe\Component\Security\User\StorableUser;
+use Zoe\Component\Security\User\StorableUserFactory;
 use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 
@@ -58,6 +61,35 @@ class AuthenticationTest extends SecurityTestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Authentication\Authentication::switch()
+     */
+    public function testSwitch(): void
+    {
+        $newStrategy = new AuthenticationStrategyFixture();
+        $newUserLoader = new UserLoaderFixture();
+        $currentStrategy = $this->getMockedAuthenticateStrategy();
+        $currentLoader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
+        
+        $authentication = new Authentication($currentLoader, $currentStrategy);
+        $reflection = new \ReflectionClass($authentication);
+
+        $getProperty = function(AuthenticationInterface $authentication, string $property) use ($reflection) {
+            return $this->reflection_getPropertyValue($authentication, $reflection, $property);
+        };
+        
+        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "loader"));
+        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "strategy"));
+        
+        $authentication = $authentication->switch($newUserLoader, null);
+        $this->assertInstanceOf(UserLoaderFixture::class, $getProperty($authentication, "loader"));
+        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "strategy"));
+        
+        $authentication = $authentication->switch(null, $newStrategy);
+        $this->assertInstanceOf(UserLoaderFixture::class, $getProperty($authentication, "loader"));
+        $this->assertInstanceOf(AuthenticationStrategyFixture::class, $getProperty($authentication, "strategy"));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
     public function testAuthenticate(): void
@@ -74,6 +106,21 @@ class AuthenticationTest extends SecurityTestCase
     }
     
                     /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Authentication::switch()
+     */
+    public function testExceptionSwitchWhenBothUserLoaderAndAuthenticationStrategyAreNull(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage("UserLoader and AuthenticationStrategy cannot be both null during switching process");
+        
+        $authentication = new Authentication(
+            $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar")), 
+            $this->getMockedAuthenticateStrategy());
+        
+        $authentication->switch(null, null);
+    }
     
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
@@ -176,7 +223,7 @@ class AuthenticationTest extends SecurityTestCase
                 $mock
                     ->expects($this->once())
                     ->method($methods[$i])
-                    ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUser::createFromUser($user))
+                    ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUserFactory::createFromUser($user))
                     ->will($returnValue);
             }
         }
