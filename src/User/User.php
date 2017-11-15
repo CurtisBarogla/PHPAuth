@@ -13,15 +13,14 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\User;
 
 use Zoe\Component\Security\Exception\InvalidUserAttributeException;
-use Zoe\Component\Security\User\Contracts\UserInterface;
 
 /**
- * Common class for all users
+ * Basic user implementation
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-abstract class User implements UserInterface
+final class User implements UserInterface
 {
     
     /**
@@ -29,57 +28,62 @@ abstract class User implements UserInterface
      * 
      * @var string
      */
-    protected $name;
+    private $name;
     
     /**
-     * Role associate the user
+     * User password
      * 
-     * @var array
+     * @var string
      */
-    protected $roles = [];
+    private $password;
     
     /**
-     * User attributes
+     * User extra attributes
      * 
      * @var array|null
      */
-    protected $attributes = null;
+    private $attributes = null;
     
     /**
-     * If the user is considered root
+     * Roles 
+     * 
+     * @var array
+     */
+    private $roles = [];
+    
+    /**
+     * Is root
      * 
      * @var bool
      */
-    protected $isRoot = false;
+    private $isRoot = false;
     
     /**
-     * Initialize a user
+     * Initialize a basic user
      * 
      * @param string $name
      *   User name
+     * @param string|null $password
+     *   User password
+     * @param array $roles
+     *   User roles
      * @param bool $isRoot
-     *   If the user is considered root
-     * @param array|null $roles
-     *   Roles
+     *   If the user is root
      * @param array|null $attributes
-     *   Default attributes
+     *   User attributes
      */
-    public function __construct(
-        string $name,
-        bool $isRoot = false,
-        ?array $roles = null,
-        ?array $attributes = null)
+    public function __construct(string $name, ?string $password, array $roles = [], bool $isRoot = false, ?array $attributes = null)
     {
         $this->name = $name;
+        $this->password = $password;
+        $this->roles = $roles;
         $this->isRoot = $isRoot;
         $this->attributes = $attributes;
-        if(null !== $roles)
-            $this->roles = \array_combine($roles, $roles);
     }
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::getName()
+     * @see \Zoe\Component\Security\User\UserInterface::getName()
      */
     public function getName(): string
     {
@@ -88,16 +92,32 @@ abstract class User implements UserInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::isRoot()
+     * @see \Zoe\Component\Security\User\UserInterface::getPassword()
      */
-    public function isRoot(): bool
+    public function getPassword(): ?string
     {
-        return $this->isRoot;
+        return $this->password;
+    }
+
+    /**
+     * Set a new role for the user
+     * 
+     * @param string $role
+     *   Role to add
+     * 
+     * @return self
+     *   self
+     */
+    public function addRole(string $role): self
+    {
+        $this->roles[$role] = $role;
+        
+        return $this;
     }
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::getRoles()
+     * @see \Zoe\Component\Security\User\UserInterface::getRoles()
      */
     public function getRoles(): array
     {
@@ -106,7 +126,43 @@ abstract class User implements UserInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::getAttributes()
+     * @see \Zoe\Component\Security\User\UserInterface::hasRole()
+     */
+    public function hasRole(string $role): bool
+    {
+        return isset($this->roles[$role]);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\UserInterface::isRoot()
+     */
+    public function isRoot(): bool
+    {
+        return $this->isRoot;
+    }
+    
+    /**
+     * Add an extra attribute to the user
+     * 
+     * @param string $name
+     *   Attribute name
+     * @param mixed $value
+     *   Attribute value
+     * 
+     * @return self
+     *   self 
+     */
+    public function addAttribute(string $name, $value): self
+    {
+        $this->attributes[$name] = $value;
+        
+        return $this;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\UserInterface::getAttributes()
      */
     public function getAttributes(): ?array
     {
@@ -115,32 +171,36 @@ abstract class User implements UserInterface
 
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::getAttribute()
+     * @see \Zoe\Component\Security\User\UserInterface::getAttribute()
      */
-    public function getAttribute(string $attribute)
+    public function getAttribute(string $name)
     {
-        if(!isset($this->attributes[$attribute]))
-            throw new InvalidUserAttributeException($this, $attribute);
-        
-        return $this->attributes[$attribute];
+        if(!isset($this->attributes[$name]))
+            throw new InvalidUserAttributeException(\sprintf("This attribute '%s' for user '%s' is not setted",
+                $name,
+                $this->name));
+            
+        return $this->attributes[$name];
     }
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::hasRole()
+     * @see \Zoe\Component\Security\User\UserInterface::hasAttribute()
      */
-    public function hasRole(string $role): bool
+    public function hasAttribute(string $name): bool
     {
-        return isset($this->roles[$role]);
+        return isset($this->attributes[$name]);
     }
-
+    
     /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\UserInterface::hasAttribute()
+     * Output user name
+     * 
+     * @return string
+     *   User name
      */
-    public function hasAttribute(string $attribute): bool
+    public function __toString(): string
     {
-        return null !== $this->attributes && isset($this->attributes[$attribute]);
+        return $this->name;
     }
 
 }

@@ -13,9 +13,9 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\User;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use ZoeTest\Component\Security\Fixtures\User\UserFixture;
 use Zoe\Component\Security\Exception\InvalidUserAttributeException;
-use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\User;
+use Zoe\Component\Security\User\UserInterface;
 
 /**
  * User testcase
@@ -27,31 +27,15 @@ use Zoe\Component\Security\User\Contracts\UserInterface;
  */
 class UserTest extends SecurityTestCase
 {
-
-    /**
-     * @see \Zoe\Component\Security\User\User::__construct()
-     */
-    public function testInitialization(): void
-    {
-        $user = new UserFixture("foo");
-        $reflection = new \ReflectionClass($user);
-        
-        $this->assertInstanceOf(UserInterface::class, $user);
-        $this->assertSame([], $this->reflection_getPropertyValue($user, $reflection, "roles"));
-        $this->assertSame(null, $this->reflection_getPropertyValue($user, $reflection, "attributes"));
-    }
     
     /**
-     * @see \Zoe\Component\Security\User\User::__construct()
+     * @see \Zoe\Component\Security\User\User
      */
-    public function testInitializationWithSettedValues(): void
+    public function testInterface(): void
     {
-        $user = new UserFixture("foo", false, ["foo", "bar"], ["foo" => "bar", "bar" => "foo"]);
-        $reflection = new \ReflectionClass($user);
+        $user = new User("foo", "bar");
         
         $this->assertInstanceOf(UserInterface::class, $user);
-        $this->assertSame(["foo" => "foo", "bar" => "bar"], $this->reflection_getPropertyValue($user, $reflection, "roles"));
-        $this->assertSame(["foo" => "bar", "bar" => "foo"], $this->reflection_getPropertyValue($user, $reflection, "attributes"));
     }
     
     /**
@@ -59,62 +43,46 @@ class UserTest extends SecurityTestCase
      */
     public function testGetName(): void
     {
-        $user = new UserFixture("foo");
+        $user = new User("foo", "bar");
         
         $this->assertSame("foo", $user->getName());
     }
     
     /**
-     * @see \Zoe\Component\Security\User\User::isRoot()
+     * @see \Zoe\Component\Security\User\User::getPassword()
      */
-    public function testIsRoot(): void
+    public function testGetPassword(): void
     {
-        $user = new UserFixture("foo");
+        $user = new User("foo", "bar");
         
-        $this->assertFalse($user->isRoot());
+        $this->assertSame("bar", $user->getPassword());
         
-        $user = new UserFixture("foo", true);
+        $user = new User("foo", null);
         
-        $this->assertTrue($user->isRoot());
+        $this->assertNull($user->getPassword());
     }
     
     /**
-     * @see \Zoe\Component\Security\User\User::getRoles()
+     * @see \Zoe\Component\Security\User\User::addRole()
+     */
+    public function testAddRole(): void
+    {
+        $user = new User("foo", "bar");
+        
+        $this->assertInstanceOf(UserInterface::class, $user->addRole("foo"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::addRole()
      */
     public function testGetRoles(): void
     {
-        $user = new UserFixture("foo");
+        $user = new User("foo", "bar");
         
-        $this->assertSame([], $user->getRoles());
+        $user->addRole("foo")->addRole("bar");
+        $expected = ["foo" => "foo", "bar" => "bar"];
         
-        $user = new UserFixture("foo", false, ["foo", "bar"]);
-        
-        $this->assertSame(["foo" => "foo", "bar" => "bar"], $user->getRoles());
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\User::getAttributes()
-     */
-    public function testGetAttributes(): void
-    {
-        $user = new UserFixture("foo");
-        
-        $this->assertNull($user->getAttributes());
-        
-        $user = new UserFixture("foo", false, [], ["foo" => "bar", "bar" => "foo"]);
-        
-        $this->assertSame(["foo" => "bar", "bar" => "foo"], $user->getAttributes());
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\User::getAttribute()
-     */
-    public function testGetAttribute(): void
-    {
-        $user = new UserFixture("foo", false, [], ["foo" => "bar", "bar" => "foo"]);
-        
-        $this->assertSame("bar", $user->getAttribute("foo"));
-        $this->assertSame("foo", $user->getAttribute("bar"));
+        $this->assertSame($expected, $user->getRoles());
     }
     
     /**
@@ -122,13 +90,64 @@ class UserTest extends SecurityTestCase
      */
     public function testHasRole(): void
     {
-        $user = new UserFixture("foo");
+        $user = new User("foo", "bar");
         
-        $this->assertFalse($user->hasRole("foo"));
-        
-        $user = new UserFixture("foo", false, ["foo"]);
-        
+        $user->addRole("foo");
         $this->assertTrue($user->hasRole("foo"));
+        $this->assertFalse($user->hasRole("bar"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::isRoot()
+     */
+    public function testIsRoot(): void
+    {
+        $user = new User("foo", "bar");
+        
+        $this->assertFalse($user->isRoot());
+        
+        $user = new User("foo", "bar", [], true);
+        
+        $this->assertTrue($user->isRoot());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::addAttribute()
+     */
+    public function testAddAttribute(): void
+    {
+        $user = new User("foo", "bar");
+        
+        $this->assertInstanceOf(UserInterface::class, $user->addAttribute("foo", "bar")->addAttribute("bar", "foo"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::getAttributes()
+     */
+    public function testGetAttributes(): void
+    {
+        $user = new User("foo", "bar");
+        
+        $expected = ["foo" => "bar", "bar" => "foo"];
+        $user->addAttribute("foo", "bar")->addAttribute("bar", "foo");
+        
+        $this->assertSame($expected, $user->getAttributes());
+        
+        $user = new User("foo", "bar");
+        
+        $this->assertNull($user->getAttributes());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::getAttribute()
+     */
+    public function testGetAttribute(): void
+    {
+        $user = new User("foo", "bar");
+        
+        $user->addAttribute("foo", "bar");
+        
+        $this->assertSame("bar", $user->getAttribute("foo"));
     }
     
     /**
@@ -136,13 +155,25 @@ class UserTest extends SecurityTestCase
      */
     public function testHasAttribute(): void
     {
-        $user = new UserFixture("foo");
+        $user = new User("foo", "bar");
         
         $this->assertFalse($user->hasAttribute("foo"));
         
-        $user = new UserFixture("foo", false, [], ["foo" => "bar"]);
+        $user->addAttribute("foo", "bar");
         
         $this->assertTrue($user->hasAttribute("foo"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::__toString()
+     */
+    public function test__toString(): void
+    {
+        $this->expectOutputString("foo");
+        
+        $user = new User("foo", "bar");
+        
+        echo $user;
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -150,12 +181,12 @@ class UserTest extends SecurityTestCase
     /**
      * @see \Zoe\Component\Security\User\User::getAttribute()
      */
-    public function testExceptionWhenGettingAnInvalidAttribute(): void
+    public function testExceptionWhenTryingToGetAnInvalidAttribute(): void
     {
         $this->expectException(InvalidUserAttributeException::class);
-        $this->expectExceptionMessage("This attribute 'foo' for the user 'bar' is not setted");
+        $this->expectExceptionMessage("This attribute 'foo' for user 'user' is not setted");
         
-        $user = new UserFixture("bar");
+        $user = new User("user", "bar");
         
         $user->getAttribute("foo");
     }
