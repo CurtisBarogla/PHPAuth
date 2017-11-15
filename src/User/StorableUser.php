@@ -12,132 +12,24 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User;
 
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
+
 /**
- * Basic user setted into a storage
+ * User destined to be stored
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class StorableUser implements StorableUserInterface
+final class StorableUser extends User implements StorableUserInterface
 {
     
     /**
-     * User identifier
-     * 
-     * @var string
-     */
-    protected $name;
-    
-    /**
-     * User attributes
-     * 
-     * @var array|null
-     */
-    protected $attributes;
-    
-    /**
-     * Roles user
-     * 
-     * @var array
-     */
-    protected $roles = [];
-    
-    /**
-     * Is root
-     * 
-     * @var bool
-     */
-    protected $isRoot = false;
-
-    /**
-     * Initialize a storable user
-     * 
-     * @param string $name
-     *   User name
-     * @param array $roles
-     *   Roles user
-     * @param array|null $attributes
-     *   User attributes
-     */
-    public function __construct(string $name, array $roles, ?array $attributes)
-    {
-        $this->name = $name;
-        $this->roles = $roles;
-        $this->attributes = $attributes;
-    }
-    
-    /**
-     * Create a storable user from a user instance
-     * 
-     * @param UserInterface $user
-     *   User instance
-     * 
-     * @return StorableUserInterface
-     *   Storable user
-     */
-    public static function createFromUser(UserInterface $user): StorableUserInterface
-    {
-        $storable = new StorableUser($user->getName(), $user->getRoles(), $user->getAttributes());
-        if($user->isRoot()) 
-            $storable->setRoot();
-        unset($user);
-        
-        return $storable;
-    }
-    
-    /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\StorableUserInterface::getName()
+     * @see \Zoe\Component\Security\User\Contracts\StorableUserInterface::storable()
      */
-    public function getName(): string
+    public function storable(): bool
     {
-        return $this->name;
+        return true;
     }
     
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\StorableUserInterface::isRoot()
-     */
-    public function isRoot(): bool
-    {
-        return $this->isRoot;
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\StorableUserInterface::getRoles()
-     */
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\StorableUserInterface::getAttributes()
-     */
-    public function getAttributes(): ?array
-    {
-        return $this->attributes;
-    }
-    
-    /**
-     * Output user name
-     *
-     * @return string
-     *   User name
-     */
-    public function __toString(): string
-    {
-        return $this->name;
-    }
-    
-    /**
-     * Set the stored user as root
-     */
-    private function setRoot(): void
-    {
-        $this->isRoot = true;
-    }
-
 }
