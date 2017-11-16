@@ -140,7 +140,16 @@ abstract class User implements UserInterface
      */
     public function hasAttribute(string $attribute): bool
     {
-        return null !== $this->attributes && isset($this->attributes[$attribute]);
+        return isset($this->attributes[$attribute]);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\Contracts\UserInterface::__toString()
+     */
+    public function __toString(): string
+    {
+        return $this->name;
     }
 
 }

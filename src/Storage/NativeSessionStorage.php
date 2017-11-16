@@ -12,9 +12,9 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Storage;
 
-use Zoe\Component\Security\User\StorableUserInterface;
-use Zoe\Component\Security\Exception\UserNotFoundException;
 use Zoe\Component\Security\Exception\LogicException;
+use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * Use native Session ($_SESSION) array as storage

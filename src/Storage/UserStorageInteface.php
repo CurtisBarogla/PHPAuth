@@ -12,8 +12,8 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Storage;
 
-use Zoe\Component\Security\User\StorableUserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * Responsible to storing user data during the session duration
@@ -23,6 +23,13 @@ use Zoe\Component\Security\Exception\UserNotFoundException;
  */
 interface UserStorageInteface
 {
+    
+    /**
+     * Identifier to interacting with a user storage
+     *
+     * @var string
+     */
+    public const STORE_USER_ID = "USER_ID";
     
     /**
      * Add a user into the store
