@@ -13,9 +13,9 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\User\User;
-use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * SecurityTestCast testcase
@@ -33,66 +33,54 @@ class SecurityTestCaseTest extends TestCase
      */
     public function testGetMockedUser(): void
     {
-        $user = (new SecurityTestCase())->getMockedUser("foo", "bar");
+        // mutable user
         
-        $this->assertSame("foo", $user->getName());
-        $this->assertSame("bar", $user->getPassword());
+        $mock = (new SecurityTestCase())->getMockedUser(MutableUserInterface::class, "foo", false);
         
-        $user = (new SecurityTestCase())->getMockedUser("foo", null);
-        $this->assertNull($user->getPassword()); 
+        $this->assertSame("foo", $mock->getName());
+        $this->assertInstanceOf(MutableUserInterface::class, $mock);
+        $this->assertFalse($mock->isRoot());
+        
+        // credential user with attributes, roles, and credentials
+        
+        $mock = (new SecurityTestCase())->getMockedUser(CredentialUserInterface::class, "foo", true, 3, 3);
+        
+        $this->assertSame(["foo" => "foo", "bar" => "bar", "poz" => "poz"], $mock->getRoles());
+        $this->assertSame(["foo" => "bar", "bar" => "foo", "poz" => "moz"], $mock->getAttributes());
+        $this->assertSame(["foo" => "bar", "bar" => "foo", "poz" => "moz"], $mock->getCredentials());
+        $this->assertInstanceOf(CredentialUserInterface::class, $mock);
+        $this->assertTrue($mock->isRoot());
+        
+        // storable user with attributes and roles
+        
+        $mock = (new SecurityTestCase())->getMockedUser(StorableUserInterface::class, "foo", false, 2, 2);
+        $this->assertSame(["foo" => "foo", "bar" => "bar"], $mock->getRoles());
+        $this->assertSame(["foo" => "bar", "bar" => "foo"], $mock->getAttributes());
+        $this->assertInstanceOf(StorableUserInterface::class, $mock);
+    }
+    
+                    /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedUser()
+     */
+    public function testExceptionOnInvalidCountOfPlaceholdersAttributes(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Count cannot be > 3. '100' given");
+        
+        $mock = (new SecurityTestCase())->getMockedUser(StorableUserInterface::class, "foo", true, 100);
     }
     
     /**
-     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedUserLoader()
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedUser()
      */
-    public function testGetMockedUserLoaderWithException(): void
+    public function testExceptionOnInvalidCountOfPlaceholdersRoles(): void
     {
-        $this->expectException(UserNotFoundException::class);
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Count cannot be > 3. '100' given");
         
-        $user = new User("foo", "bar");
-        $loader = (new SecurityTestCase())->getMockedUserLoader("foo", $user, true);
-        $loader->loadUser($user);
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedUserLoader()
-     */
-    public function testGetMockedUserLoader(): void
-    {
-        $user1 = new User("foo", "bar");
-        $user2 = new User("foo", "bar", ["role1", "role2"], true, ["foo" => "bar"]);
-        
-        $loader1 = (new SecurityTestCase())->getMockedUserLoader("foo", $user1);
-        $this->assertSame($user1, $loader1->loadUser($user1));
-        $this->assertSame("foo", $loader1->identify());
-        
-        $loader2 = (new SecurityTestCase())->getMockedUserLoader("bar", $user1, false, $user2);
-        $this->assertSame($user2, $loader2->loadUser($user1));
-        $this->assertSame("bar", $loader2->identify());
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedAuthenticationStrategy()
-     */
-    public function testGetMockedAuthenticationStrategy(): void
-    {
-        $user1 = new User("foo", "bar");
-        $user2 = new User("foo", "bar");
-        
-        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy();
-        $this->assertInstanceOf(AuthenticationStrategyInterface::class, $strategy);
-        
-        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SUCCESS);
-        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $strategy->process($user1, $user2));
-        
-        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::FAIL);
-        $this->assertSame(AuthenticationStrategyInterface::FAIL, $strategy->process($user1, $user2));
-        
-        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS);
-        $this->assertSame(AuthenticationStrategyInterface::SHUNT_ON_SUCCESS, $strategy->process($user1, $user2));
-        
-        $strategy = (new SecurityTestCase())->getMockedAuthenticateStrategy($user1, $user2, AuthenticationStrategyInterface::SKIP);
-        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user1, $user2));
+        $mock = (new SecurityTestCase())->getMockedUser(StorableUserInterface::class, "foo", true, null, 100);
     }
     
 }
