@@ -91,4 +91,12 @@ interface UserInterface
      */
     public function hasAttribute(string $attribute): bool;
     
+    /**
+     * Output user name
+     * 
+     * @return string
+     *   User name
+     */
+    public function __toString(): string;
+    
 }

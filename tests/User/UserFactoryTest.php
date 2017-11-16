@@ -42,6 +42,7 @@ class UserFactoryTest extends TestCase
         $credentialUser = UserFactory::createCredentialUser($user, "foo", ["foo" => "bar", "bar" => "foo"]);
         
         $this->assertInstanceOf(CredentialUserInterface::class, $credentialUser);
+        $this->assertInstanceOf(MutableUserInterface::class, $credentialUser);
         $this->assertSame(["foo" => "foo", "bar" => "bar"], $credentialUser->getRoles());
         $this->assertTrue($credentialUser->isRoot());
         $this->assertSame(["foo" => "bar", "bar" => "foo"], $credentialUser->getAttributes());

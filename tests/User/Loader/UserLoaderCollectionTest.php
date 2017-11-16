@@ -13,9 +13,10 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\User\Loader;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use Zoe\Component\Security\User\Loader\UserLoaderCollection;
-use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderCollection;
 
 /**
  * UserLoaderCollection testcase
@@ -29,38 +30,42 @@ class UserLoaderCollectionTest extends SecurityTestCase
 {
     
     /**
+     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::addLoader()
+     */
+    public function testAddLoader(): void
+    {
+        $loader = $this->getMockedUserLoader("foo");
+        
+        $collection = new UserLoaderCollection("foo");
+        $this->assertNull($collection->add($loader));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
      */
     public function testLoadUser(): void
     {
-        $collection = $this->getSettedUserLoaderCollection(5, [true, true, true, true, false]);
-        
-        $this->assertInstanceOf(UserInterface::class, $collection->loadUser($this->getMockedUser("foo", "bar")));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
-     */
-    public function testLoadUserFails(): void
-    {
-        $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage("This user 'foo' does not exist for the given loaders '0, 1, 2, 3'");
-        
-        $collection = $this->getSettedUserLoaderCollection(4, [true, true, true, true]);
-        
-        $collection->loadUser($this->getMockedUser("foo", "bar"));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
-     */
-    public function testLoadUserWithNoLoader(): void
-    {
-        $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage("No loader has been registered into the collection 'foo'");
+        $user = $this->getMockedUser(UserInterface::class, "foo");
+        $loader1 = $this->getMockedUserLoader("loader1");
+        $loader2 = $this->getMockedUserLoader("loader2");
+        $loader1->expects($this->once())->method("loadUser")->with($user)->will($this->throwException(new UserNotFoundException()));
+        $loader2
+            ->expects($this->once())
+            ->method("loadUser")
+            ->with($user)
+            ->will($this->returnValue($this->getMockedUser(MutableUserInterface::class, "foo", true, 1, 1)));
         
         $collection = new UserLoaderCollection("foo");
-        $collection->loadUser($this->getMockedUser("foo", "bar"));
+        $collection->add($loader1);
+        $collection->add($loader2);
+            
+        $userLoaded = $collection->loadUser($user);
+        
+        $this->assertInstanceOf(MutableUserInterface::class, $userLoaded);
+        $this->assertSame("foo", $userLoaded->getName());
+        $this->assertSame(["foo" => "foo"], $userLoaded->getRoles());
+        $this->assertTrue($userLoaded->isRoot());
+        $this->assertSame(["foo" => "bar"], $userLoaded->getAttributes());
     }
     
     /**
@@ -73,27 +78,43 @@ class UserLoaderCollectionTest extends SecurityTestCase
         $this->assertSame("foo", $collection->identify());
     }
     
+                    /**_____EXCEPTIONS_____**/
+    
     /**
-     * Get a UserLoaderCollection with a number of UserLoader mocked setted into it
-     * 
-     * @param int $countMockedLoaders
-     *   Number of loaders to mock
-     * @param bool[] $exceptionThrownByLoaders
-     *   If the loader must throw an exception
-     * 
-     * @return UserLoaderCollection
-     *   Collection with mocked UserLoader setted
+     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
      */
-    private function getSettedUserLoaderCollection(int $countMockedLoaders, array $exceptionThrownByLoaders): UserLoaderCollection
+    public function testExceptionWhenNoLoaderHasBeenAbleToLoadAUser(): void
     {
-        $user = $this->getMockedUser("foo", "bar");
-        $collection = new UserLoaderCollection("foo");
-        for ($i = 0; $i < $countMockedLoaders; $i++) {
-            $loader = $this->getMockedUserLoader((string) $i, $user, $exceptionThrownByLoaders[$i]);
-            $collection->add($loader);
-        }
+        $this->expectException(UserNotFoundException::class);
+        $this->expectExceptionMessage("This user 'foo' does not exist for the given loaders 'loader1, loader2'");
         
-        return $collection;
+        $user = $this->getMockedUser(UserInterface::class, "foo");
+
+        $loader1 = $this->getMockedUserLoader("loader1");
+        $loader1->expects($this->once())->method("loadUser")->with($user)->will($this->throwException(new UserNotFoundException()));
+        $loader1->expects($this->once())->method("identify")->will($this->returnValue("loader1"));
+        $loader2 = $this->getMockedUserLoader("loader2");
+        $loader2->expects($this->once())->method("loadUser")->with($user)->will($this->throwException(new UserNotFoundException()));
+        $loader2->expects($this->once())->method("identify")->will($this->returnValue("loader2"));
+        
+        $collection = new UserLoaderCollection("foo");
+        $collection->add($loader1);
+        $collection->add($loader2);
+        
+        $collection->loadUser($this->getMockedUser(UserInterface::class, "foo"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
+     */
+    public function testExceptionWhenNoLoaderSetted(): void
+    {
+        $this->expectException(UserNotFoundException::class);
+        $this->expectExceptionMessage("No loader has been registered into the collection 'foo'");
+        
+        $collection = new UserLoaderCollection("foo");
+        
+        $collection->loadUser($this->getMockedUser(UserInterface::class, "foo"));
     }
     
 }

@@ -14,9 +14,10 @@ namespace ZoeTest\Component\Security\User\Loader;
 
 use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\User\User;
+use Zoe\Component\Security\User\CredentialUser;
+use Zoe\Component\Security\User\MutableUser;
+use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\NativeUserLoader;
-use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 
 /**
  * NativeUserLoader testcase
@@ -30,51 +31,55 @@ class NativeUserLoaderTest extends SecurityTestCase
 {
     
     /**
-     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader
-     */
-    public function testInterface(): void
-    {
-        $loader = new NativeUserLoader([]);
-        $this->assertInstanceOf(UserLoaderInterface::class, $loader);
-    }
-    
-    /**
      * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
      */
-    public function testErrorWhenNotFoundedUserIsGiven(): void
+    public function testLoadBasicUser(): void
     {
-        $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage("This user 'foo' does not exist");
-        
-        $users = [];
-        $loader = new NativeUserLoader($users);
-        $user = $this->getMockedUser("foo", "bar");
-        $loader->loadUser($user);
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
-     */
-    public function testLoadUser(): void
-    {
-        $expectedUser1 = new User("foo", "bar", ["ROLE_FOO", "ROLE_BAR"], true, ["foo" => "bar", "bar" => "foo"]);
-        $expectedUser2 = new User("bar", "foo", ["ROLE_FOO"]);
         $users = [
             "foo"   =>  [
-                "password"      =>  "bar",
-                "roles"         =>  ["ROLE_FOO", "ROLE_BAR"],
-                "attributes"    =>  ["foo" => "bar", "bar" => "foo"],
-                "root"          =>  true
-            ],
-            "bar"   =>  [
-                "password"      =>  "foo",
-                "roles"         =>  ["ROLE_FOO"],
+                "root"          =>  true,
+                "roles"         =>  ["foo", "bar"],
+                "attributes"    =>  ["foo" => "bar", "bar" => "foo"]
             ]
         ];
         
         $loader = new NativeUserLoader($users);
-        $this->assertEquals($expectedUser1, $loader->loadUser(new User("foo", "bar")));
-        $this->assertEquals($expectedUser2, $loader->loadUser(new User("bar", "bar")));
+        
+        $expectedUser = (new MutableUser("foo", true))
+                            ->addRole("foo")
+                            ->addRole("bar")
+                            ->addAttribute("foo", "bar")
+                            ->addAttribute("bar", "foo");
+        
+        $this->assertEquals($expectedUser, $loader->loadUser($this->getMockedUser(UserInterface::class, "foo")));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
+     */
+    public function testLoadUserWithCredentials(): void
+    {
+        $users =  [
+            "foo"   =>  [
+                "password"      =>  "foo",
+                "root"          =>  true,
+                "credentials"   =>  ["foo" => "bar", "bar" => "foo"],
+                "roles"         =>  ["foo", "bar"],
+                "attributes"    =>  ["foo" => "bar", "bar" => "foo"]
+            ]
+        ];
+        
+        $loader = new NativeUserLoader($users);
+        
+        $expectedUser = (new CredentialUser("foo", "foo", true))
+                            ->addAttribute("foo", "bar")
+                            ->addAttribute("bar", "foo")
+                            ->addRole("foo")
+                            ->addRole("bar")
+                            ->addCredential("foo", "bar")
+                            ->addCredential("bar", "foo");
+        
+        $this->assertEquals($expectedUser, $loader->loadUser($this->getMockedUser(UserInterface::class, "foo")));
     }
     
     /**
@@ -84,7 +89,21 @@ class NativeUserLoaderTest extends SecurityTestCase
     {
         $loader = new NativeUserLoader([]);
         
-        $this->assertSame("NativeUser", $loader->identify());
+        $this->assertSame("NativeUserLoader", $loader->identify());
+    }
+    
+                    /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \Zoe\Component\Security\User\Loader\NativeUserLoader::loadUser()
+     */
+    public function testExceptionWhenUserHasBeenNotFound(): void
+    {
+        $this->expectException(UserNotFoundException::class);
+        $this->expectExceptionMessage("This user 'foo' does not exist");
+        
+        $loader = new NativeUserLoader([]);
+        $loader->loadUser($this->getMockedUser(UserInterface::class, "foo"));
     }
     
 }

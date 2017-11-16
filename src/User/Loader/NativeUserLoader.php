@@ -12,9 +12,11 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User\Loader;
 
-use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\User\User;
+use Zoe\Component\Security\User\MutableUser;
+use Zoe\Component\Security\User\UserFactory;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * Load users from a given array
@@ -47,7 +49,7 @@ class NativeUserLoader implements UserLoaderInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\Loader\UserLoaderInterface::loadUser()
      */
-    public function loadUser(UserInterface $user): UserInterface
+    public function loadUser(UserInterface $user): MutableUserInterface
     {
         $name = $user->getName();
         if(!isset($this->users[$name]))
@@ -58,7 +60,16 @@ class NativeUserLoader implements UserLoaderInterface
         $roles = $this->users[$name]["roles"] ?? [];
         $root = $this->users[$name]["root"] ?? false;
         
-        return new User($name, $this->users[$name]["password"], $roles, $root, $attributes);
+        $user = new MutableUser($name, $root, $roles, $attributes);
+        
+        if(isset($this->users[$name]["password"]) || isset($this->users[$name]["credentials"])) {
+            $user = UserFactory::createCredentialUser(
+                $user, 
+                $this->users[$name]["password"] ?? null, 
+                $this->users[$name]["credentials"] ?? null);
+        }
+        
+        return $user;
     }
     
     /**
@@ -67,7 +78,7 @@ class NativeUserLoader implements UserLoaderInterface
      */
     public function identify(): string
     {
-        return "NativeUser";
+        return "NativeUserLoader";
     }
 
 }

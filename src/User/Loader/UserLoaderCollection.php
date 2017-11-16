@@ -12,8 +12,9 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User\Loader;
 
-use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * Try to load a user over a set of UserLoaderInterface
@@ -57,21 +58,21 @@ class UserLoaderCollection implements UserLoaderInterface
      */
     public function add(UserLoaderInterface $loader): void
     {
-        $this->loaders[$loader->identify()] = $loader; 
+        $this->loaders[] = $loader; 
     }
     
     /**
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\Loader\UserLoaderInterface::loadUser()
      */
-    public function loadUser(UserInterface $user): UserInterface
+    public function loadUser(UserInterface $user): MutableUserInterface
     {
         $loadersTried = [];
         foreach ($this->loaders as $identifier => $loader) {
             try {
                 return $loader->loadUser($user); 
             } catch (UserNotFoundException $e) {
-                $loadersTried[] = $identifier;
+                $loadersTried[] = $loader->identify();
                 continue;
             }
         }
