@@ -59,6 +59,16 @@ class SecurityTestCaseTest extends TestCase
         $this->assertInstanceOf(StorableUserInterface::class, $mock);
     }
     
+    /**
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedUserLoader()
+     */
+    public function testGetMockedUserLoader(): void
+    {
+        $mock = (new SecurityTestCase())->getMockedUserLoader("foo");
+        
+        $this->assertSame("foo", $mock->identify());
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**

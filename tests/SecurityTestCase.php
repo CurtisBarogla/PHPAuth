@@ -15,6 +15,7 @@ namespace ZoeTest\Component\Security;
 use PHPUnit\Framework\TestCase;
 use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 
 /**
  * Common class for Security component testcases
@@ -69,15 +70,24 @@ class SecurityTestCase extends TestCase
         return $mock;
     }
     
+    public function getMockedUserLoader(string $identifier): \PHPUnit_Framework_MockObject_MockObject
+    {
+        $methods = $this->reflection_extractMethods(new \ReflectionClass(UserLoaderInterface::class));
+        $mock = $this->getMockBuilder(UserLoaderInterface::class)->setMethods($methods)->getMock();
+        $mock->method("identify")->will($this->returnValue($identifier));
+        
+        return $mock;
+    }
+    
     /**
      * Generate placeholders for attributes or credentials
      * 
      * @param int $count
      *   Number of placeholders to generate
-     * @throws \LogicException
-     *   if > 3
      * @return array
      *   Placeholders
+     * @throws \LogicException
+     *   if > placeholders given
      */
     private function getPlaceholders(int $count): array
     {
@@ -101,10 +111,10 @@ class SecurityTestCase extends TestCase
      * 
      * @param int $count
      *   Number of roles to generate
-     * @throws \LogicException
-     *   If > 3
      * @return array
      *   Roles placeholders
+     * @throws \LogicException
+     *   If > placeholders given
      */
     private function getRolePlaceholders(int $count): array
     {
