@@ -12,8 +12,10 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Authentication\Strategy;
 
-use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 
 /**
  * Process a verification over the passwords
@@ -46,9 +48,10 @@ class UsernamePasswordStrategy implements AuthenticationStrategyInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */
-    public function process(UserInterface $loadedUser, UserInterface $user): int
+    public function process(MutableUserInterface $loadedUser, UserInterface $user): int
     {
-        if(null === $user->getPassword() || null === $loadedUser->getPassword())
+        if(!$loadedUser instanceof CredentialUserInterface || !$user instanceof CredentialUserInterface 
+            || null === $user->getPassword() || null === $loadedUser->getPassword())
             return self::SKIP;
         
         return (true === $this->encoder->compare($user->getPassword(), $loadedUser->getPassword())) ? self::SUCCESS : self::FAIL;

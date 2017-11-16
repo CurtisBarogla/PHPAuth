@@ -16,6 +16,8 @@ use PHPUnit\Framework\TestCase;
 use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 
 /**
  * Common class for Security component testcases
@@ -70,11 +72,46 @@ class SecurityTestCase extends TestCase
         return $mock;
     }
     
+    /**
+     * Get a mocked user loader with identifier setted
+     * 
+     * @param string $identifier
+     *   User loader identifier
+     * 
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     *   Mocked user loader
+     */
     public function getMockedUserLoader(string $identifier): \PHPUnit_Framework_MockObject_MockObject
     {
         $methods = $this->reflection_extractMethods(new \ReflectionClass(UserLoaderInterface::class));
         $mock = $this->getMockBuilder(UserLoaderInterface::class)->setMethods($methods)->getMock();
         $mock->method("identify")->will($this->returnValue($identifier));
+        
+        return $mock;
+    }
+    
+    /**
+     * Get a mocked authentication strategy
+     * 
+     * @param int $result
+     *   Result of the mocked authentication strategy
+     * @param UserInterface $user1
+     *   User1 to pass to the process
+     * @param UserInterface|null $user2
+     *   User2 to pass to the process. If null, user2 = user1
+     */
+    public function getMockedAuthenticationStrategy(
+        int $result, 
+        UserInterface $user1, 
+        ?UserInterface $user2 = null): \PHPUnit_Framework_MockObject_MockObject
+    {
+        if(null === $user2)
+            $user2 = $user1;
+        
+        $methods = $this->reflection_extractMethods(new \ReflectionClass(AuthenticationStrategyInterface::class));
+        $mock = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods($methods)->getMock();
+        
+        $mock->expects($this->once())->method("process")->with($user1, $user2)->will($this->returnValue($result));
         
         return $mock;
     }

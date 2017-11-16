@@ -13,8 +13,9 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
@@ -67,6 +68,21 @@ class SecurityTestCaseTest extends TestCase
         $mock = (new SecurityTestCase())->getMockedUserLoader("foo");
         
         $this->assertSame("foo", $mock->identify());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedAuthenticationStrategy()
+     */
+    public function testGetMockedAuthenticationStrategy(): void
+    {
+        $user = (new SecurityTestCase())->getMockedUser(MutableUserInterface::class, "foo");
+        $user2 = (new SecurityTestCase())->getMockedUser(MutableUserInterface::class, "bar");
+        
+        $mock = (new SecurityTestCase())->getMockedAuthenticationStrategy(AuthenticationStrategyInterface::SUCCESS, $user);
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $mock->process($user, $user));
+        
+        $mock = (new SecurityTestCase())->getMockedAuthenticationStrategy(AuthenticationStrategyInterface::FAIL, $user, $user2);
+        $this->assertSame(AuthenticationStrategyInterface::FAIL, $mock->process($user, $user2));
     }
     
                     /**_____EXCEPTIONS_____**/

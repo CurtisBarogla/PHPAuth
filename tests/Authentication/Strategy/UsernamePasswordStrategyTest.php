@@ -13,10 +13,11 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Authentication\Strategy;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy;
 use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * UsernamePasswordStrategy testcase
@@ -29,79 +30,71 @@ use Zoe\Component\Security\Encoder\PasswordEncoderInterface;
 class UsernamePasswordStrategyTest extends SecurityTestCase
 {
     
-    use ReflectionTrait;
-    
-    /**
-     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy
-     */
-    public function testInterface(): void
-    {
-        $strategy = new UsernamePasswordStrategy($this->getMockedEncoder("foo", "bar", false));
-        
-        $this->assertInstanceOf(AuthenticationStrategyInterface::class, $strategy);
-    }
-    
     /**
      * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
      */
     public function testProcess(): void
     {
-        $mock = $this->getMockedEncoder("foo", "foo", true);
-
-        $strategy = new UsernamePasswordStrategy($mock);
+        $user = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user->method("getPassword")->will($this->returnValue("foo"));
         
-        $this->assertSame(
-            AuthenticationStrategyInterface::SUCCESS, 
-            $strategy->process($this->getMockedUser("bar", "foo"), $this->getMockedUser("bar", "foo")));
+        $encoder = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
+        $encoder->expects($this->once())->method("compare")->with($user->getPassword(), $user->getPassword())->will($this->returnValue(true));
         
-        $mock = $this->getMockedEncoder("foo", "bar", false);
-
-        $strategy = new UsernamePasswordStrategy($mock);
+        $strategy = new UsernamePasswordStrategy($encoder);
         
-        $this->assertSame(
-            AuthenticationStrategyInterface::FAIL, 
-            $strategy->process($this->getMockedUser("bar", "bar"), $this->getMockedUser("foo", "foo")));
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $strategy->process($user, $user));
     }
     
     /**
      * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
      */
-    public function testProcessWhenUserPasswordIsNull(): void
+    public function testProcessOnFail(): void
     {
-        $mock = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
+        $user = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user->method("getPassword")->will($this->returnValue("foo"));
+        $user2 = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user2->method("getPassword")->will($this->returnValue("bar"));
         
-        $strategy = new UsernamePasswordStrategy($mock);
-        $this->assertSame(
-            AuthenticationStrategyInterface::SKIP, 
-            $strategy->process($this->getMockedUser("foo", null), $this->getMockedUser("foo", "bar")));
+        $encoder = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
+        $encoder->expects($this->once())->method("compare")->with($user->getPassword(), $user2->getPassword())->will($this->returnValue(false));
         
-        $this->assertSame(
-            AuthenticationStrategyInterface::SKIP,
-            $strategy->process($this->getMockedUser("foo", "foo"), $this->getMockedUser("foo", null)));
+        $strategy = new UsernamePasswordStrategy($encoder);
+        
+        $this->assertSame(AuthenticationStrategyInterface::FAIL, $strategy->process($user2, $user));
     }
     
     /**
-     * Get a mock of a password encoder
-     * 
-     * @param string $comparedPassword
-     *   Clear password
-     * @param string $encodedPassword
-     *   "Encoded" password
-     * @param bool $result
-     *   Comparaison result
-     * 
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     *   Mocked PasswordEncoderInterface
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
      */
-    private function getMockedEncoder(
-        string $comparedPassword, 
-        string $encodedPassword, 
-        bool $result): \PHPUnit_Framework_MockObject_MockObject
+    public function testProcessOnNonCredentialUser(): void
     {
-        $mock = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
-        $mock->method("compare")->with($comparedPassword, $encodedPassword)->will($this->returnValue($result));
+        $user = $this->getMockedUser(MutableUserInterface::class, "foo");
+        $user2 = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user2->method("getPassword")->will($this->returnValue("bar"));
+        $encoder = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
         
-        return $mock;
+        $strategy = new UsernamePasswordStrategy($encoder);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user, $user2));
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user2, $user));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::process()
+     */
+    public function testProcessWhenPasswordIsNull(): void
+    {
+        $user = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user->method("getPassword")->will($this->returnValue(null));
+        $user2 = $this->getMockedUser(CredentialUserInterface::class, "foo");
+        $user2->method("getPassword")->will($this->returnValue("bar"));
+        $encoder = $this->getMockBuilder(PasswordEncoderInterface::class)->setMethods(["encode", "compare"])->getMock();
+        
+        $strategy = new UsernamePasswordStrategy($encoder);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user, $user2));
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user2, $user));
     }
     
 }
