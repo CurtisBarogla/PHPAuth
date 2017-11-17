@@ -59,4 +59,20 @@ class UserFactory
         return new StorableUser($user->getName(), $user->isRoot(), $user->getRoles(), $user->getAttributes());
     }
     
+    /**
+     * Initialize a StorabeUser from a his json representation
+     * 
+     * @param string $json
+     *   Json user representation
+     * 
+     * @return StorableUserInterface
+     *   Storable user from his json representation
+     */
+    public static function createStorableUserFromJson(string $json): StorableUserInterface
+    {
+        $json = \json_decode($json, true);
+        
+        return new StorableUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);  
+    }
+    
 }

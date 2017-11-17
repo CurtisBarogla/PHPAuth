@@ -37,7 +37,24 @@ class StorableUserTest extends SecurityTestCase
         
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertInstanceOf(StorableUserInterface::class, $user);
+        $this->assertTrue($user instanceof \JsonSerializable);
         $this->assertTrue($user->storable());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\StorableUser::jsonSerialize()
+     */
+    public function testJsonSerialize(): void
+    {
+        $expected = \json_encode([
+            "name"          =>  "foo",
+            "root"          =>  false,
+            "attributes"    =>  ["foo" => "bar"],
+            "roles"         =>  ["foo" => "foo"]
+        ]);
+        $user = new StorableUser("foo", false, ["foo"], ["foo" => "bar"]);
+        
+        $this->assertSame($expected, \json_encode($user));
     }
     
 }

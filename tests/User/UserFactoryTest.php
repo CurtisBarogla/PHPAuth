@@ -19,6 +19,7 @@ use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\CredentialUser;
+use Zoe\Component\Security\User\StorableUser;
 
 /**
  * UserFactory testcase
@@ -81,6 +82,17 @@ class UserFactoryTest extends TestCase
         $this->assertFalse($storableUser instanceof CredentialUserInterface);
         
         $this->assertFalse($storableUser->isRoot());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\UserFactory::createStorableUserFromJson()
+     */
+    public function testCreateStorableUserFromJson(): void
+    {
+        $user = new StorableUser("foo", true, ["foo"], ["foo" => "bar"]);
+        $json = \json_encode($user);
+        
+        $this->assertEquals($user, UserFactory::createStorableUserFromJson($json));
     }
     
 }

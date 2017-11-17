@@ -36,7 +36,7 @@ final class CredentialUser extends MutableUser implements CredentialUserInterfac
      * 
      * @param string $name
      *   User name
-     * @param string $password
+     * @param string|null $password
      *   User password
      * @param bool $isRoot
      *   If the user is considered root

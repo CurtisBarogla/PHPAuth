@@ -16,11 +16,13 @@ use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * User destined to be stored
+ * Storable user can be "jsonify".
+ * Attributes setted which not implement JsonSerializable interface will loss their values during the process
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-final class StorableUser extends User implements StorableUserInterface
+final class StorableUser extends User implements StorableUserInterface, \JsonSerializable
 {
     
     /**
@@ -32,4 +34,18 @@ final class StorableUser extends User implements StorableUserInterface
         return true;
     }
     
+    /**
+     * {@inheritdoc}
+     * @see \JsonSerializable::jsonSerialize()
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            "name"          =>  $this->name,
+            "root"          =>  $this->isRoot,
+            "attributes"    =>  $this->attributes,
+            "roles"         =>  $this->roles
+        ];
+    }
+
 }
