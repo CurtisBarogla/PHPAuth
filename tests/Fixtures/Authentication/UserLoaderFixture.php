@@ -12,9 +12,10 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\Fixtures\Authentication;
 
+use Zoe\Component\Security\User\MutableUser;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\User\UserInterface;
-use Zoe\Component\Security\User\User;
 
 /**
  * For testing purpose only
@@ -31,9 +32,9 @@ class UserLoaderFixture implements UserLoaderInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\Loader\UserLoaderInterface::loadUser()
      */
-    public function loadUser(UserInterface $user): UserInterface
+    public function loadUser(UserInterface $user): MutableUserInterface
     {
-        return new User("foo", "bar");  
+        return new MutableUser("foo");
     }
     
     /**

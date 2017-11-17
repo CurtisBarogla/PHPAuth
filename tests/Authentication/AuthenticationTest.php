@@ -13,18 +13,41 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Authentication;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use ZoeTest\Component\Security\Fixtures\Authentication\AuthenticationStrategyFixture;
-use ZoeTest\Component\Security\Fixtures\Authentication\UserLoaderFixture;
 use Zoe\Component\Security\Authentication\Authentication;
 use Zoe\Component\Security\Authentication\AuthenticationInterface;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\Exception\LogicException;
-use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\Storage\UserStorageInteface;
-use Zoe\Component\Security\User\StorableUserFactory;
-use Zoe\Component\Security\User\StorableUserInterface;
-use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use ZoeTest\Component\Security\Fixtures\Authentication\UserLoaderFixture;
+
+/**
+ * Get Authentication implementation with mock setted
+ * 
+ * @param MutableUserInterface|null $user
+ *   User passed to authentication
+ * @param SecurityTestCase $case
+ *   SecurityTestCase instance 
+ * @param int $strategyResult
+ *   Result given by the strategy mocked
+ * 
+ * @return AuthenticationInterface
+ *   Authentication instance with mocked setted into it
+ */
+function getAuthenticationForTest(
+    ?MutableUserInterface& $user, 
+    SecurityTestCase $case,
+    int $strategyResult): AuthenticationInterface
+{
+    $user = $case->getMockedUser(MutableUserInterface::class, "foo", true, 2, 2);
+    $loader = $case->getMockedUserLoader("foo");
+    $loader->method("loadUser")->with($user)->will($case->returnValue($user));
+    $strategy = $case->getMockedAuthenticationStrategy($strategyResult, $user);
+    
+    return new Authentication($loader, $strategy);
+}
 
 /**
  * Authentication testcase
@@ -38,55 +61,31 @@ class AuthenticationTest extends SecurityTestCase
 {
     
     /**
-     * @see \Zoe\Component\Security\Authentication\Authentication
-     */
-    public function testInterface(): void
-    {
-        $mock = $this->getMockBuilder(Authentication::class)->disableOriginalConstructor()->setMethods(["authenticate"])->getMock();
-        
-        $this->assertInstanceOf(AuthenticationInterface::class, $mock);
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\Authentication\Authentication::setStorage()
-     */
-    public function testSetStorage(): void
-    {
-        $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
-        $strategy = $this->getMockedAuthenticateStrategy();
-        
-        $authentication = new Authentication($loader, $strategy);
-        $this->assertNull($authentication->setStorage($store));
-    }
-    
-    /**
      * @see \Zoe\Component\Security\Authentication\Authentication::switch()
      */
     public function testSwitch(): void
     {
-        $newStrategy = new AuthenticationStrategyFixture();
-        $newUserLoader = new UserLoaderFixture();
-        $currentStrategy = $this->getMockedAuthenticateStrategy();
-        $currentLoader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"));
+        $loader = $this->getMockBuilder(UserLoaderInterface::class)->setMethods(["loadUser", "identify"])->getMock();
+        $strategy = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods(["process"])->getMock();
         
-        $authentication = new Authentication($currentLoader, $currentStrategy);
+        $authentication = new Authentication($loader, $strategy);
         $reflection = new \ReflectionClass($authentication);
-
-        $getProperty = function(AuthenticationInterface $authentication, string $property) use ($reflection) {
-            return $this->reflection_getPropertyValue($authentication, $reflection, $property);
-        };
+        $iAuthentication = $authentication->switch(new UserLoaderFixture(), null);
+        $iReflection = new \ReflectionClass($iAuthentication);
+        $this->assertInstanceOf(AuthenticationInterface::class, $iAuthentication);
+        $this->assertInstanceOf(
+            UserLoaderInterface::class, 
+            $this->reflection_getPropertyValue($authentication, $reflection, "loader"));
+        $this->assertInstanceOf(
+            AuthenticationStrategyInterface::class, 
+            $this->reflection_getPropertyValue($authentication, $reflection, "strategy"));
         
-        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "loader"));
-        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "strategy"));
-        
-        $authentication = $authentication->switch($newUserLoader, null);
-        $this->assertInstanceOf(UserLoaderFixture::class, $getProperty($authentication, "loader"));
-        $this->assertInstanceOf(\PHPUnit_Framework_MockObject_MockObject::class, $getProperty($authentication, "strategy"));
-        
-        $authentication = $authentication->switch(null, $newStrategy);
-        $this->assertInstanceOf(UserLoaderFixture::class, $getProperty($authentication, "loader"));
-        $this->assertInstanceOf(AuthenticationStrategyFixture::class, $getProperty($authentication, "strategy"));
+        $this->assertInstanceOf(
+            UserLoaderFixture::class,
+            $this->reflection_getPropertyValue($iAuthentication, $reflection, "loader"));
+        $this->assertInstanceOf(
+            AuthenticationStrategyInterface::class,
+            $this->reflection_getPropertyValue($iAuthentication, $reflection, "strategy"));
     }
     
     /**
@@ -94,15 +93,19 @@ class AuthenticationTest extends SecurityTestCase
      */
     public function testAuthenticate(): void
     {
-        $user = $this->getMockedUser("foo", "bar");
-        $loader = $this->getMockedUserLoader("foo", $user);
-        $strategy = $this->getMockedAuthenticateStrategy($user, $user, AuthenticationStrategyInterface::SUCCESS);
-        $store = $this->getMockedStorage(["refreshUser", "addUser"], $user, [true, false]);
+        $user = null;
+        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SUCCESS);
+        $userAuthenticated = $authentication->authenticate($user);
+        $this->assertInstanceOf(StorableUserInterface::class, $userAuthenticated);
+        $this->assertSame("foo", $userAuthenticated->getName());
+        $this->assertTrue($userAuthenticated->isRoot());
+        $this->assertSame(["foo" => "foo", "bar" => "bar"], $userAuthenticated->getRoles());
+        $this->assertSame(["foo" => "bar", "bar" => "foo"], $userAuthenticated->getAttributes());
         
-        $authentication = new Authentication($loader, $strategy);
-        $authentication->setStorage($store);
-        
-        $this->assertNull($authentication->authenticate($user));
+        $user = null;
+        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS);
+        $userAuthenticated = $authentication->authenticate($user);
+        $this->assertInstanceOf(StorableUserInterface::class, $userAuthenticated);
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -110,125 +113,57 @@ class AuthenticationTest extends SecurityTestCase
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication::switch()
      */
-    public function testExceptionSwitchWhenBothUserLoaderAndAuthenticationStrategyAreNull(): void
+    public function testExceptionLoaderAndStrategyAreBothNullDuringSwitch(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage("UserLoader and AuthenticationStrategy cannot be both null during switching process");
         
-        $authentication = new Authentication(
-            $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar")), 
-            $this->getMockedAuthenticateStrategy());
+        $loader = $this->getMockBuilder(UserLoaderInterface::class)->setMethods(["loadUser", "identify"])->getMock();
+        $strategy = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods(["process"])->getMock();
         
+        $authentication = new Authentication($loader, $strategy);
         $authentication->switch(null, null);
     }
     
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
-    public function testExceptionWhenLoaderDoesNotFoundAUser(): void
-    {
-        $this->expectException(UserNotFoundException::class);
-        
-        $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader("foo", $this->getMockedUser("foo", "bar"), true);
-        $strategy = $this->getMockedAuthenticateStrategy(
-                                    $this->getMockedUser("foo", "bar"), 
-                                    $this->getMockedUser("foo", "bar"), AuthenticationStrategyInterface::SUCCESS);
-        
-        $authentication = new Authentication($loader, $strategy);
-        $authentication->authenticate($this->getMockedUser("foo", "bar"));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
-     */
-    public function testExceptionWhenStrategyProcessFailed(): void
+    public function testAuthenticateOnFail(): void
     {
         $this->expectException(AuthenticationFailedException::class);
         $this->expectExceptionMessage("This user 'foo' cannot be authenticated");
         
-        $user = $this->getMockedUser("foo", "bar");
+        $user = null;
+        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::FAIL);
         
-        $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader("foo", $user);
-        $strategy = $this->getMockedAuthenticateStrategy($user, $user, AuthenticationStrategyInterface::FAIL);
-        
-        $authentication = new Authentication($loader, $strategy);
         $authentication->authenticate($user);
     }
     
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
-    public function testExceptionWhenStrategyProcessSkipped(): void
+    public function testAuthenticateOnSkip(): void
     {
         $this->expectException(AuthenticationFailedException::class);
         $this->expectExceptionMessage("This user 'foo' cannot be authenticated");
         
-        $user = $this->getMockedUser("foo", "bar");
+        $user = null;
+        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SKIP);
         
-        $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader("foo", $user);
-        $strategy = $this->getMockedAuthenticateStrategy($user, $user, AuthenticationStrategyInterface::SKIP);
-        
-        $authentication = new Authentication($loader, $strategy);
         $authentication->authenticate($user);
     }
     
     /**
      * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
      */
-    public function testExceptionWhenStrategyReturnAnInvalidReturnValue(): void
+    public function testExceptionOnInvalidReturnValueFromStrategy(): void
     {
         $this->expectException(\UnexpectedValueException::class);
-        //$this->expectExceptionMessage("Invalid return value on '%s' strategy");
         
-        $user = $this->getMockedUser("foo", "bar");
+        $user = null;
+        $authentication = getAuthenticationForTest($user, $this, 5);
         
-        $store = $this->getMockedStorage();
-        $loader = $this->getMockedUserLoader("foo", $user);
-        $strategy = $this->getMockedAuthenticateStrategy($user, $user, 10);
-        
-        $authentication = new Authentication($loader, $strategy);
         $authentication->authenticate($user);
-    }
-    
-    /**
-     * Get a mocked user storage
-     * 
-     * @param string[]|null $methods
-     *   Methods called once to mock. Set to null to skip method mocking
-     * @param UserInterface $user
-     *   User to store. Set to null to skip method mocking
-     * @param bool[] $exception
-     *   If the method can return an exception and must return it. Set to null to skip method mocking
-     * 
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     *   Mocked user storage
-     */
-    private function getMockedStorage(
-        ?array $methods = null, 
-        ?UserInterface $user = null, 
-        ?array $exceptions = null): \PHPUnit_Framework_MockObject_MockObject
-    {
-        $reflection = new \ReflectionClass(UserStorageInteface::class);
-        $r_methods = $this->reflection_extractMethods($reflection);
-        
-        $mock = $this->getMockBuilder(UserStorageInteface::class)->setMethods($r_methods)->getMock();
-        
-        if(null !== $methods && null !== $user && $exceptions !== null) {
-            $count = \count($methods) - 1;
-            for ($i = 0; $i <= $count; $i++) {
-                $returnValue = ($exceptions[$i]) ? $this->throwException(new UserNotFoundException()) : $this->returnValue(null);
-                $mock
-                    ->expects($this->once())
-                    ->method($methods[$i])
-                    ->with(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUserFactory::createFromUser($user))
-                    ->will($returnValue);
-            }
-        }
-        
-        return $mock;
     }
     
 }

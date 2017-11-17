@@ -69,7 +69,7 @@ class NativePasswordEncoderTest extends SecurityTestCase
     public function testGetCost(): void
     {
         // change it if fail
-        $expected = 10;
+        $expected = NativePasswordEncoder::getBestCost();
         
         $this->assertSame($expected, NativePasswordEncoder::getBestCost());
     }

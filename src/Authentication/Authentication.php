@@ -15,13 +15,10 @@ namespace Zoe\Component\Security\Authentication;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\Security\Exception\AuthenticationFailedException;
 use Zoe\Component\Security\Exception\LogicException;
-use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\Storage\UserStorageAwareInterface;
-use Zoe\Component\Security\Storage\UserStorageTrait;
-use Zoe\Component\Security\User\StorableUserFactory;
-use Zoe\Component\Security\User\StorableUserInterface;
-use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\UserFactory;
+use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * Basic AuthenticationInterface implementation.
@@ -30,10 +27,8 @@ use Zoe\Component\Security\User\Loader\UserLoaderInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class Authentication implements AuthenticationInterface, UserStorageAwareInterface
+class Authentication implements AuthenticationInterface
 {
-    
-    use UserStorageTrait;
     
     /**
      * User loader
@@ -83,7 +78,7 @@ class Authentication implements AuthenticationInterface, UserStorageAwareInterfa
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Authentication\AuthenticationInterface::authenticate()
      */
-    public function authenticate(UserInterface $user): void
+    public function authenticate(UserInterface $user): StorableUserInterface
     {
         $loadedUser = $this->loader->loadUser($user);
   
@@ -101,15 +96,7 @@ class Authentication implements AuthenticationInterface, UserStorageAwareInterfa
                     \get_class($this->strategy)));
         }
         
-        try {
-            $this
-                ->getStorage()
-                ->refreshUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUserFactory::createFromUser($loadedUser));
-        } catch (UserNotFoundException $e) {
-            $this
-                ->getStorage()
-                ->addUser(StorableUserInterface::USER_STORE_IDENTIFIER, StorableUserFactory::createFromUser($loadedUser));
-        }
+        return UserFactory::createStorableUser($loadedUser);
     }
 
 }
