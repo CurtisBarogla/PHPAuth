@@ -12,7 +12,8 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Authentication\Strategy;
 
-use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * Responsible to filter user before the storing process
@@ -54,7 +55,7 @@ interface AuthenticationStrategyInterface
     /**
      * Process the strategy over a loaded user and the user given to the authentification process
      * 
-     * @param UserInterface $loadedUser
+     * @param MutableUserInterface $loadedUser
      *   User from the loader
      * @param UserInterface $user
      *   User given to the authentification process
@@ -62,6 +63,6 @@ interface AuthenticationStrategyInterface
      * @return int
      *   One of the "enum const" defined into the interface
      */
-    public function process(UserInterface $loadedUser, UserInterface $user): int;
+    public function process(MutableUserInterface $loadedUser, UserInterface $user): int;
     
 }

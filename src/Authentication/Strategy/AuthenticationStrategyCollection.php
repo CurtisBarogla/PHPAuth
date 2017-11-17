@@ -12,7 +12,8 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Authentication\Strategy;
 
-use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * Strategy processing over a collection of AuthenticationStrategyInterface implementation
@@ -46,7 +47,7 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */
-    public function process(UserInterface $loadedUser, UserInterface $user): int
+    public function process(MutableUserInterface $loadedUser, UserInterface $user): int
     {
         $error = 0;
         $processed = 0;
