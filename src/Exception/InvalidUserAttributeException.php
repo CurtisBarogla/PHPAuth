@@ -20,7 +20,7 @@ use Zoe\Component\Security\User\Contracts\UserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class InvalidUserAttributeException extends \Exception
+class InvalidUserAttributeException extends InvalidArgumentException
 {
     
     /**

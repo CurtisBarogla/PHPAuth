@@ -18,6 +18,8 @@ use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Internal\GeneratorTrait;
 
 /**
  * Common class for Security component testcases
@@ -29,6 +31,7 @@ class SecurityTestCase extends TestCase
 {
     
     use ReflectionTrait;
+    use GeneratorTrait;
 
     /**
      * Get a mocked user
@@ -112,6 +115,27 @@ class SecurityTestCase extends TestCase
         $mock = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods($methods)->getMock();
         
         $mock->expects($this->once())->method("process")->with($user1, $user2)->will($this->returnValue($result));
+        
+        return $mock;
+    }
+    
+    /**
+     * Get a mocked Mask
+     * 
+     * @param string $identifier
+     *   Identifier returned by getIdentifier()
+     * @param int $value
+     *   Value returned by getValue()
+     * 
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     *   Mocked mask
+     */
+    public function getMockedMask(string $identifier, int $value): \PHPUnit_Framework_MockObject_MockObject
+    {
+        $mock = $this->getMockBuilder(Mask::class)->setMethods(["getIdentifier", "getValue"])->disableOriginalConstructor()->getMock();
+        
+        $mock->method("getIdentifier")->will($this->returnValue($identifier));
+        $mock->method("getValue")->will($this->returnValue($value));
         
         return $mock;
     }

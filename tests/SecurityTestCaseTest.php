@@ -85,6 +85,17 @@ class SecurityTestCaseTest extends TestCase
         $this->assertSame(AuthenticationStrategyInterface::FAIL, $mock->process($user, $user2));
     }
     
+    /**
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getMockedMask()
+     */
+    public function testGetMockedMask(): void
+    {
+        $mock = (new SecurityTestCase())->getMockedMask("foo", 0x0000);
+        
+        $this->assertSame("foo", $mock->getIdentifier());
+        $this->assertSame(0, $mock->getValue());
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**
