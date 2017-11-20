@@ -13,13 +13,13 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Internal\ReflectionTrait;
-use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
-use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\User\Contracts\UserInterface;
-use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
-use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Internal\GeneratorTrait;
+use Zoe\Component\Internal\ReflectionTrait;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 
 /**
  * Common class for Security component testcases
@@ -39,7 +39,7 @@ class SecurityTestCase extends TestCase
      * @param string $userType
      *   Type of user to generate (Storable, Credential, Mutable)
      * @param string $name
-     *   Returned bu getName()
+     *   Returned by getName()
      * @param bool $isRoot
      *   Return by isRoot()
      * @param int|null $placeholdersCount

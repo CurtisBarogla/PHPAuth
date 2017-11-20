@@ -139,22 +139,23 @@ class MaskCollection implements \IteratorAggregate, \JsonSerializable, \Countabl
     }
     
     /**
-     * Create a mask collection for his json representation
+     * Create a mask collection for his json representation.
+     * Can be a dejsonified array value or its raw string representation
      *
-     * @param string $json
-     *   Mask collection json reprensentation
+     * @param string|array $json
+     *   Mask collection json representation
      *
      * @return MaskCollection
      *   Mask collection with informations setted from json
      */
-    public static function createCollectionFromJson(string $json): MaskCollection
+    public static function createCollectionFromJson($json): MaskCollection
     {
-        $json = \json_decode($json, true);
+        if(!\is_array($json))
+            $json = \json_decode($json, true);
         
         $collection = new MaskCollection($json["identifier"]);
         foreach ($json["masks"] as $identifier => $mask) {
-            $mask = new Mask($identifier, $mask["value"]);
-            $collection->add($mask);
+            $collection->add(new Mask($identifier, $mask["value"]));
         }
         
         return $collection;

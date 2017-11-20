@@ -112,23 +112,7 @@ class MaskCollectionTest extends SecurityTestCase
         $collection->add($mask);
         $collection->add($mask2);
         
-        $expected = [
-            "identifier" => "foo", 
-            "masks" => [
-                "foo" => [
-                    "identifier" => "foo", 
-                    "value" => 0
-                ], 
-                "bar" => [
-                    "identifier" => "bar",
-                    "value" => 1
-                ],
-            ]                
-        ];
-        
-        $collection = \json_encode($collection);
-        
-        $this->assertSame($expected, \json_decode($collection, true));
+        $this->assertNotFalse(\json_encode($collection));
     }
     
     /**
@@ -143,6 +127,10 @@ class MaskCollectionTest extends SecurityTestCase
         $collection->add(new Mask("moz", 0x0004));
         
         $json = \json_encode($collection);
+        
+        $this->assertEquals($collection, MaskCollection::createCollectionFromJson($json));
+        
+        $json = \json_decode($json, true);
         
         $this->assertEquals($collection, MaskCollection::createCollectionFromJson($json));
     }
