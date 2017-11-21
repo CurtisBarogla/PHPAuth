@@ -32,6 +32,17 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
     private $strategies = [];
     
     /**
+     * Initialize strategy
+     * 
+     * @param AuthenticationStrategyInterface $strategy
+     *   First strategy processed
+     */
+    public function __construct(AuthenticationStrategyInterface $strategy)
+    {
+        $this->strategies[] = $strategy;
+    }
+    
+    /**
      * Add a strategy to the collection.
      * For optimisation reason, you should add strategy that can return SHUNT_ON_SUCCESS at first position
      * 

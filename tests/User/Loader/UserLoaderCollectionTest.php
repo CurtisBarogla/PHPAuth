@@ -36,7 +36,7 @@ class UserLoaderCollectionTest extends SecurityTestCase
     {
         $loader = $this->getMockedUserLoader("foo");
         
-        $collection = new UserLoaderCollection("foo");
+        $collection = new UserLoaderCollection("foo", $loader);
         $this->assertNull($collection->add($loader));
     }
     
@@ -55,8 +55,7 @@ class UserLoaderCollectionTest extends SecurityTestCase
             ->with($user)
             ->will($this->returnValue($this->getMockedUser(MutableUserInterface::class, "foo", true, 1, 1)));
         
-        $collection = new UserLoaderCollection("foo");
-        $collection->add($loader1);
+        $collection = new UserLoaderCollection("foo", $loader1);
         $collection->add($loader2);
             
         $userLoaded = $collection->loadUser($user);
@@ -73,7 +72,7 @@ class UserLoaderCollectionTest extends SecurityTestCase
      */
     public function testIdentify(): void
     {
-        $collection = new UserLoaderCollection("foo");
+        $collection = new UserLoaderCollection("foo", $this->getMockedUserLoader("foo"));
         
         $this->assertSame("foo", $collection->identify());
     }
@@ -97,22 +96,8 @@ class UserLoaderCollectionTest extends SecurityTestCase
         $loader2->expects($this->once())->method("loadUser")->with($user)->will($this->throwException(new UserNotFoundException()));
         $loader2->expects($this->once())->method("identify")->will($this->returnValue("loader2"));
         
-        $collection = new UserLoaderCollection("foo");
-        $collection->add($loader1);
+        $collection = new UserLoaderCollection("foo", $loader1);
         $collection->add($loader2);
-        
-        $collection->loadUser($this->getMockedUser(UserInterface::class, "foo"));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\Loader\UserLoaderCollection::loadUser()
-     */
-    public function testExceptionWhenNoLoaderSetted(): void
-    {
-        $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage("No loader has been registered into the collection 'foo'");
-        
-        $collection = new UserLoaderCollection("foo");
         
         $collection->loadUser($this->getMockedUser(UserInterface::class, "foo"));
     }

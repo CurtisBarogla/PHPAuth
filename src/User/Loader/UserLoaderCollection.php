@@ -44,10 +44,13 @@ class UserLoaderCollection implements UserLoaderInterface
      * 
      * @param string $identifier
      *   Identifier for the collection
+     * @param UserLoaderInterface $loader
+     *   Default user loader
      */
-    public function __construct(string $identifier)
+    public function __construct(string $identifier, UserLoaderInterface $loader)
     {
         $this->identifier = $identifier;
+        $this->loaders[] = $loader;
     }
     
     /**
@@ -76,16 +79,10 @@ class UserLoaderCollection implements UserLoaderInterface
                 continue;
             }
         }
-        
-        if(!empty($this->loaders))
-            $message = \sprintf("This user '%s' does not exist for the given loaders '%s'",
-                $user->getName(),
-                \implode(", ", $loadersTried));
-        else 
-            $message = \sprintf("No loader has been registered into the collection '%s'",
-                $this->identifier);
-        
-        throw new UserNotFoundException($message);
+
+        throw new UserNotFoundException(\sprintf("This user '%s' does not exist for the given loaders '%s'",
+            $user->getName(),
+            \implode(", ", $loadersTried)));
     }
 
     /**
