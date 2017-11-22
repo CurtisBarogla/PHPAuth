@@ -26,14 +26,14 @@ interface ResourceInterface
 {
     
     /**
-     * By default, all entities has no permission and must be whitelised when adding the entity
+     * By default, all permissions are denied and must be whitelisted
      * 
      * @var int
      */
     public const WHITELIST_BEHAVIOUR = 0;
     
     /**
-     * By default, all entities has all permissions and must be blacklisted when adding the entity
+     * By default, all permissions are granted and must be blacklisted
      * 
      * @var int
      */

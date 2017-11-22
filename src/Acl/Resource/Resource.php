@@ -16,6 +16,7 @@ use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Exception\InvalidMaskException;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Acl\Mask\MaskFactory;
 
 /**
  * Native ResourceInterface implementation
@@ -145,14 +146,14 @@ class Resource implements ResourceInterface, \JsonSerializable
      *   Json resource representation
      * 
      * @return ResourceInterface
-     *   Resource restaured
+     *   Resource restored
      */
     public static function createResourceFromJson($json): ResourceInterface
     {
         if(!\is_array($json))
             $json = \json_decode($json, true);
         
-        $permissions = MaskCollection::createCollectionFromJson($json["permissions"]);
+        $permissions = MaskFactory::createCollectionFromJson($json["permissions"]);
         $resource = new Resource($json["name"], $json["behaviour"]);
         $resource->permissions = $permissions;
         
