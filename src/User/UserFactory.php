@@ -12,9 +12,12 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User;
 
+use Zoe\Component\Security\Acl\Mask\MaskFactory;
+use Zoe\Component\Security\Acl\User\AclUser;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
+use Zoe\Component\Security\Acl\User\AclUserInterface;
 
 /**
  * Create and convert user implementation
@@ -65,12 +68,20 @@ class UserFactory
      * @param string $json
      *   Json user representation
      * 
-     * @return StorableUserInterface
+     * @return StorableUserInterface|AclUserInterface
      *   Storable user from his json representation
      */
     public static function createStorableUserFromJson(string $json): StorableUserInterface
     {
         $json = \json_decode($json, true);
+        
+        if(isset($json["permissions"])) {
+            $user = new AclUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);
+            
+            $user->setPermissions(MaskFactory::createCollectionFromJson($json["permissions"]));
+            
+            return $user;
+        }
         
         return new StorableUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);  
     }
