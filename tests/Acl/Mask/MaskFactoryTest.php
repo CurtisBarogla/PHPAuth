@@ -29,6 +29,26 @@ class MaskFactoryTest extends SecurityTestCase
 {
     
     /**
+     * @see \Zoe\Component\Security\Acl\Mask\MaskFactory::createCollectionFromJson()
+     */
+    public function testCreateCollectionFromJson(): void
+    {
+        $collection = new MaskCollection("foo");
+        
+        $collection->add(new Mask("foo", 0x0001));
+        $collection->add(new Mask("bar", 0x0002));
+        $collection->add(new Mask("moz", 0x0004));
+        
+        $json = \json_encode($collection);
+        
+        $this->assertEquals($collection, MaskFactory::createCollectionFromJson($json));
+        
+        $json = \json_decode($json, true);
+        
+        $this->assertEquals($collection, MaskFactory::createCollectionFromJson($json));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Mask\MaskFactory::createMaskFromResource()
      */
     public function testCreateMaskFromResource(): void

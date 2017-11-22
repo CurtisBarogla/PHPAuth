@@ -127,6 +127,22 @@ class MaskCollection implements \IteratorAggregate, \JsonSerializable, \Countabl
     }
     
     /**
+     * Refresh an existing mask
+     * 
+     * @param Mask $mask
+     *   Mask to refresh
+     */
+    public function refresh(Mask $mask): void
+    {
+        if(!isset($this->masks[$mask->getIdentifier()]))
+            throw new InvalidMaskException(\sprintf("Cannot refresh this mask '%s' into collection '%s'. It does not correspond to an existing one",
+                $mask->getIdentifier(),
+                $this->identifier));
+            
+        $this->masks[$mask->getIdentifier()] = $mask;
+    }
+    
+    /**
      * {@inheritdoc}
      * @see \JsonSerializable::jsonSerialize()
      */
@@ -136,29 +152,6 @@ class MaskCollection implements \IteratorAggregate, \JsonSerializable, \Countabl
             "identifier"    =>  $this->identifier,
             "masks"         =>  $this->masks
         ];
-    }
-    
-    /**
-     * Create a mask collection for his json representation.
-     * Can be a dejsonified array value or its raw string representation
-     *
-     * @param string|array $json
-     *   Mask collection json representation
-     *
-     * @return MaskCollection
-     *   Mask collection with informations setted from json
-     */
-    public static function createCollectionFromJson($json): MaskCollection
-    {
-        if(!\is_array($json))
-            $json = \json_decode($json, true);
-        
-        $collection = new MaskCollection($json["identifier"]);
-        foreach ($json["masks"] as $identifier => $mask) {
-            $collection->add(new Mask($identifier, $mask["value"]));
-        }
-        
-        return $collection;
     }
     
     /**

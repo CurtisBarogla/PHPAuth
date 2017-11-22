@@ -101,6 +101,21 @@ class MaskCollectionTest extends SecurityTestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\Mask\MaskCollection::refresh()
+     */
+    public function testRefresh(): void
+    {
+        $collection = new MaskCollection("foo");
+        $old = $this->getMockedMask("foo", 0x0002);
+        $new = $this->getMockedMask("foo", 0x0004);
+        $collection->add($old);
+        
+        $this->assertSame($old, $collection->get("foo"));
+        $this->assertNull($collection->refresh($new));
+        $this->assertSame($new, $collection->get("foo"));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Mask\MaskCollection::jsonSerialize()
      */
     public function testJsonSerialize(): void
@@ -113,26 +128,6 @@ class MaskCollectionTest extends SecurityTestCase
         $collection->add($mask2);
         
         $this->assertNotFalse(\json_encode($collection));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\Acl\Mask\MaskCollection::createCollectionFromJson()
-     */
-    public function testCreateCollectionFromJson(): void
-    {
-        $collection = new MaskCollection("foo");
-        
-        $collection->add(new Mask("foo", 0x0001));
-        $collection->add(new Mask("bar", 0x0002));
-        $collection->add(new Mask("moz", 0x0004));
-        
-        $json = \json_encode($collection);
-        
-        $this->assertEquals($collection, MaskCollection::createCollectionFromJson($json));
-        
-        $json = \json_decode($json, true);
-        
-        $this->assertEquals($collection, MaskCollection::createCollectionFromJson($json));
     }
     
     /**
@@ -160,6 +155,18 @@ class MaskCollectionTest extends SecurityTestCase
         
         $collection = new MaskCollection("bar");
         $collection->get("foo");
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Mask\MaskCollection::refresh()
+     */
+    public function testExceptionOnRefreshNotRegisteredMask(): void
+    {
+        $this->expectException(InvalidMaskException::class);
+        $this->expectExceptionMessage("Cannot refresh this mask 'foo' into collection 'bar'. It does not correspond to an existing one");
+        
+        $collection = new MaskCollection("bar");
+        $collection->refresh($this->getMockedMask("foo", 0x0000));
     }
     
 }

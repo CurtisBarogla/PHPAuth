@@ -25,6 +25,29 @@ class MaskFactory
 {
     
     /**
+     * Create a mask collection for his json representation.
+     * Can be a dejsonified array value or its raw string representation
+     *
+     * @param string|array $json
+     *   Mask collection json representation
+     *
+     * @return MaskCollection
+     *   Mask collection with informations setted from json
+     */
+    public static function createCollectionFromJson($json): MaskCollection
+    {
+        if(!\is_array($json))
+            $json = \json_decode($json, true);
+            
+            $collection = new MaskCollection($json["identifier"]);
+            foreach ($json["masks"] as $identifier => $mask) {
+                $collection->add(new Mask($identifier, $mask["value"]));
+            }
+            
+            return $collection;
+    }
+    
+    /**
      * Create a mask and initialize it depending of the behaviour of the resource
      * 
      * @param ResourceInterface $resource
@@ -33,8 +56,10 @@ class MaskFactory
      *   Mask name
      * @param array $permissions
      *   Permission to apply or deny depending of the resource behaviour
+     *   
      * @return Mask
      *   Mask initialized with permissions from the resource setted
+     *   
      * @throws InvalidArgumentException
      *   When the behaviour is invalid
      */
