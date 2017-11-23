@@ -24,7 +24,9 @@
 		"php" : ">= 7.1"
 	},
 	"keywords" : [
-		"security"
+		"security",
+		"acl",
+		"autentication"
 	],
 	"extra" : {
 		"branch-alias" : {
