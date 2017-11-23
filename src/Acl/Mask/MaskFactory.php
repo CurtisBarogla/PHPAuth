@@ -39,12 +39,12 @@ class MaskFactory
         if(!\is_array($json))
             $json = \json_decode($json, true);
             
-            $collection = new MaskCollection($json["identifier"]);
-            foreach ($json["masks"] as $identifier => $mask) {
-                $collection->add(new Mask($identifier, $mask["value"]));
-            }
-            
-            return $collection;
+        $collection = new MaskCollection($json["identifier"]);
+        foreach ($json["masks"] as $identifier => $mask) {
+            $collection->add(new Mask($identifier, $mask["value"]));
+        }
+        
+        return $collection;
     }
     
     /**

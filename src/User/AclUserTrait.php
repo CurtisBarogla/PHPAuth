@@ -56,12 +56,12 @@ trait AclUserTrait
     {
         try {
             $mask = $this->getPermissionsContainer()->get($resource->getName());
+            
+            foreach ($permissions as $permission) {
+                $mask->{$action}($resource->getPermission($permission));
+            }
         } catch (InvalidMaskException $e) {
             $mask = MaskFactory::createMaskFromResource($resource, $resource->getName(), $permissions);
-        }
-        
-        foreach ($permissions as $permission) {
-            $mask->{$action}($resource->getPermission($permission));
         }
         
         try {

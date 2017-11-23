@@ -75,7 +75,7 @@ class UserFactory
     }
     
     /**
-     * Initialize a StorableUser from a his json representation
+     * Initialize a StorableUser from his json representation
      * 
      * @param string $json
      *   Json user representation
