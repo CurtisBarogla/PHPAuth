@@ -22,7 +22,7 @@ use Zoe\Component\Security\User\Contracts\StorableUserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-final class StorableUser extends User implements StorableUserInterface, \JsonSerializable
+class StorableUser extends User implements StorableUserInterface, \JsonSerializable
 {
     
     /**
