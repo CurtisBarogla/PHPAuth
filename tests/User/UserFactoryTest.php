@@ -12,17 +12,14 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\User;
 
-use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\SecurityTestCase;
+use Zoe\Component\Security\User\CredentialUser;
 use Zoe\Component\Security\User\MutableUser;
+use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\UserFactory;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
-use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
-use Zoe\Component\Security\User\CredentialUser;
-use Zoe\Component\Security\User\StorableUser;
-use Zoe\Component\Security\Acl\User\AclUser;
-use Zoe\Component\Security\Acl\Resource\Resource;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
+use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 
 /**
  * UserFactory testcase
@@ -32,7 +29,7 @@ use Zoe\Component\Security\Acl\Resource\ResourceInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class UserFactoryTest extends TestCase
+class UserFactoryTest extends SecurityTestCase
 {
     
     /**
@@ -93,26 +90,6 @@ class UserFactoryTest extends TestCase
     public function testCreateStorableUserFromJson(): void
     {
         $user = new StorableUser("foo", true, ["foo"], ["foo" => "bar"]);
-        $json = \json_encode($user);
-        
-        $this->assertEquals($user, UserFactory::createStorableUserFromJson($json));
-    }
-    
-    /**
-     * @see \Zoe\Component\Security\User\UserFactory::createStorableUserFromJson()
-     */
-    public function testCreateStorableUserWithAclAttributes(): void
-    {
-        $resource = new Resource("foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
-        $resource->addPermission("foo");
-        $resource->addPermission("bar");
-        $resource2 = new Resource("bar", ResourceInterface::WHITELIST_BEHAVIOUR);
-        $resource2->addPermission("foo");
-        $resource2->addPermission("bar");
-        $user = new AclUser("foo");
-        $user->deny($resource, ["foo"]);
-        $user->grant($resource2, ["foo", "bar"]);
-        
         $json = \json_encode($user);
         
         $this->assertEquals($user, UserFactory::createStorableUserFromJson($json));

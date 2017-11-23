@@ -12,12 +12,9 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User;
 
-use Zoe\Component\Security\Acl\Mask\MaskFactory;
-use Zoe\Component\Security\Acl\User\AclUser;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
-use Zoe\Component\Security\Acl\User\AclUserInterface;
 
 /**
  * Create and convert user implementation
@@ -37,6 +34,7 @@ class UserFactory
      *   User password
      * @param array|null $credentials
      *   Credentials to set
+     *   
      * @return CredentialUserInterface
      *   Credential user with informations from MutableUser setted
      */
@@ -58,30 +56,22 @@ class UserFactory
      *   Storable user instance with informations from MutableUser setted
      */
     public static function createStorableUser(MutableUserInterface $user): StorableUserInterface
-    {
+    { 
         return new StorableUser($user->getName(), $user->isRoot(), $user->getRoles(), $user->getAttributes());
     }
     
     /**
-     * Initialize a StorabeUser from a his json representation
+     * Initialize a StorableUser from a his json representation
      * 
      * @param string $json
      *   Json user representation
      * 
-     * @return StorableUserInterface|AclUserInterface
+     * @return StorableUserInterface
      *   Storable user from his json representation
      */
     public static function createStorableUserFromJson(string $json): StorableUserInterface
     {
         $json = \json_decode($json, true);
-        
-        if(isset($json["permissions"])) {
-            $user = new AclUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);
-            
-            $user->setPermissions(MaskFactory::createCollectionFromJson($json["permissions"]));
-            
-            return $user;
-        }
         
         return new StorableUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);  
     }
