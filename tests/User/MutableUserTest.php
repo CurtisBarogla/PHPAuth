@@ -16,6 +16,7 @@ use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\User\MutableUser;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
+use Zoe\Component\Security\Exception\InvalidUserAttributeException;
 
 /**
  * MutableUser testcase
@@ -64,6 +65,33 @@ class MutableUserTest extends SecurityTestCase
         $this->assertInstanceOf(MutableUserInterface::class, $user->addAttribute("foo", "bar"));
         $this->assertTrue($user->hasAttribute("foo"));
         $this->assertSame("bar", $user->getAttribute("foo"));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\MutableUser::deleteAttribute()
+     */
+    public function testDeleteAttribute(): void
+    {
+        $user = new MutableUser("foo");
+        
+        $user->addAttribute("foo", "bar");
+        $this->assertTrue($user->hasAttribute("foo"));
+        $user->deleteAttribute("foo");
+        $this->assertFalse($user->hasAttribute("foo"));
+    }
+    
+                    /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \Zoe\Component\Security\User\MutableUser::deleteAttribute()
+     */
+    public function testExceptionWhenDeletingAnInvalidAttribute(): void
+    {
+        $this->expectException(InvalidUserAttributeException::class);
+        $this->expectExceptionMessage("This attribute 'foo' for the user 'bar' is not setted");
+        
+        $user = new MutableUser("bar");
+        $user->deleteAttribute("foo");
     }
     
 }
