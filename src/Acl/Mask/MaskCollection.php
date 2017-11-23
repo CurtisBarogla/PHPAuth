@@ -61,7 +61,7 @@ class MaskCollection implements \IteratorAggregate, \JsonSerializable, \Countabl
     }
     
     /**
-     * Get a mask initialize with the total value of all masks registered into the collection
+     * Get a mask initialized with the total value of all masks registered into the collection
      * 
      * @param string $identifier
      *   Identifier for the new generated mask
@@ -131,6 +131,9 @@ class MaskCollection implements \IteratorAggregate, \JsonSerializable, \Countabl
      * 
      * @param Mask $mask
      *   Mask to refresh
+     *   
+     * @throws InvalidMaskException
+     *   When the mask is not setted
      */
     public function refresh(Mask $mask): void
     {
