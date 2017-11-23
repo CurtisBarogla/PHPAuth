@@ -102,6 +102,16 @@ class SecurityTestCaseTest extends TestCase
         $this->assertSame(0, $mock->getValue());
     }
     
+    /**
+     * @see \ZoeTest\Component\Security\SecurityTestCase::getRoleCollection()
+     */
+    public function testGetMockedRoleCollection(): void
+    {
+        $mock = (new SecurityTestCase())->getMockedRoleCollection("Foo", ["Foo", "Bar"]);
+        
+        $this->assertSame(["Foo", "Bar"], $mock->getRole("Foo"));
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**
