@@ -23,7 +23,7 @@ use Zoe\Component\Security\User\Contracts\AclUserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class StorableAclUser extends StorableUser implements AclUserInterface
+class StorableAclUser extends StorableUser implements AclUserInterface, \JsonSerializable
 {
     
     use AclUserTrait;
@@ -85,6 +85,17 @@ class StorableAclUser extends StorableUser implements AclUserInterface
     public function setPermissions(MaskCollection $permissions): void
     {
         $this->permissions = $permissions;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\StorableUser::jsonSerialize()
+     */
+    public function jsonSerialize(): array
+    {
+        $user = parent::jsonSerialize();
+        
+        return \array_merge($user, ["permissions" => $this->permissions]);
     }
     
     /**

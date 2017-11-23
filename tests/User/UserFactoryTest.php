@@ -24,6 +24,9 @@ use Zoe\Component\Security\User\MutableAclUser;
 use Zoe\Component\Security\Acl\Resource\Resource;
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\User\Contracts\AclUserInterface;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use Zoe\Component\Security\User\StorableAclUser;
+use Zoe\Component\Security\Acl\Mask\Mask;
 
 /**
  * UserFactory testcase
@@ -113,6 +116,23 @@ class UserFactoryTest extends SecurityTestCase
     public function testCreateStorableUserFromJson(): void
     {
         $user = new StorableUser("foo", true, ["foo"], ["foo" => "bar"]);
+        $json = \json_encode($user);
+        
+        $this->assertEquals($user, UserFactory::createStorableUserFromJson($json));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\UserFactory::createStorableUserFromJson()
+     */
+    public function testCreateStorableAclUserFromJson(): void
+    {
+        $permissions = new MaskCollection("foo");
+        $permissions->add(new Mask("foo", 0x0001));
+        $permissions->add(new Mask("bar", 0x000F));
+        
+        $user = new StorableAclUser("foo");
+        $user->setPermissions($permissions);
+        
         $json = \json_encode($user);
         
         $this->assertEquals($user, UserFactory::createStorableUserFromJson($json));

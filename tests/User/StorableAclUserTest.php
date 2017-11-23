@@ -39,6 +39,7 @@ class StorableAclUserTest extends AclUserTest
         
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertInstanceOf(StorableUserInterface::class, $user);
+        $this->assertInstanceOf(\JsonSerializable::class, $user);
         $this->assertTrue($user->isRoot());
         $this->assertSame(["foo" => "foo", "bar" => "bar"], $user->getRoles());
         $this->assertSame("bar", $user->getAttribute("foo"));

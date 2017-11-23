@@ -37,6 +37,7 @@ class StorableUserTest extends SecurityTestCase
         
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertInstanceOf(StorableUserInterface::class, $user);
+        $this->assertInstanceOf(\JsonSerializable::class, $user);
         $this->assertTrue($user instanceof \JsonSerializable);
         $this->assertTrue($user->storable());
     }
