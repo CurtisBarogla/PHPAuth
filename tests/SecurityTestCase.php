@@ -16,7 +16,9 @@ use PHPUnit\Framework\TestCase;
 use Zoe\Component\Internal\GeneratorTrait;
 use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
@@ -46,6 +48,8 @@ class SecurityTestCase extends TestCase
      *   Number of placeholders attributes (and credentials if CredentialUser) to generate (returned by getAttributes() and getCredentials()) 
      * @param int $rolesCount
      *   Number of roles to generate (return by getRoles())
+     * @param string|null $aclPermissionsNeeded
+     *   Resource name to get the permission to the default setted MaskCollection instance (foo => 0x0001, bar => 0x00002)
      * 
      * @return \PHPUnit_Framework_MockObject_MockObject
      *   Mocked user type
@@ -55,17 +59,27 @@ class SecurityTestCase extends TestCase
         string $name, 
         bool $isRoot = false,
         ?int $placeholdersCount = null, 
-        ?int $rolesCount = null): \PHPUnit_Framework_MockObject_MockObject
+        ?int $rolesCount = null,
+        ?string $aclPermissionsNeeded = null): \PHPUnit_Framework_MockObject_MockObject
     {
         $methods = $this->reflection_extractMethods(new \ReflectionClass($userType));
         
-        $mock = $this->getMockBuilder($userType)->setMethods($methods)->getMock();
+        $mock = $this->getMockBuilder($userType)->setMethods($methods)->disableOriginalConstructor()->getMock();
         $mock->method("getName")->will($this->returnValue($name));
         $mock->method("isRoot")->will($this->returnValue($isRoot));
         if(null !== $placeholdersCount) {
             $mock->method("getAttributes")->will($this->returnValue($this->getPlaceholders($placeholdersCount)));
             if($userType === CredentialUserInterface::class) {
                 $mock->method("getCredentials")->will($this->returnValue($this->getPlaceholders($placeholdersCount)));
+            }
+            if($userType === AclUserInterface::class && null !== $aclPermissionsNeeded) {
+                $collection = new MaskCollection("ACL_PERMISSIONS");
+                $collection->add($this->getMockedMask("foo", 0x0001));
+                $collection->add($this->getMockedMask("bar", 0x0002));
+                $mock
+                    ->method("getPermission")
+                    ->with($aclPermissionsNeeded)
+                    ->will($this->returnValue($collection->get($aclPermissionsNeeded)));
             }
         }
         if(null !== $rolesCount) {

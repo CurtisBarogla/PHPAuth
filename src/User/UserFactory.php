@@ -15,6 +15,7 @@ namespace Zoe\Component\Security\User;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 
 /**
  * Create and convert user implementation
@@ -57,6 +58,18 @@ class UserFactory
      */
     public static function createStorableUser(MutableUserInterface $user): StorableUserInterface
     { 
+        if($user->hasAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER)) {
+            $permissions = $user->getAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER);
+            $user->deleteAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER);
+            
+            $user = new StorableAclUser($user->getName(), $user->isRoot(), $user->getRoles(), $user->getAttributes());
+            $user->setPermissions($permissions);
+            
+            unset($permissions);
+            
+            return $user;
+        }
+        
         return new StorableUser($user->getName(), $user->isRoot(), $user->getRoles(), $user->getAttributes());
     }
     

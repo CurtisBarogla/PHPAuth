@@ -14,6 +14,7 @@ namespace ZoeTest\Component\Security;
 
 use PHPUnit\Framework\TestCase;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
@@ -55,9 +56,14 @@ class SecurityTestCaseTest extends TestCase
         // storable user with attributes and roles
         
         $mock = (new SecurityTestCase())->getMockedUser(StorableUserInterface::class, "foo", false, 2, 2);
+        
         $this->assertSame(["foo" => "foo", "bar" => "bar"], $mock->getRoles());
         $this->assertSame(["foo" => "bar", "bar" => "foo"], $mock->getAttributes());
         $this->assertInstanceOf(StorableUserInterface::class, $mock);
+        
+        // acl user
+        $mock = (new SecurityTestCase())->getMockedUser(AclUserInterface::class, "foo", false, 2, 2, "foo");
+        $this->assertSame(0x0001, $mock->getPermission("foo")->getValue());
     }
     
     /**

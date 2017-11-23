@@ -20,6 +20,10 @@ use Zoe\Component\Security\User\UserFactory;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
+use Zoe\Component\Security\User\MutableAclUser;
+use Zoe\Component\Security\Acl\Resource\Resource;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 
 /**
  * UserFactory testcase
@@ -82,6 +86,25 @@ class UserFactoryTest extends SecurityTestCase
         $this->assertFalse($storableUser instanceof CredentialUserInterface);
         
         $this->assertFalse($storableUser->isRoot());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\UserFactory::createStorableUser()
+     */
+    public function testCreateStorableWithAclAttribute(): void
+    {
+        $resource = new Resource("foo", ResourceInterface::WHITELIST_BEHAVIOUR);
+        $resource->addPermission("foo");
+        $resource->addPermission("bar");
+        $user = new MutableAclUser("foo");
+        $user->grant($resource, ["foo", "bar"]);
+        
+        $storable = UserFactory::createStorableUser($user);
+        
+        $this->assertInstanceOf(StorableUserInterface::class, $storable);
+        $this->assertInstanceOf(AclUserInterface::class, $storable);
+        $this->assertSame(0x0003, $storable->getPermission("foo")->getValue());
+        $this->assertFalse($storable->hasAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER));
     }
     
     /**
