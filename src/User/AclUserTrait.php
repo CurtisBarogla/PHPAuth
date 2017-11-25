@@ -30,6 +30,24 @@ trait AclUserTrait
 
     /**
      * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\Contracts\AclUserInterface::grant()
+     */
+    public function grant(ResourceInterface $resource, array $permissions): void
+    {
+        $this->apply($resource, $permissions, "add");
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\Contracts\AclUserInterface::deny()
+     */
+    public function deny(ResourceInterface $resource, array $permissions): void
+    {
+        $this->apply($resource, $permissions, "sub");
+    }
+    
+    /**
+     * {@inheritDoc}
      * @see \Zoe\Component\Security\User\Contracts\AclUserInterface::getPermission()
      */
     public function getPermission(string $resource): Mask

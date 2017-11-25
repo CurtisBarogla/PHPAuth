@@ -13,7 +13,6 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\User;
 
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\User\Contracts\AclUserInterface;
 
 /**
@@ -49,24 +48,6 @@ class MutableAclUser extends MutableUser implements AclUserInterface
         $this->addAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER, new MaskCollection("ACL_PERMISSIONS"));
     }
     
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\AclUserInterface::grant()
-     */
-    public function grant(ResourceInterface $resource, array $permissions): void
-    {
-        $this->apply($resource, $permissions, "add");
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\User\Contracts\AclUserInterface::deny()
-     */
-    public function deny(ResourceInterface $resource, array $permissions): void
-    {
-        $this->apply($resource, $permissions, "sub");
-    }
-
     /**
      * {@inheritdoc}
      * @see \Zoe\Component\Security\User\AclUserTrait::getPermissionContainer()
