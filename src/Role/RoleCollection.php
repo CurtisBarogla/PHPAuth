@@ -20,7 +20,7 @@ use Zoe\Component\Security\Exception\RoleNotFoundException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class RoleCollection implements \JsonSerializable
+class RoleCollection implements \JsonSerializable, \IteratorAggregate
 {
     
     /**
@@ -38,15 +38,26 @@ class RoleCollection implements \JsonSerializable
     private $inheritance;
     
     /**
+     * {@inheritdoc}
+     * @see \IteratorAggregate::getIterator()
+     */ 
+    public function getIterator(): \Generator
+    {
+        foreach ($this->roles as $role) {
+            yield $role => $this->inheritance[$role] ?? null;
+        }
+    }
+    
+    /**
      * Add a role into the collection
      * 
      * @param string $role
      *   Main role
-     * @param array $childrens
-     *   Childrens (must be registered)
+     * @param array $parents
+     *   Parents (must be registered)
      *   
      * @throws RoleNotFoundException
-     *   When a children role is not registered
+     *   When a parent role is not registered
      */
     public function add(string $role, array $parents = []): void
     {
@@ -82,7 +93,7 @@ class RoleCollection implements \JsonSerializable
      * @throws RoleNotFoundException
      *   When the given role is not setted
      */
-    public function getRole(string $role): array
+    public function get(string $role): array
     {
         if(!isset($this->roles[$role]))
             throw new RoleNotFoundException(\sprintf("This role '%s' is not setted",
@@ -90,8 +101,25 @@ class RoleCollection implements \JsonSerializable
         
         if(!isset($this->inheritance[$role]))
             return [$this->roles[$role]];
-
-        return \array_merge([$role], $this->inheritance[$role]);
+            
+            
+        $this->inheritance[$role][] = $role;
+        
+        return \array_values($this->inheritance[$role]);
+    }
+    
+    /**
+     * Check if a role is present into the collection
+     * 
+     * @param string $role
+     *   Role name
+     *   
+     * @return bool
+     *   True if the role is in the collection. False otherwise
+     */
+    public function has(string $role): bool
+    {
+        return isset($this->roles[$role]);
     }
     
     /**
@@ -102,7 +130,7 @@ class RoleCollection implements \JsonSerializable
     {
         return [
             "roles"     =>  $this->roles,
-            "childrens" =>  $this->inheritance
+            "parents"   =>  $this->inheritance
         ];
     }
     
@@ -122,7 +150,7 @@ class RoleCollection implements \JsonSerializable
         
         $collection = new RoleCollection();
         $collection->roles = $json["roles"];
-        $collection->inheritance = $json["childrens"];
+        $collection->inheritance = $json["parents"];
         
         return $collection;
     }

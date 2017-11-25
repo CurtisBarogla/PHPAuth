@@ -22,7 +22,6 @@ use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
-use Zoe\Component\Security\Role\RoleCollection;
 
 /**
  * Common class for Security component testcases
@@ -151,27 +150,6 @@ class SecurityTestCase extends TestCase
         
         $mock->method("getIdentifier")->will($this->returnValue($identifier));
         $mock->method("getValue")->will($this->returnValue($value));
-        
-        return $mock;
-    }
-    
-    /**
-     * Get a mocked RoleCollection
-     * 
-     * @param string $role
-     *   Role passed to getRole
-     * @param array $rolesGetted
-     *   Roles getted from getRole
-     * 
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     *   Mocked RoleCollection
-     */
-    public function getMockedRoleCollection(string $role, array $rolesGetted): \PHPUnit_Framework_MockObject_MockObject
-    {
-        $methods = $this->reflection_extractMethods(new \ReflectionClass(RoleCollection::class));
-        $mock = $this->getMockBuilder(RoleCollection::class)->disableOriginalConstructor()->setMethods($methods)->getMock();
-        
-        $mock->method("getRole")->with($role)->will($this->returnValue($rolesGetted));
         
         return $mock;
     }

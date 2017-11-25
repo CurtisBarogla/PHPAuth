@@ -28,6 +28,21 @@ class RoleCollectionTest extends SecurityTestCase
 {
     
     /**
+     * @see \Zoe\Component\Security\Role\RoleCollection::getIterator()
+     */
+    public function testGetIterator(): void
+    {
+        $collection = new RoleCollection();
+        $collection->add("Foo");
+        $collection->add("Bar", ["Foo"]);
+        $collection->add("Moz", ["Bar"]);
+        
+        $expected = $this->getGenerator(["Foo" => null, "Bar" => ["Foo"], "Moz" => ["Bar", "Foo"]]);
+        
+        $this->assertTrue($this->assertGeneratorEquals($expected, $collection->getIterator()));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Role\RoleCollection::add()
      */
     public function testAdd(): void
@@ -51,12 +66,26 @@ class RoleCollectionTest extends SecurityTestCase
         $collection->add("ROLE5", ["ROLE1", "ROLE4"]);
         $collection->add("ROLE6", ["ROLE2", "ROLE4"]);
         
-        $this->assertSame(["ROLE1"], $collection->getRole("ROLE1"));
-        $this->assertSame(["ROLE2"], $collection->getRole("ROLE2"));
-        $this->assertSame(["ROLE3", "ROLE1"], $collection->getRole("ROLE3"));
-        $this->assertSame(["ROLE4", "ROLE3", "ROLE1"], $collection->getRole("ROLE4"));
-        $this->assertSame(["ROLE5", "ROLE1", "ROLE4", "ROLE3"], $collection->getRole("ROLE5"));
-        $this->assertSame(["ROLE6", "ROLE2", "ROLE4", "ROLE3", "ROLE1"], $collection->getRole("ROLE6"));
+        $this->assertSame(["ROLE1"], $collection->get("ROLE1"));
+        $this->assertSame(["ROLE2"], $collection->get("ROLE2"));
+        $this->assertSame(["ROLE1" ,"ROLE3"], $collection->get("ROLE3"));
+        $this->assertSame(["ROLE3", "ROLE1", "ROLE4"], $collection->get("ROLE4"));
+        $this->assertSame(["ROLE1", "ROLE4", "ROLE3", "ROLE5"], $collection->get("ROLE5"));
+        $this->assertSame(["ROLE2", "ROLE4", "ROLE3", "ROLE1", "ROLE6"], $collection->get("ROLE6"));
+    }
+    
+    /**
+     * @see  \Zoe\Component\Security\Role\RoleCollection::has()
+     */
+    public function testHasRole(): void
+    {
+        $collection = new RoleCollection();
+        
+        $this->assertFalse($collection->has("Foo"));
+        
+        $collection->add("Foo");
+        
+        $this->assertTrue($collection->has("Foo"));
     }
     
     /**
@@ -120,7 +149,7 @@ class RoleCollectionTest extends SecurityTestCase
         $this->expectExceptionMessage("This role 'Foo' is not setted");
         
         $collection = new RoleCollection();
-        $collection->getRole("Foo");
+        $collection->get("Foo");
     }
     
 }
