@@ -68,10 +68,10 @@ class RoleCollectionTest extends SecurityTestCase
         
         $this->assertSame(["ROLE1"], $collection->get("ROLE1"));
         $this->assertSame(["ROLE2"], $collection->get("ROLE2"));
-        $this->assertSame(["ROLE1" ,"ROLE3"], $collection->get("ROLE3"));
-        $this->assertSame(["ROLE3", "ROLE1", "ROLE4"], $collection->get("ROLE4"));
-        $this->assertSame(["ROLE1", "ROLE4", "ROLE3", "ROLE5"], $collection->get("ROLE5"));
-        $this->assertSame(["ROLE2", "ROLE4", "ROLE3", "ROLE1", "ROLE6"], $collection->get("ROLE6"));
+        $this->assertSame(["ROLE3", "ROLE1"], $collection->get("ROLE3"));
+        $this->assertSame(["ROLE4", "ROLE3", "ROLE1"], $collection->get("ROLE4"));
+        $this->assertSame(["ROLE5", "ROLE1", "ROLE4", "ROLE3"], $collection->get("ROLE5"));
+        $this->assertSame(["ROLE6", "ROLE2", "ROLE4", "ROLE3", "ROLE1"], $collection->get("ROLE6"));
     }
     
     /**

@@ -34,10 +34,10 @@ class RoleAttributionStrategyTest extends SecurityTestCase
      */
     public function testProcess(): void
     {
-        $collection = $this->getMockBuilder(RoleCollection::class)->setMethods(["getRole"])->disableOriginalConstructor()->getMock();
+        $collection = $this->getMockBuilder(RoleCollection::class)->setMethods(["get"])->disableOriginalConstructor()->getMock();
         $collection
             ->expects($this->exactly(2))
-            ->method("getRole")
+            ->method("get")
             ->withConsecutive(["Foo"], ["Moz"])
             ->willReturnOnConsecutiveCalls(["Foo"], ["Foo", "Bar", "Moz"]);
         $reflection = new \ReflectionClass(MutableUserInterface::class);

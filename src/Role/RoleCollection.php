@@ -102,10 +102,9 @@ class RoleCollection implements \JsonSerializable, \IteratorAggregate
         if(!isset($this->inheritance[$role]))
             return [$this->roles[$role]];
             
-            
-        $this->inheritance[$role][] = $role;
+        $roles = \array_merge([$role], $this->inheritance[$role]);
         
-        return \array_values($this->inheritance[$role]);
+        return \array_values($roles);
     }
     
     /**
