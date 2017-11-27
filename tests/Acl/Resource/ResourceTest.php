@@ -13,11 +13,15 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Acl\Resource;
 
 use ZoeTest\Component\Security\SecurityTestCase;
+use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Resource\Resource;
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Exception\InvalidResourceBehaviourException;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Exception\RuntimeException;
+use Zoe\Component\Security\Exception\InvalidEntityException;
 
 /**
  * Resource testcase
@@ -88,6 +92,31 @@ class ResourceTest extends SecurityTestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::addEntity()
+     */
+    public function testAddEntity(): void
+    {
+        $entity = $this->getMockBuilder(Entity::class)->setMethods(["getName"])->disableOriginalConstructor()->getMock();
+        $entity->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
+        $this->assertNull($resource->addEntity($entity));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntity()
+     */
+    public function testGetEntity(): void
+    {
+        $entity = $this->getMockBuilder(Entity::class)->setMethods(["getName"])->disableOriginalConstructor()->getMock();
+        $entity->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
+        $resource->addEntity($entity);
+        $this->assertInstanceOf(Entity::class, $resource->getEntity("Foo"));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Resource\Resource::getBehaviour()
      */
     public function testGetBehaviour(): void
@@ -128,10 +157,12 @@ class ResourceTest extends SecurityTestCase
      */
     public function testCreateResourceFromJson(): void
     {
+        $entity = new Entity("Foo", "FooProc");
         $resource = new Resource("foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
         $resource->addPermission("foo");
         $resource->addPermission("bar");
         $resource->addPermission("moz");
+        $resource->addEntity($entity);
         
         $json = \json_encode($resource);
         
@@ -145,6 +176,31 @@ class ResourceTest extends SecurityTestCase
                     /**_____EXCEPTIONS_____**/
     
     /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::__construct()
+     */
+    public function testExceptionWhenInvalidBehaviourIsGiven(): void
+    {
+        $this->expectException(InvalidResourceBehaviourException::class);
+        $this->expectExceptionMessage("Behaviour given for resource 'Foo' is invalid. Use constant values defined into ResourceInterface");
+        
+        $resource = new Resource("Foo", 5);
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::addPermission()
+     */
+    public function testExceptionAddPermissionOnLimit(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Cannot add this permission '32' into 'Foo' resource. Resource permissions limit is setted to '31'");
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
+        for ($i = 1; $i <= 32; $i++) {
+            $resource->addPermission((string) $i);
+        }
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Resource\Resource::getPermission()
      */
     public function testExceptionWhenGettingAnInvalidPermission(): void
@@ -155,6 +211,18 @@ class ResourceTest extends SecurityTestCase
         $resource = new Resource("bar", ResourceInterface::BLACKLIST_BEHAVIOUR);
         
         $resource->getPermission("foo");
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntity()
+     */
+    public function testExceptionGetInvalidEntity(): void
+    {
+        $this->expectException(InvalidEntityException::class);
+        $this->expectExceptionMessage("This entity 'Foo' is not registered into this resource 'Bar'");
+        
+        $resource = new Resource("Bar", ResourceInterface::BLACKLIST_BEHAVIOUR);
+        $resource->getEntity("Foo");
     }
     
 }

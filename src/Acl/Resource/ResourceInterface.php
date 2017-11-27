@@ -15,6 +15,9 @@ namespace Zoe\Component\Security\Acl\Resource;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Exception\InvalidEntityException;
+use Zoe\Component\Security\Exception\RuntimeException;
 
 /**
  * Acl resource
@@ -47,10 +50,20 @@ interface ResourceInterface
     public const PERMISSIONS_IDENTIFIER = "PERMISSIONS_";
     
     /**
+     * 32 bits -1
+     *
+     * @var int
+     */
+    public const MAX_PERMISSIONS = 31;
+    
+    /**
      * Add a permission for the resource
      * 
      * @param string $name
      *   Permission name
+     *   
+     * @throws RuntimeException
+     *   When impossible to add more permissions for this resource
      */
     public function addPermission(string $name): void;
     
@@ -88,9 +101,32 @@ interface ResourceInterface
     public function hasPermission(string $name): bool;
     
     /**
+     * Add an entity into the resource
+     * 
+     * @param Entity $entity
+     *   Entity initialized
+     */
+    public function addEntity(Entity $entity): void;
+    
+    /**
+     * Get an entity from the resource
+     * 
+     * @param string $entity
+     *   Entity name
+     * 
+     * @return Entity
+     *   Entity instance
+     *   
+     * @throws InvalidEntityException
+     *   When the given entity name is not registered
+     */
+    public function getEntity(string $entity): Entity;
+    
+    /**
      * Get resource behaviour
      * 
-     * @var int
+     * @return int
+     *   One of the resource behaviour const defined
      */
     public function getBehaviour(): int;
     

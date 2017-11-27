@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace Zoe\Component\Internal\Exception;
+namespace Zoe\Component\Security\Exception;
 
 /**
  * RuntimeException Security component

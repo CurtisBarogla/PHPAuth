@@ -12,11 +12,15 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl\Resource;
 
+use Zoe\Component\Security\Acl\Entity\Entity;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\Exception\InvalidMaskException;
-use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
 use Zoe\Component\Security\Acl\Mask\MaskFactory;
+use Zoe\Component\Security\Exception\InvalidEntityException;
+use Zoe\Component\Security\Exception\InvalidMaskException;
+use Zoe\Component\Security\Exception\InvalidResourceBehaviourException;
+use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Exception\RuntimeException;
 
 /**
  * Native ResourceInterface implementation
@@ -49,6 +53,13 @@ class Resource implements ResourceInterface, \JsonSerializable
     private $permissions;
     
     /**
+     * Resource entities
+     * 
+     * @var Entity[]
+     */
+    private $entities = [];
+    
+    /**
      * Initialize resource
      * 
      * @param string $name
@@ -60,6 +71,7 @@ class Resource implements ResourceInterface, \JsonSerializable
     {
         $this->name = $name;
         $this->behaviour = $behaviour;
+        $this->validateBehaviour();
         $this->permissions = new MaskCollection(ResourceInterface::PERMISSIONS_IDENTIFIER.$name);
     }
     
@@ -70,6 +82,12 @@ class Resource implements ResourceInterface, \JsonSerializable
     public function addPermission(string $name): void
     {
         $index = \count($this->permissions);
+        if($index === self::MAX_PERMISSIONS)
+            throw new RuntimeException(\sprintf("Cannot add this permission '%s' into '%s' resource. Resource permissions limit is setted to '%d'",
+                $name,
+                $this->name,
+                self::MAX_PERMISSIONS));
+        
         $mask = new Mask($name, 0x0001);
         $mask->left($index);
         
@@ -109,6 +127,29 @@ class Resource implements ResourceInterface, \JsonSerializable
     
     /**
      * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::addEntity()
+     */
+    public function addEntity(Entity $entity): void
+    {
+        $this->entities[$entity->getName()] = $entity;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntity()
+     */
+    public function getEntity(string $entity): Entity
+    {
+        if(!isset($this->entities[$entity]))
+            throw new InvalidEntityException(\sprintf("This entity '%s' is not registered into this resource '%s'",
+                $entity,
+                $this->name));
+            
+        return $this->entities[$entity];
+    }
+    
+    /**
+     * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getBehaviour()
      */
     public function getBehaviour(): int
@@ -134,12 +175,13 @@ class Resource implements ResourceInterface, \JsonSerializable
         return [
             "name"          =>  $this->name,
             "behaviour"     =>  $this->behaviour,
-            "permissions"   =>  $this->permissions
+            "permissions"   =>  $this->permissions,
+            "entities"      =>  $this->entities
         ];
     }
     
     /**
-     * Create a resource for his json representation
+     * Create a resource from his json representation
      * Can be a dejsonified array value or its raw string representation
      * 
      * @param string|array $json
@@ -156,8 +198,27 @@ class Resource implements ResourceInterface, \JsonSerializable
         $permissions = MaskFactory::createCollectionFromJson($json["permissions"]);
         $resource = new Resource($json["name"], $json["behaviour"]);
         $resource->permissions = $permissions;
+        $entities = [];
+        foreach ($json["entities"] as $name => $entity) {
+            $entities[$name] = Entity::createEntityFromJson($entity);
+        }
+        $resource->entities = $entities;
         
         return $resource;
+    }
+    
+    /**
+     * Validate the resource bahviour parameter
+     * 
+     * @throws InvalidResourceBehaviourException
+     *   When given behaviour is not handled
+     */
+    private function validateBehaviour(): void
+    {
+        if(
+            $this->behaviour !== ResourceInterface::BLACKLIST_BEHAVIOUR && 
+            $this->behaviour !== ResourceInterface::WHITELIST_BEHAVIOUR)
+            throw new InvalidResourceBehaviourException($this);
     }
     
 }
