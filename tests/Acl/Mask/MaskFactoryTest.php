@@ -13,9 +13,8 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Acl\Mask;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Acl\Resource\Resource;
-use Zoe\Component\Security\Exception\InvalidArgumentException;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 
 /**
  * MaskFactory testcase
@@ -74,22 +73,6 @@ class MaskFactoryTest extends SecurityTestCase
         
         $this->assertSame("foo", $mask->getIdentifier());
         $this->assertSame(0x0003, $mask->getValue());
-    }
-    
-                    /**_____EXCEPTIONS_____**/
-    
-    /**
-     * @see \Zoe\Component\Security\Acl\Mask\MaskFactory::createMaskFromResource()
-     */
-    public function testExceptionWhenInvalidBehaviourIsGiven(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("This behaviour '5' for the resource 'foo' is invalid");
-        
-        $resource = new Resource("foo", 5);
-        $resource->addPermission("foo");
-        
-        $mask = MaskFactory::createMaskFromResource($resource, "foo", ["foo"]);
     }
     
 }

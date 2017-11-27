@@ -81,10 +81,6 @@ class MaskFactory
                     $mask->add($resource->getPermission($permission));
                 }
                 break;
-            default:
-                throw new InvalidArgumentException(\sprintf("This behaviour '%s' for the resource '%s' is invalid",
-                    $resource->getBehaviour(),
-                    $resource->getName()));
         }
         
         return $mask;
