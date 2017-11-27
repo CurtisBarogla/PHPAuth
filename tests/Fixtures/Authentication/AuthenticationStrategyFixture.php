@@ -13,7 +13,7 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Fixtures\Authentication;
 
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
-use Zoe\Component\Security\User\UserInterface;
+use Zoe\Component\Security\User\Contracts\UserInterface;
 
 /**
  * For testing purpose only
