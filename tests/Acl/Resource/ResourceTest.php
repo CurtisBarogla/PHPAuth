@@ -63,6 +63,12 @@ class ResourceTest extends SecurityTestCase
         $expected->add(new Mask("poz", 0x0008));
         
         $this->assertEquals($expected, $resource->getPermissions());
+        
+        $expected = new MaskCollection(ResourceInterface::PERMISSIONS_IDENTIFIER."foo");
+        $expected->add(new Mask("foo", 0x0001));
+        $expected->add(new Mask("bar", 0x0002));
+        
+        $this->assertEquals($expected, $resource->getPermissions(["foo", "bar"]));
     }
     
     /**
@@ -158,6 +164,8 @@ class ResourceTest extends SecurityTestCase
     public function testCreateResourceFromJson(): void
     {
         $entity = new Entity("Foo", "FooProc");
+        $entity->add("Foo", ["Foo", "Bar"]);
+        $entity->add("Bar", ["Foo", "Bar"]);
         $resource = new Resource("foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
         $resource->addPermission("foo");
         $resource->addPermission("bar");
@@ -165,7 +173,6 @@ class ResourceTest extends SecurityTestCase
         $resource->addEntity($entity);
         
         $json = \json_encode($resource);
-        
         $this->assertEquals($resource, Resource::createResourceFromJson($json));
         
         $json = \json_decode($json, true);

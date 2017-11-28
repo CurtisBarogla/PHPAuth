@@ -98,8 +98,16 @@ class Resource implements ResourceInterface, \JsonSerializable
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getPermissions()
      */
-    public function getPermissions(): MaskCollection
+    public function getPermissions(?array $permissions = null): MaskCollection
     {
+        if(null !== $permissions) {
+            $collection = new MaskCollection(ResourceInterface::PERMISSIONS_IDENTIFIER.$this->name);
+            foreach ($permissions as $permission)
+                $collection->add($this->getPermission($permission));
+            
+            return $collection;
+        }
+        
         return $this->permissions;
     }
     

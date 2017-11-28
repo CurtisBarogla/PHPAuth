@@ -70,10 +70,13 @@ interface ResourceInterface
     /**
      * Get all permissions for the resource
      * 
+     * @param array|null $permissions
+     *   If not null, will only set into the MaskCollection the given ones
+     * 
      * @return MaskCollection
      *   All permissions
      */
-    public function getPermissions(): MaskCollection;
+    public function getPermissions(?array $permissions = null): MaskCollection;
     
     /**
      * Get a specific permission for the resource
