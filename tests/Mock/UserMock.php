@@ -121,10 +121,13 @@ class UserMock extends Mock
      * @param \ReflectionClass|null $reflection
      *   Reflection class or null (passed by reference)
      * 
+     * @return UserMock
+     *   New mocked user
+     * 
      * @throws \InvalidArgumentException
      *   When given user type is not valid
      */
-    public static function initMock(string $type, string $name, ?\ReflectionClass& $reflection = null)
+    public static function initMock(string $type, string $name, ?\ReflectionClass& $reflection = null): UserMock
     {
         return new UserMock($type, $name, $reflection);
     }
@@ -155,11 +158,11 @@ class UserMock extends Mock
      */
     public function mockGetName(PhpUnitCallMethod $count): self
     {
-        $mock = function(string $method) use ($count) {
+        $mock = function(string $method) use ($count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($this->name));
         };
         
-        return $this->executeMock("getName", $mock);
+        return $this->executeMock("getName", $mock, null);
     }
     
     /**
@@ -175,11 +178,11 @@ class UserMock extends Mock
      */
     public function mockIsRoot(PhpUnitCallMethod $count, bool $isRoot): self
     {
-        $mock = function(string $method) use ($isRoot, $count) {
+        $mock = function(string $method) use ($isRoot, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($isRoot));
         };
         
-        return $this->executeMock("isRoot", $mock);
+        return $this->executeMock("isRoot", $mock, null);
     }
     
     /**
@@ -195,12 +198,12 @@ class UserMock extends Mock
      */
     public function mockGetRoles(PhpUnitCallMethod $count, array $roles): self
     {
-        $mock = function(string $method) use ($roles, $count) {
+        $mock = function(string $method) use ($roles, $count): void {
             $roles = \array_combine($roles, $roles);
             $this->mock->expects($count)->method($method)->will($this->returnValue($roles));            
         };
         
-        return $this->executeMock("getRoles", $mock);
+        return $this->executeMock("getRoles", $mock, null);
     }
     
     /**
@@ -216,14 +219,14 @@ class UserMock extends Mock
      */
     public function mockGetRoles_consecutive(PhpUnitCallMethod $count, array ...$consecutiveRolesReturned): self
     {
-        $mock = function(string $method) use ($consecutiveRolesReturned, $count) {            
+        $mock = function(string $method) use ($consecutiveRolesReturned, $count): void {            
             foreach ($consecutiveRolesReturned as $index => $role) {
                 $consecutiveRolesReturned[$index] = \array_combine($role, $role);
             }
             $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$consecutiveRolesReturned);
         };
         
-        return $this->executeMock("getRoles", $mock);
+        return $this->executeMock("getRoles", $mock, null);
     }
     
     /**
@@ -239,11 +242,11 @@ class UserMock extends Mock
      */
     public function mockGetAttributes(PhpUnitCallMethod $count, ?array $attributes): self
     {
-        $mock = function(string $method) use ($attributes, $count) {
+        $mock = function(string $method) use ($attributes, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($attributes));
         };
         
-        return $this->executeMock("getAttributes", $mock);
+        return $this->executeMock("getAttributes", $mock, null);
     }
     
     /**
@@ -259,11 +262,11 @@ class UserMock extends Mock
      */
     public function mockGetAttributes_consecutive(PhpUnitCallMethod $count, ?array ...$attributes): self
     {
-        $mock = function(string $method) use ($attributes, $count) {
+        $mock = function(string $method) use ($attributes, $count): void {
             $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$attributes);            
         };
         
-        return $this->executeMock("getAttributes", $mock);
+        return $this->executeMock("getAttributes", $mock, null);
     }
     
     /**
@@ -281,12 +284,12 @@ class UserMock extends Mock
      */
     public function mockGetAttribute(PhpUnitCallMethod $count, string $attributeName, $attribute): self
     {
-        $mock = function(string $method) use ($attributeName, $attribute, $count) {            
+        $mock = function(string $method) use ($attributeName, $attribute, $count): void {            
             $result = ($attribute instanceof \Exception) ? $this->throwException($attribute) : $this->returnValue($attribute);
             $this->mock->expects($count)->method($method)->with($attributeName)->will($result);
         };
         
-        return $this->executeMock("getAttribute", $mock);
+        return $this->executeMock("getAttribute", $mock, null);
     }
     
     /**
@@ -302,7 +305,7 @@ class UserMock extends Mock
      */
     public function mockGetAttribute_consecutive(PhpUnitCallMethod $count, array ...$returnedAttributes): self
     {
-        $mock = function(string $method) use ($returnedAttributes, $count) {
+        $mock = function(string $method) use ($returnedAttributes, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($returnedAttributes, $args, $returned);
@@ -310,7 +313,7 @@ class UserMock extends Mock
             $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);                
         };
         
-        return $this->executeMock("getAttribute", $mock);
+        return $this->executeMock("getAttribute", $mock, null);
     }
     
     /**
@@ -328,12 +331,12 @@ class UserMock extends Mock
      */
     public function mockHasRole(PhpUnitCallMethod $count, string $role, bool $result): self
     {
-        $mock = function(string $method) use ($role, $result, $count) {
+        $mock = function(string $method) use ($role, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($role)->will($this->returnValue($result));
             
         };
         
-        return $this->executeMock("hasRole", $mock);
+        return $this->executeMock("hasRole", $mock, null);
     }
     
     /**
@@ -349,7 +352,7 @@ class UserMock extends Mock
      */
     public function mockHasRole_consecutive(PhpUnitCallMethod $count, array ...$returnedResults): self
     {
-        $mock = function(string $method) use ($returnedResults, $count) {            
+        $mock = function(string $method) use ($returnedResults, $count): void {            
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($returnedResults, $args, $returned);
@@ -357,7 +360,7 @@ class UserMock extends Mock
             $this->mock->expects($count)->method("hasRole")->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
         };
         
-        return $this->executeMock("hasRole", $mock);
+        return $this->executeMock("hasRole", $mock, null);
     }
     
     /**
@@ -375,11 +378,11 @@ class UserMock extends Mock
      */
     public function mockHasAttribute(PhpUnitCallMethod $count, string $attribute, bool $result): self
     {
-        $mock = function(string $method) use ($attribute, $result, $count) {
+        $mock = function(string $method) use ($attribute, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($attribute)->will($this->returnValue($result));            
         };
         
-        return $this->executeMock("hasAttribute", $mock);
+        return $this->executeMock("hasAttribute", $mock, null);
     }
     
     /**
@@ -395,7 +398,7 @@ class UserMock extends Mock
      */
     public function mockHasAttribute_consecutive(PhpUnitCallMethod $count, array ...$returnedResults): self
     {
-        $mock = function(string $method) use ($returnedResults, $count) {            
+        $mock = function(string $method) use ($returnedResults, $count): void {            
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($returnedResults, $args, $returned);
@@ -403,7 +406,7 @@ class UserMock extends Mock
             $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
         };
         
-        return $this->executeMock("hasAttribute", $mock);
+        return $this->executeMock("hasAttribute", $mock, null);
     }
     
     /**
@@ -423,7 +426,7 @@ class UserMock extends Mock
      */
     public function mockAddRole(PhpUnitCallMethod $count, string $role): self
     {
-        $mock = function(string $method) use ($role, $count) {
+        $mock = function(string $method) use ($role, $count): void {
             $this->mock->expects($count)->method("addRole")->with($role)->will($this->returnSelf());            
         };
 
@@ -443,7 +446,7 @@ class UserMock extends Mock
      */
     public function mockAddRole_consecutive(PhpUnitCallMethod $count, string ...$roles): self
     {
-        $mock = function(string $method) use ($roles, $count) {
+        $mock = function(string $method) use ($roles, $count): void {
             $rolesArg = [];
             foreach ($roles as $role) {
                 $rolesArg[][] = $role;
@@ -471,7 +474,7 @@ class UserMock extends Mock
      */
     public function mockAddAttribute(PhpUnitCallMethod $count, string $attribute, $value): self
     {
-        $mock = function(string $method) use ($attribute, $value, $count) {
+        $mock = function(string $method) use ($attribute, $value, $count): void {
             $this->mock->expects($count)->method($method)->with($attribute, $value)->will($this->returnSelf());
             
         };
@@ -492,7 +495,7 @@ class UserMock extends Mock
      */
     public function mockAddAttribute_consecutive(PhpUnitCallMethod $count, array ...$attributes): self
     {
-        $mock = function(string $method) use ($attributes, $count) {            
+        $mock = function(string $method) use ($attributes, $count): void {            
             $args = [];
             $returned = [];
             $loop = 0;
@@ -526,7 +529,7 @@ class UserMock extends Mock
      */
     public function mockDeleteAttribute(PhpUnitCallMethod $count, string $attribute, bool $exception = false): self
     {
-        $mock = function(string $method) use ($attribute, $exception, $count) {            
+        $mock = function(string $method) use ($attribute, $exception, $count): void {            
             $return = 
                 ($exception) ? $this->throwException(new InvalidUserAttributeException($this->mock, $attribute)) : $this->returnSelf();
             $this->mock->expects($count)->method($method)->with($attribute)->will($return);
@@ -548,7 +551,7 @@ class UserMock extends Mock
      */
     public function mockDeleteAttribute_consecutive(PhpUnitCallMethod $count, array ...$attributes): self
     {
-        $mock = function(string $method) use ($attributes, $count) {
+        $mock = function(string $method) use ($attributes, $count): void {
             $args = [];
             $returned = [];
             foreach ($attributes as $variadicAttributes) {
@@ -583,7 +586,7 @@ class UserMock extends Mock
      */
     public function mockGetPassword(PhpUnitCallMethod $count, string $password): self
     {
-        $mock = function(string $method) use ($password, $count) {
+        $mock = function(string $method) use ($password, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($password));            
         };
         
@@ -603,7 +606,7 @@ class UserMock extends Mock
      */
     public function mockGetCredentials(PhpUnitCallMethod $count, ?array $credentials): self
     {
-        $mock = function(string $method) use ($credentials, $count) {
+        $mock = function(string $method) use ($credentials, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($credentials));            
         };
         
@@ -623,7 +626,7 @@ class UserMock extends Mock
      */
     public function mockGetCredentials_consecutive(PhpUnitCallMethod $count, ?array ...$credentials): self
     {   
-        $mock = function(string $method) use ($credentials, $count) {
+        $mock = function(string $method) use ($credentials, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($credentials, $args, $returned);
@@ -649,7 +652,7 @@ class UserMock extends Mock
      */
     public function mockGetCredential(PhpUnitCallMethod $count, string $credential, $value): self
     {
-        $mock = function(string $method) use ($credential, $value, $count) {
+        $mock = function(string $method) use ($credential, $value, $count): void {
             if($value instanceof \Exception) {
                 $return = $this->throwException($value);
             } else {
@@ -680,7 +683,7 @@ class UserMock extends Mock
      */
     public function mockGetCredentical_consecutive(PhpUnitCallMethod $count, array $credentials): self
     {
-        $mock = function(string $method) use ($credentials, $count) {
+        $mock = function(string $method) use ($credentials, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($credentials, $args, $returned);
@@ -706,7 +709,7 @@ class UserMock extends Mock
      */
     public function mockHasCredential(PhpUnitCallMethod $count, string $credential, bool $result): self
     {
-        $mock = function(string $method) use ($credential, $result, $count) {
+        $mock = function(string $method) use ($credential, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($credential)->will($this->returnValue($result));            
         };
         
@@ -726,7 +729,7 @@ class UserMock extends Mock
      */
     public function mockHasCredential_consecutive(PhpUnitCallMethod $count, array $credentials): self
     {
-        $mock = function(string $method) use ($credentials, $count) {
+        $mock = function(string $method) use ($credentials, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($credentials, $args, $returned);
@@ -752,7 +755,7 @@ class UserMock extends Mock
      */
     public function mockAddCredential(PhpUnitCallMethod $count, string $credential, string $value): self
     {
-        $mock = function(string $method) use ($credential, $value, $count) {
+        $mock = function(string $method) use ($credential, $value, $count): void {
             $this->mock->expects($count)->method($method)->with($credential, $value)->will($this->returnSelf());            
         };
         
@@ -772,7 +775,7 @@ class UserMock extends Mock
      */
     public function mockAddCredential_consecutive(PhpUnitCallMethod $count, array $credentials): self
     {
-        $mock = function(string $method) use ($credentials, $count) {
+        $mock = function(string $method) use ($credentials, $count): void {
             $args = [];
             $returned = [];
             $loop = 0;
@@ -808,7 +811,7 @@ class UserMock extends Mock
      */
     public function mockGrant(PhpUnitCallMethod $count, ResourceInterface $resource, array $permissions): self
     {
-        $mock = function(string $method) use ($resource, $permissions, $count) {
+        $mock = function(string $method) use ($resource, $permissions, $count): void {
             $this->mock->expects($count)->method($method)->with($resource, $permissions)->will($this->returnValue(null));            
         };
         
@@ -830,7 +833,7 @@ class UserMock extends Mock
      */
     public function mockDeny(PhpUnitCallMethod $count, ResourceInterface $resource, array $permissions): self
     {
-        $mock = function(string $method) use ($resource, $permissions, $count) {            
+        $mock = function(string $method) use ($resource, $permissions, $count): void {            
             $this->mock->expects($count)->method($method)->with($resource, $permissions)->will($this->returnValue(null));
         };
         
@@ -852,7 +855,7 @@ class UserMock extends Mock
      */
     public function mockGetPermission(PhpUnitCallMethod $count, string $permission, ?Mask $mask): self
     {
-        $mock = function(string $method) use($permission, $mask, $count) {
+        $mock = function(string $method) use($permission, $mask, $count): void {
             $return = (null === $mask) ? $this->throwException(new \Exception()) : $this->returnValue($mask);
             $this->mock->expects($count)->method($method)->with($permission)->will($return);
         };
@@ -863,22 +866,6 @@ class UserMock extends Mock
     /**
      * INTERNAL
      */
-    
-    /**
-     * Throw exception if a method has been already mocked for this user
-     * 
-     * @param string $method
-     *   Method name
-     * @throws \LogicException
-     *   When method already mocked
-     */
-    private function throwExceptionIfMocked(string $method): void
-    {
-        if($this->hasBeenMocked($method))
-            throw new \LogicException(\sprintf("This method '%s' for mocked user '%s' has been already mocked",
-                $method,
-                $this->name));
-    }
     
     /**
      * Check a user type over a method
@@ -902,22 +889,16 @@ class UserMock extends Mock
     }
     
     /**
-     * Execute a mock, check user type if needed, check if it has been already mocked and add it to the mocked methods
+     * Extra argument will be used for checking if needed a user type
      * 
-     * @param string $method
-     *   Method name
-     * @param callable $mock
-     *   Callback to execute (basically the core mocking process)
-     * @param array $restrict
-     *   If the mock is restricted to a type of user
-     * 
-     * @return self
-     *   Fluent
+     * {@inheritDoc}
+     * @see \ZoeTest\Component\Security\Mock\Mock::executeMock()
      */
-    private function executeMock(string $method, callable $mock, ?array $restrict = null): self
+    protected function executeMock(string $method, callable $mock, ...$extra)
     {
-        if(null !== $restrict)
-            $this->checkUserType($restrict, $method);
+        if(null !== $extra[0])
+            $this->checkUserType($extra[0], $method);
+        
         $this->throwExceptionIfMocked($method);
         
         \call_user_func($mock, $method);
@@ -925,6 +906,17 @@ class UserMock extends Mock
         $this->addMethodMocked($method);
         
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \ZoeTest\Component\Security\Mock\Mock::getMessageForExceptionIfMocked()
+     */
+    protected function getMessageForExceptionIfMocked(string $method): string
+    {
+        return \sprintf("This method '%s' for mocked user '%s' has been already mocked", 
+            $method,
+            $this->name); 
     }
     
 }

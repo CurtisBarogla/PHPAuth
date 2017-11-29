@@ -88,4 +88,51 @@ abstract class Mock extends SecurityTestCase
         }
     }
     
+    /**
+     * Execute a mock, check user type if needed, check if it has been already mocked and add it to the mocked methods
+     *
+     * @param string $method
+     *   Method name
+     * @param callable $mock
+     *   Callback to execute (basically the core mocking process)
+     * @param mixed $extra
+     *   Extra params passed to the function. Not handled natively
+     *
+     * @return self
+     *   Fluent
+     */
+    protected function executeMock(string $method, callable $mock, ...$extra)
+    {
+        $this->throwExceptionIfMocked($method);
+            
+        \call_user_func($mock, $method);
+            
+        $this->addMethodMocked($method);
+            
+        return $this;
+    }
+    
+    /**
+     * Throw exception if a method has been already mocked for this user
+     *
+     * @param string $method
+     *   Method name
+     * 
+     * @throws \LogicException
+     *   When method already mocked
+     */
+    protected function throwExceptionIfMocked(string $method): void
+    {
+        if($this->hasBeenMocked($method))
+            throw new \LogicException($this->getMessageForExceptionIfMocked($method));
+    }
+    
+    /**
+     * Get exception message when method has been already mocked
+     *
+     * @return string
+     *   Exception message
+     */
+    abstract protected function getMessageForExceptionIfMocked(string $method): string;
+    
 }
