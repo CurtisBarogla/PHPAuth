@@ -76,7 +76,7 @@ class MutableUserTest extends SecurityTestCase
         
         $user->addAttribute("foo", "bar");
         $this->assertTrue($user->hasAttribute("foo"));
-        $user->deleteAttribute("foo");
+        $this->assertInstanceOf(MutableUserInterface::class, $user->deleteAttribute("foo"));
         $this->assertFalse($user->hasAttribute("foo"));
     }
     

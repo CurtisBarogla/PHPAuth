@@ -56,6 +56,6 @@ interface MutableUserInterface extends UserInterface
      * @throws InvalidUserAttributeException
      *   When the given attribute is invalid
      */
-    public function deleteAttribute(string $attribute): void;
+    public function deleteAttribute(string $attribute): MutableUserInterface;
     
 }

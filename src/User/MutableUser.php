@@ -50,12 +50,14 @@ class MutableUser extends User implements MutableUserInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\Contracts\MutableUserInterface::deleteAttribute()
      */
-    public function deleteAttribute(string $attribute): void
+    public function deleteAttribute(string $attribute): MutableUserInterface
     {
         if(!isset($this->attributes[$attribute]))
             throw new InvalidUserAttributeException($this, $attribute);
         
         unset($this->attributes[$attribute]);
+        
+        return $this;
     }
 
 }
