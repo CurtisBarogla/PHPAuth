@@ -38,6 +38,18 @@ class MaskMockTest extends SecurityTestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\MaskMock::mockGetIdentifier_consecutive()
+     */
+    public function testMockGetIdentifier_consecutive(): void
+    {
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier_consecutive($this->exactly(3), "Foo", "Bar", "Moz")->finalizeMock();
+        
+        $this->assertSame("Foo", $mask->getIdentifier());
+        $this->assertSame("Bar", $mask->getIdentifier());
+        $this->assertSame("Moz", $mask->getIdentifier());
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\MaskMock::mockGetValue()
      */
     public function testMockGetValue(): void

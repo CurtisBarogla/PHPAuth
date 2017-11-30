@@ -51,8 +51,8 @@ class MaskMock extends Mock
     
     /**
      * Initialize a new mocked mask
-
-     * @param string $name
+     *
+     * @param string $identifier
      *   Mocked user name returned by getIdentifier()
      * @param \ReflectionClass|null $reflection
      *   Reflection class or null (passed by reference)
@@ -91,6 +91,26 @@ class MaskMock extends Mock
             $this->mock->expects($count)->method($method)->will($this->returnValue($this->identifier));   
         };
 
+        return $this->executeMock("getIdentifier", $mock, null);
+    }
+    
+    /**
+     * Mock getIdentifier() with consecutive calls
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param string ...$identifiers
+     *   Varidic identifiers returned on each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetIdentifier_consecutive(PhpUnitCallMethod $count, string ...$identifiers): self
+    {
+        $mock = function(string $method) use ($identifiers, $count): void {
+            $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$identifiers);   
+        };
+        
         return $this->executeMock("getIdentifier", $mock, null);
     }
     
