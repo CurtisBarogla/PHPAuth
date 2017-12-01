@@ -16,7 +16,7 @@ use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\InvalidArgumentException;
 
 /**
- * Shortcuts for initializing masks for various sources
+ * Shortcuts for initializing masks from various sources
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
@@ -25,7 +25,7 @@ class MaskFactory
 {
     
     /**
-     * Create a mask collection for his json representation.
+     * Create a mask collection from his json representation.
      * Can be a dejsonified array value or its raw string representation
      *
      * @param string|array $json
@@ -58,7 +58,7 @@ class MaskFactory
      *   Permission to apply or deny depending of the resource behaviour
      *   
      * @return Mask
-     *   Mask initialized with permissions from the resource setted
+     *   Mask initialized with permissions from the setted resource
      *   
      * @throws InvalidArgumentException
      *   When the behaviour is invalid

@@ -13,20 +13,18 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\User;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use Zoe\Component\Security\User\CredentialUser;
-use Zoe\Component\Security\User\MutableUser;
+use ZoeTest\Component\Security\Mock\MaskCollectionMock;
+use ZoeTest\Component\Security\Mock\MaskMock;
+use ZoeTest\Component\Security\Mock\UserMock;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use Zoe\Component\Security\User\StorableAclUser;
 use Zoe\Component\Security\User\StorableUser;
 use Zoe\Component\Security\User\UserFactory;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
-use Zoe\Component\Security\User\MutableAclUser;
-use Zoe\Component\Security\Acl\Resource\Resource;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\User\Contracts\AclUserInterface;
-use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\User\StorableAclUser;
-use Zoe\Component\Security\Acl\Mask\Mask;
 
 /**
  * UserFactory testcase
@@ -44,18 +42,23 @@ class UserFactoryTest extends SecurityTestCase
      */
     public function testCreateCredentialUser(): void
     {
-        $user = new MutableUser("foo", true);
-        $user->addRole("foo")->addRole("bar")->addAttribute("foo", "bar")->addAttribute("bar", "foo");
-        
-        $credentialUser = UserFactory::createCredentialUser($user, "foo", ["foo" => "bar", "bar" => "foo"]);
+        $user = 
+            UserMock::initMock(MutableUserInterface::class, "Foo")
+                ->mockGetName($this->once())
+                ->mockIsRoot($this->once(), false)
+                ->mockGetRoles($this->once(), ["Foo", "Bar"])
+                ->mockGetAttributes($this->once(), ["Foo" => "Bar", "Bar" => "Foo"])
+            ->finalizeMock();
+
+        $credentialUser = UserFactory::createCredentialUser($user, "Foo", ["Foo" => "Bar", "Bar" => "Foo"]);
         
         $this->assertInstanceOf(CredentialUserInterface::class, $credentialUser);
         $this->assertInstanceOf(MutableUserInterface::class, $credentialUser);
-        $this->assertSame(["foo" => "foo", "bar" => "bar"], $credentialUser->getRoles());
-        $this->assertTrue($credentialUser->isRoot());
-        $this->assertSame(["foo" => "bar", "bar" => "foo"], $credentialUser->getAttributes());
-        $this->assertSame("foo", $credentialUser->getPassword());
-        $this->assertSame(["foo" => "bar", "bar" => "foo", "password" => "foo"], $credentialUser->getCredentials());
+        $this->assertSame(["Foo" => "Foo", "Bar" => "Bar"], $credentialUser->getRoles());
+        $this->assertFalse($credentialUser->isRoot());
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $credentialUser->getAttributes());
+        $this->assertSame("Foo", $credentialUser->getPassword());
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo", "password" => "Foo"], $credentialUser->getCredentials());
     }
     
     /**
@@ -63,16 +66,21 @@ class UserFactoryTest extends SecurityTestCase
      */
     public function testCreateStorableUserFromMutable(): void
     {
-        $user = new MutableUser("foo", true);
-        $user->addRole("foo")->addRole("bar")->addAttribute("foo", "bar")->addAttribute("bar", "foo");
-        
-        $storableUser = UserFactory::createStorableUser($user, "foo");
+        $user = 
+            UserMock::initMock(MutableUserInterface::class, "Foo")
+                ->mockGetName($this->once())
+                ->mockIsRoot($this->once(), false)
+                ->mockGetRoles($this->once(), ["Foo", "Bar"])
+                ->mockGetAttributes($this->once(), ["Foo" => "Bar", "Bar" => "Foo"])
+            ->finalizeMock();
+
+        $storableUser = UserFactory::createStorableUser($user);
         
         $this->assertInstanceOf(StorableUserInterface::class, $storableUser);
         $this->assertFalse($storableUser instanceof MutableUserInterface);
-        $this->assertSame(["foo" => "foo", "bar" => "bar"], $storableUser->getRoles());
-        $this->assertTrue($storableUser->isRoot());
-        $this->assertSame(["foo" => "bar", "bar" => "foo"], $storableUser->getAttributes());
+        $this->assertSame(["Foo" => "Foo", "Bar" => "Bar"], $storableUser->getRoles());
+        $this->assertFalse($storableUser->isRoot());
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $storableUser->getAttributes());
     }
     
     /**
@@ -80,15 +88,23 @@ class UserFactoryTest extends SecurityTestCase
      */
     public function testCreateStorableUserFromCredential(): void
     {
-        $user = new CredentialUser("foo", "bar");
+        $user = 
+            UserMock::initMock(CredentialUserInterface::class, "Foo")
+                ->mockGetName($this->once())
+                ->mockIsRoot($this->once(), false)
+                ->mockGetRoles($this->once(), ["Foo", "Bar"])
+                ->mockGetAttributes($this->once(), ["Foo" => "Bar", "Bar" => "Foo"])
+            ->finalizeMock();
         
         $storableUser = UserFactory::createStorableUser($user);
         
         $this->assertInstanceOf(StorableUserInterface::class, $storableUser);
         $this->assertFalse($storableUser instanceof MutableUserInterface);
         $this->assertFalse($storableUser instanceof CredentialUserInterface);
-        
+        $this->assertSame("Foo", $storableUser->getName());
         $this->assertFalse($storableUser->isRoot());
+        $this->assertSame(["Foo" => "Foo", "Bar" => "Bar"], $storableUser->getRoles());
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $storableUser->getAttributes());
     }
     
     /**
@@ -96,18 +112,29 @@ class UserFactoryTest extends SecurityTestCase
      */
     public function testCreateStorableWithAclAttribute(): void
     {
-        $resource = new Resource("foo", ResourceInterface::WHITELIST_BEHAVIOUR);
-        $resource->addPermission("foo");
-        $resource->addPermission("bar");
-        $user = new MutableAclUser("foo");
-        $user->grant($resource, ["foo", "bar"]);
-        
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->mockGetValue($this->once(), 3)->finalizeMock();
+        $permissions = MaskCollectionMock::initMock()->mockGet($this->any(), "Foo", $mask)->finalizeMock();
+        $user = 
+                UserMock::initMock(MutableUserInterface::class, "Foo")
+                    ->mockHasAttribute($this->once(), AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER, true)
+                    ->mockGetAttribute($this->once(), AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER, $permissions)
+                    ->mockDeleteAttribute($this->once(), AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER)
+                    ->mockGetName($this->atLeastOnce())
+                    ->mockIsRoot($this->atLeastOnce(), false)
+                    ->mockGetRoles($this->atLeastOnce(), ["Foo", "Bar"])
+                    ->mockGetAttributes($this->atLeastOnce(), ["Foo" => "Bar", "Bar" => "Foo"])
+                ->finalizeMock();
+
         $storable = UserFactory::createStorableUser($user);
         
         $this->assertInstanceOf(StorableUserInterface::class, $storable);
         $this->assertInstanceOf(AclUserInterface::class, $storable);
-        $this->assertSame(0x0003, $storable->getPermission("foo")->getValue());
+        $this->assertSame(3, $storable->getPermission("Foo")->getValue());
         $this->assertFalse($storable->hasAttribute(AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER));
+        $this->assertSame("Foo", $storable->getName());
+        $this->assertFalse($storable->isRoot());
+        $this->assertSame(["Foo" => "Foo", "Bar" => "Bar"], $storable->getRoles());
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $storable->getAttributes());
     }
     
     /**

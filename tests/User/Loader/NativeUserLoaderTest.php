@@ -13,9 +13,10 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\User\Loader;
 
 use ZoeTest\Component\Security\SecurityTestCase;
+use ZoeTest\Component\Security\Mock\UserMock;
 use Zoe\Component\Security\Exception\UserNotFoundException;
-use Zoe\Component\Security\User\CredentialUser;
-use Zoe\Component\Security\User\MutableUser;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\Loader\NativeUserLoader;
 
@@ -43,15 +44,16 @@ class NativeUserLoaderTest extends SecurityTestCase
             ]
         ];
         
+        $user = UserMock::initMock(UserInterface::class, "foo")->mockGetName($this->atLeastOnce())->finalizeMock();
+        
         $loader = new NativeUserLoader($users);
         
-        $expectedUser = (new MutableUser("foo", true))
-                            ->addRole("foo")
-                            ->addRole("bar")
-                            ->addAttribute("foo", "bar")
-                            ->addAttribute("bar", "foo");
+        $user = $loader->loadUser($user);
         
-        $this->assertEquals($expectedUser, $loader->loadUser($this->getMockedUser(UserInterface::class, "foo")));
+        $this->assertInstanceOf(MutableUserInterface::class, $user);
+        $this->assertTrue($user->isRoot());
+        $this->assertSame(["foo" => "foo", "bar" => "bar"], $user->getRoles());
+        $this->assertSame(["foo" => "bar", "bar" => "foo"], $user->getAttributes());
     }
     
     /**
@@ -68,18 +70,17 @@ class NativeUserLoaderTest extends SecurityTestCase
                 "attributes"    =>  ["foo" => "bar", "bar" => "foo"]
             ]
         ];
+        $user = UserMock::initMock(UserInterface::class, "foo")->mockGetName($this->atLeastOnce())->finalizeMock();
         
         $loader = new NativeUserLoader($users);
+        $user = $loader->loadUser($user);
         
-        $expectedUser = (new CredentialUser("foo", "foo", true))
-                            ->addAttribute("foo", "bar")
-                            ->addAttribute("bar", "foo")
-                            ->addRole("foo")
-                            ->addRole("bar")
-                            ->addCredential("foo", "bar")
-                            ->addCredential("bar", "foo");
-        
-        $this->assertEquals($expectedUser, $loader->loadUser($this->getMockedUser(UserInterface::class, "foo")));
+        $this->assertInstanceOf(CredentialUserInterface::class, $user);
+        $this->assertSame("foo", $user->getPassword());
+        $this->assertTrue($user->isRoot()).
+        $this->assertSame(["foo" => "bar", "bar" => "foo", "password" => "foo"], $user->getCredentials());
+        $this->assertSame(["foo" => "foo", "bar" => "bar"], $user->getRoles());
+        $this->assertSame(["foo" => "bar", "bar" => "foo"], $user->getAttributes());
     }
     
     /**

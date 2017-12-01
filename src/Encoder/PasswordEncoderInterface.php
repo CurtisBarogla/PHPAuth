@@ -12,7 +12,7 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Encoder;
 
-use Zoe\Component\Internal\Exception\RuntimeException;
+use Zoe\Component\Security\Exception\RuntimeException;
 
 /**
  * Responsable of encoding and comparing password

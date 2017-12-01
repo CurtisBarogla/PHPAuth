@@ -17,32 +17,9 @@ use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterfa
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyCollection;
 use Zoe\Component\Security\User\Contracts\UserInterface;
+use ZoeTest\Component\Security\Mock\AuthenticationStrategyMock;
+use ZoeTest\Component\Security\Mock\UserMock;
 
-/**
- * Fill AuthenticationStrategyCollection instance with AuthenticationStrategy instance
- * 
- * @param SecurityTestCase $case
- *   Test case which the collection is testes
- * @param int $count
- *   Number of strategy to set
- * @param array $results
- *   Result for each
- */
-function generateCollectionWithStrategies(
-    SecurityTestCase $case,
-    int $count, 
-    array $results,
-    ?UserInterface& $user): AuthenticationStrategyCollection
-{
-    $user = $case->getMockedUser(MutableUserInterface::class, "foo");
-    $collection = new AuthenticationStrategyCollection($case->getMockedAuthenticationStrategy($results[0], $user));
-    for ($i = 1; $i < $count; $i++) {
-        $strategy = $case->getMockedAuthenticationStrategy($results[$i], $user);
-        $collection->add($strategy);
-    }
-    
-    return $collection;
-}
 
 /**
  * AuthenticationStrategyCollection testcase
@@ -60,11 +37,11 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testAdd(): void
     {
-        $mock = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods(["process"])->getMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($mock);
+        $collection = new AuthenticationStrategyCollection($strategy);
         
-        $this->assertNull($collection->add($mock));
+        $this->assertNull($collection->add($strategy));
     }
     
     /**
@@ -72,15 +49,17 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testProcess(): void
     {
-        $user = null;
-        $results = [
-            AuthenticationStrategyInterface::SUCCESS,
-            AuthenticationStrategyInterface::SKIP,
-            AuthenticationStrategyInterface::SKIP
-        ];
-        $collection = generateCollectionWithStrategies($this, 3, $results, $user);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();      
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user));
+        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection->add($strategy2);
+        $collection->add($strategy3);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user2));
     }
     
     /**
@@ -88,15 +67,17 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testProcessOnFail(): void
     {
-        $user = null;
-        $results = [
-            AuthenticationStrategyInterface::SUCCESS,
-            AuthenticationStrategyInterface::SUCCESS,
-            AuthenticationStrategyInterface::FAIL
-        ];
-        $collection = generateCollectionWithStrategies($this, 3, $results, $user);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user));
+        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection->add($strategy2);
+        $collection->add($strategy3);
+        
+        $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user2));
     }
     
     /**
@@ -104,16 +85,19 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testProcessOnFailWithShuntOnSuccess(): void
     {
-        $user = null;
-        $results = [
-            AuthenticationStrategyInterface::FAIL,
-            AuthenticationStrategyInterface::SKIP,
-            AuthenticationStrategyInterface::SUCCESS,
-            AuthenticationStrategyInterface::SHUNT_ON_SUCCESS
-        ];
-        $collection = generateCollectionWithStrategies($this, 4, $results, $user);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
+        $strategy4 = AuthenticationStrategyMock::initMock("Poz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS)->finalizeMock();
         
-        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user));
+        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection->add($strategy2);
+        $collection->add($strategy3);
+        $collection->add($strategy4);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user2));
     }
     
     /**
@@ -121,14 +105,15 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testProcessWithOnlySkip(): void
     {
-        $user = null;
-        $results = [
-            AuthenticationStrategyInterface::SKIP,
-            AuthenticationStrategyInterface::SKIP
-        ];
-        $collection = generateCollectionWithStrategies($this, 2, $results, $user);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user));
+        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection->add($strategy2);
+        
+        $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user2));
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -138,14 +123,15 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
      */
     public function testExceptionOnInvalidReturnValueStrategy(): void
     {
-        $user = $this->getMockedUser(MutableUserInterface::class, "foo");
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
         $this->expectException(\UnexpectedValueException::class);
-        
-        $strategy = $this->getMockedAuthenticationStrategy(8, $user);
+
+        $strategy = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, 5)->finalizeMock();
         
         $collection = new AuthenticationStrategyCollection($strategy);
         
-        $collection->process($user, $user);
+        $collection->process($user, $user2);
     }
 
 }

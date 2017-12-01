@@ -15,7 +15,7 @@ namespace Zoe\Component\Security\User\Contracts;
 use Zoe\Component\Security\Exception\InvalidUserCredentialException;
 
 /**
- * User holding credential informations.
+ * User holding credentials informations.
  * This informations SHOULD NOT be persisted after the user is logged in.
  * User is still mutable at this point
  * 

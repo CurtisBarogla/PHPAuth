@@ -50,7 +50,7 @@ interface ResourceInterface
     public const PERMISSIONS_IDENTIFIER = "PERMISSIONS_";
     
     /**
-     * 32 bits -1
+     * 32 bits
      *
      * @var int
      */

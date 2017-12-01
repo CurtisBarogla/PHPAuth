@@ -216,7 +216,7 @@ class Resource implements ResourceInterface, \JsonSerializable
     }
     
     /**
-     * Validate the resource bahviour parameter
+     * Validate resource behaviour parameter
      * 
      * @throws InvalidResourceBehaviourException
      *   When given behaviour is not handled

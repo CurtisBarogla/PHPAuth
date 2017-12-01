@@ -16,6 +16,7 @@ use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Storage\UserStorageInteface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\Exception\UserNotFoundException;
+use ZoeTest\Component\Security\Mock\UserMock;
 
 /**
  * Common to all UserStorageInterface testcases
@@ -42,7 +43,7 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
     {
         $store = $this->getStore();
         
-        $user = $this->getMockedUser(StorableUserInterface::class, "foo", false, 1, 1);
+        $user = UserMock::initMock(StorableUserInterface::class, "Foo")->finalizeMock();
         
         $this->assertNull($store->addUser(UserStorageInteface::STORE_USER_ID, $user));
     }
@@ -54,17 +55,13 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
     {
         $store = $this->getStore();
         
-        $user = $this->getMockedUser(StorableUserInterface::class, "foo", false, 1, 1);
-        
+        $user = UserMock::initMock(StorableUserInterface::class, "Foo")->finalizeMock();
+
         $store->addUser(UserStorageInteface::STORE_USER_ID, $user);
         
         $getted = $store->getUser(UserStorageInteface::STORE_USER_ID);
         
-        $this->assertInstanceOf(StorableUserInterface::class, $getted);
-        $this->assertSame("foo", $getted->getName());
-        $this->assertFalse($getted->isRoot());
-        $this->assertSame(["foo" => "foo"], $getted->getRoles());
-        $this->assertSame(["foo" => "bar"], $getted->getAttributes());
+        $this->assertEquals($getted, $user);
     }
     
     /**
@@ -74,7 +71,9 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
     {
         $store = $this->getStore();
         
-        $store->addUser(UserStorageInteface::STORE_USER_ID, $this->getMockedUser(StorableUserInterface::class, "foo"));
+        $user = UserMock::initMock(StorableUserInterface::class, "Foo");
+        
+        $store->addUser(UserStorageInteface::STORE_USER_ID, $user);
         
         $this->assertTrue($store->hasUser(UserStorageInteface::STORE_USER_ID));
         $this->assertNull($store->deleteUser(UserStorageInteface::STORE_USER_ID));
@@ -88,17 +87,15 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
     {
         $store = $this->getStore();
         
-        $store->addUser(UserStorageInteface::STORE_USER_ID, $this->getMockedUser(StorableUserInterface::class, "foo"));
+        $user1 = UserMock::initMock(StorableUserInterface::class, "Foo")->mockGetName($this->any())->finalizeMock();
+        $user2 = UserMock::initMock(StorableUserInterface::class, "Bar")->mockGetName($this->once())->finalizeMock();
         
-        $newUser = $this->getMockedUser(StorableUserInterface::class, "foo", true, 1, 1);
-        
-        $this->assertNull($store->refreshUser(UserStorageInteface::STORE_USER_ID, $newUser));
+        $store->addUser(UserStorageInteface::STORE_USER_ID, $user1);
+
+        $this->assertNull($store->refreshUser(UserStorageInteface::STORE_USER_ID, $user2));
         
         $getted = $store->getUser(UserStorageInteface::STORE_USER_ID);
-        
-        $this->assertTrue($getted->isRoot());
-        $this->assertSame(["foo" => "foo"], $getted->getRoles());
-        $this->assertSame(["foo" => "bar"], $getted->getAttributes());
+        $this->assertSame("Bar", $getted->getName());
     }
     
     /**
@@ -108,7 +105,9 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
     {
         $store = $this->getStore();
         
-        $store->addUser(UserStorageInteface::STORE_USER_ID, $this->getMockedUser(StorableUserInterface::class, "foo"));
+        $user = UserMock::initMock(StorableUserInterface::class, "Foo")->finalizeMock();
+        
+        $store->addUser(UserStorageInteface::STORE_USER_ID, $user);
         
         $this->assertTrue($store->hasUser(UserStorageInteface::STORE_USER_ID));
         $this->assertFalse($store->hasUser(UserStorageInteface::STORE_USER_ID."foo"));
@@ -145,11 +144,12 @@ abstract class AbstractUserStorageTest extends SecurityTestCase
      */
     public function testExceptionRefreshUserWhenInvalid(): void
     {
+        $user = UserMock::initMock(StorableUserInterface::class, "Foo")->finalizeMock();
         $identifier = UserStorageInteface::STORE_USER_ID;
         $this->expectException(UserNotFoundException::class);
         $this->expectExceptionMessage("No user found into the store for this identifier '{$identifier}'");
         
-        $this->getStore()->refreshUser(UserStorageInteface::STORE_USER_ID, $this->getMockedUser(StorableUserInterface::class, "foo"));
+        $this->getStore()->refreshUser(UserStorageInteface::STORE_USER_ID, $user);
     }
     
     /**
