@@ -1,0 +1,175 @@
+<?php
+//StrictType
+declare(strict_types = 1);
+
+/*
+ * Zoe
+ * Security component
+ *
+ * Author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
+
+namespace ZoeTest\Component\Security\Mock\Tests;
+
+use ZoeTest\Component\Security\SecurityTestCase;
+use ZoeTest\Component\Security\Mock\MaskCollectionMock;
+use ZoeTest\Component\Security\Mock\ResourceMock;
+use ZoeTest\Component\Security\Mock\MaskMock;
+use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
+
+/**
+ * ResourceMock testcase
+ * 
+ * @see \ZoeTest\Component\Security\Mock\ResourceMock
+ * 
+ * @author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
+class ResouceMockTest extends SecurityTestCase
+{
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockAddPermission()
+     */
+    public function testMockAddPermission(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockAddPermission($this->once(), "Foo")->finalizeMock();
+        
+        $this->assertNull($resource->addPermission("Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockAddPermission_consecutive()
+     */
+    public function testMockAddPermission_consecutive(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockAddPermission_consecutive($this->exactly(3), "Foo", "Bar", "Moz")->finalizeMock();
+        
+        $this->assertNull($resource->addPermission("Foo"));
+        $this->assertNull($resource->addPermission("Bar"));
+        $this->assertNull($resource->addPermission("Moz"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermissions()
+     */
+    public function testMockGetPermissions(): void
+    {
+        $permissions = MaskCollectionMock::initMock()->finalizeMock();
+        $resource = ResourceMock::initMock("Foo")->mockGetPermissions($this->once(), null, $permissions)->finalizeMock();
+        $this->assertInstanceOf(MaskCollection::class, $resource->getPermissions());
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetPermissions($this->once(), ["Foo", "Bar"], $permissions)->finalizeMock();
+        $this->assertInstanceOf(MaskCollection::class, $resource->getPermissions(["Foo", "Bar"]));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermission()
+     */
+    public function testMockGetPermission(): void
+    {
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->mockGetValue($this->once(), 3)->finalizeMock();
+        $resource = ResourceMock::initMock("Foo")->mockGetPermission($this->any(), "Foo", $mask)->finalizeMock();
+        
+        $this->assertSame("Foo", $resource->getPermission("Foo")->getIdentifier());
+        $this->assertSame(3, $resource->getPermission("Foo")->getValue());
+        
+        $mask = null;
+        $resource = ResourceMock::initMock("Foo")->mockGetPermission($this->once(), "Foo", $mask)->finalizeMock();
+        
+        $this->expectException(InvalidResourcePermissionException::class);
+        $resource->getPermission("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermission_consecutive()
+     */
+    public function testMockGetPermission_consecutive(): void
+    {
+        $maskFoo = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->finalizeMock();
+        $maskBar = MaskMock::initMock("Bar")->mockGetIdentifier($this->once())->finalizeMock();
+        $maskMoz = MaskMock::initMock("Moz")->mockGetIdentifier($this->once())->finalizeMock();
+        
+        $resource = ResourceMock::initMock("Foo")
+                        ->mockGetPermission_consecutive($this->exactly(3), ["Foo" => $maskFoo, "Bar" => $maskBar, "Moz" => $maskMoz])
+                        ->finalizeMock();
+        $this->assertSame("Foo", $resource->getPermission("Foo")->getIdentifier());
+        $this->assertSame("Bar", $resource->getPermission("Bar")->getIdentifier());
+        $this->assertSame("Moz", $resource->getPermission("Moz")->getIdentifier());
+        
+        $resource = ResourceMock::initMock("Foo")
+                            ->mockGetPermission_consecutive($this->exactly(2), ["Foo" => $maskFoo, "Bar" => null])
+                            ->finalizeMock();
+        $this->expectException(InvalidResourcePermissionException::class);
+        $resource->getPermission("Foo");
+        $resource->getPermission("Bar");
+        
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockHasPermission()
+     */
+    public function testMockHasPermission(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockHasPermission($this->any(), "Foo", true)->finalizeMock();
+        
+        $this->assertTrue($resource->hasPermission("Foo"));
+        
+        $resource = ResourceMock::initMock("Foo")->mockHasPermission($this->any(), "Foo", false)->finalizeMock();
+        
+        $this->assertFalse($resource->hasPermission("Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockHasPermission_consecutive()
+     */
+    public function testMockHasPermission_consecutive(): void
+    {
+        $resource = ResourceMock::initMock("Foo")
+                        ->mockHasPermission_consecutive($this->exactly(3), ["Foo" => true, "Bar" => false, "Moz" => true])
+                        ->finalizeMock();
+        
+        $this->assertTrue($resource->hasPermission("Foo"));
+        $this->assertFalse($resource->hasPermission("Bar"));
+        $this->assertTrue($resource->hasPermission("Moz"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetBehaviour()
+     */
+    public function testMockGetBehaviour(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockGetBehaviour($this->once(), ResourceInterface::BLACKLIST_BEHAVIOUR)->finalizeMock();
+        
+        $this->assertSame(ResourceInterface::BLACKLIST_BEHAVIOUR, $resource->getBehaviour());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetName()
+     */
+    public function testMockGetName(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->finalizeMock();
+        
+        $this->assertSame("Foo", $resource->getName());
+    }
+    
+                        /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock
+     */
+    public function testExceptionWhenMethodAlreadyMocked(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("This method 'getName' for mocked resource 'Foo' has been already mocked");
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->mockGetName($this->once())->finalizeMock();
+    }
+    
+    
+    
+}
