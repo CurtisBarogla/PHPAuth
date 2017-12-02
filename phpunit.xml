@@ -22,7 +22,6 @@
         <whitelist>
             <directory>./src</directory>
             <directory>./tests/Mock</directory>
-            <file>./tests/SecurityTestCase.php</file>
             <exclude>
             	<directory>./tests/Mock/Tests</directory>
            	</exclude>

@@ -29,6 +29,31 @@ class EntityMockTest extends SecurityTestCase
 {
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\EntityMock::mockGetIterator()
+     */
+    public function testMockGetIterator(): void
+    {
+        $values = $this->getGenerator(["Foo" => ["Foo", "Bar"], "Bar" => ["Moz", "Poz"]]);
+        $entity = EntityMock::initMock("Foo")->mockGetIterator($this->once(), $values)->finalizeMock();
+        
+        $loop = 0;
+        foreach ($entity as $name => $permissions) {
+            switch ($loop) {
+                case 0:
+                    $this->assertSame("Foo", $name);
+                    $this->assertSame(["Foo", "Bar"], $permissions);
+                    break;
+                case 1:
+                    $this->assertSame("Bar", $name);
+                    $this->assertSame(["Moz", "Poz"], $permissions);
+                    break;
+            }
+            
+            $loop++;
+        }
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\EntityMock::mockAdd()
      */
     public function testMockAdd(): void

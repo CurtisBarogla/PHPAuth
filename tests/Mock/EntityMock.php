@@ -78,6 +78,26 @@ class EntityMock extends Mock
     }
     
     /**
+     * Mock getIterator()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param \Generator $values
+     *   Entity values generator
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetIterator(PhpUnitCallMethod $count, \Generator $values): self
+    {
+        $mock = function(string $method) use ($count, $values): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($values)); 
+        };
+        
+        return $this->executeMock("getIterator", $mock, null);
+    }
+    
+    /**
      * Mock add()
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count

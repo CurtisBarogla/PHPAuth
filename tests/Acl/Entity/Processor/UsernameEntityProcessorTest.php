@@ -10,7 +10,7 @@ declare(strict_types = 1);
  *
  */
 
-namespace ZoeTest\Component\Security\Acl\Entity;
+namespace ZoeTest\Component\Security\Acl\Entity\Processor;
 
 use ZoeTest\Component\Security\SecurityTestCase;
 use ZoeTest\Component\Security\Mock\EntityMock;
