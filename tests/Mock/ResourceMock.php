@@ -18,6 +18,7 @@ use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Entity\Entity;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
+use Zoe\Component\Security\Exception\InvalidEntityException;
 
 /**
  * Generate mocked resource
@@ -93,7 +94,7 @@ class ResourceMock extends Mock
      */
     public function mockAddPermission(PhpUnitCallMethod $count, string $permission): self
     {
-        $mock = function(string $method) use ($permission, $count) {
+        $mock = function(string $method) use ($permission, $count): void {
             $this->mock->expects($count)->method($method)->with($permission)->will($this->returnValue(null));
         };
         
@@ -113,7 +114,7 @@ class ResourceMock extends Mock
      */
     public function mockAddPermission_consecutive(PhpUnitCallMethod $count, string ...$permissions): self
     {
-        $mock = function(string $method) use ($permissions, $count) {
+        $mock = function(string $method) use ($permissions, $count): void {
             $args = [];
             $returned = [];
             foreach ($permissions as $permission) {
@@ -141,7 +142,7 @@ class ResourceMock extends Mock
      */
     public function mockGetPermissions(PhpUnitCallMethod $count, ?array $permissions, MaskCollection $permissionsReturned): self
     {
-        $mock = function(string $method) use ($permissions, $permissionsReturned, $count) {
+        $mock = function(string $method) use ($permissions, $permissionsReturned, $count): void {
             $this->mock->expects($count)->method($method)->with($permissions)->will($this->returnValue($permissionsReturned));
         };
         
@@ -163,7 +164,7 @@ class ResourceMock extends Mock
      */
     public function mockGetPermission(PhpUnitCallMethod $count, string $permission, ?Mask $permissionMask): self
     {
-        $mock = function(string $method) use ($permission, $permissionMask, $count) {
+        $mock = function(string $method) use ($permission, $permissionMask, $count): void {
             if(null === $permissionMask)
                 $return = $this->throwException(new InvalidResourcePermissionException($this->mock, $permission));
             else
@@ -188,7 +189,7 @@ class ResourceMock extends Mock
      */
     public function mockGetPermission_consecutive(PhpUnitCallMethod $count, array $permissions): self
     {
-        $mock = function(string $method) use ($permissions, $count) {
+        $mock = function(string $method) use ($permissions, $count): void {
             $args = [];
             $returned = [];
             foreach ($permissions as $permission => $mask) {
@@ -220,7 +221,7 @@ class ResourceMock extends Mock
      */
     public function mockHasPermission(PhpUnitCallMethod $count, string $permission, bool $result): self
     {
-        $mock = function(string $method) use ($permission, $result, $count) {
+        $mock = function(string $method) use ($permission, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($permission)->will($this->returnValue($result));
         };
         
@@ -240,7 +241,7 @@ class ResourceMock extends Mock
      */
     public function mockHasPermission_consecutive(PhpUnitCallMethod $count, array $permissions): self
     {
-        $mock = function(string $method) use ($permissions, $count) {
+        $mock = function(string $method) use ($permissions, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($permissions, $args, $returned);
@@ -251,32 +252,102 @@ class ResourceMock extends Mock
         return $this->executeMock("hasPermission", $mock, null);
     }
     
+    /**
+     * Mock addEntity()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param Entity $entity
+     *   Mocked entity to add
+     *
+     * @return self
+     *   Fluent
+     */
     public function mockAddEntity(PhpUnitCallMethod $count, Entity $entity): self
     {
-        $mock = function(string $method) use ($count) {
-            
+        $mock = function(string $method) use ($entity, $count): void {
+            $this->mock->expects($count)->method($method)->with($entity)->will($this->returnValue(null));
         };
+        
+        return $this->executeMock("addEntity", $mock, null);
     }
     
+    /**
+     * Mock addEntity() with consecutive calls
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param Entity ...$entities
+     *   Varidic number of entity to add
+     *
+     * @return self
+     *   Fluent
+     */
     public function mockAddEntity_consecutive(PhpUnitCallMethod $count, Entity ...$entities): self
     {
-        $mock = function(string $method) use ($count) {
+        $mock = function(string $method) use ($entities, $count): void {
+            $args = [];
+            $returned = [];
+            foreach ($entities as $entity) {
+                $args[][] = $entity;
+                $returned[] = $this->returnValue(null);
+            }
             
+            $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
         };
+        
+        return $this->executeMock("addEntity", $mock, null);
     }
     
+    /**
+     * Mock getEntity()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param string $entity
+     *   Entity name
+     * @param Entity|null $entityReturned
+     *   Mocked entity or null to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
     public function mockGetEntity(PhpUnitCallMethod $count, string $entity, ?Entity $entityReturned): self
     {
-        $mock = function(string $method) use ($count) {
+        $mock = function(string $method) use ($entity, $entityReturned, $count): void {
+            $return = (null === $entityReturned) ? $this->throwException(new InvalidEntityException()) : $this->returnValue($entityReturned);
             
+            $this->mock->expects($count)->method($method)->with($entity)->will($return);
         };
+        
+        return $this->executeMock("getEntity", $mock, null);
     }
     
-    public function getEntity_consecutive(PhpUnitCallMethod $count, Entity ...$entities): self
+    /**
+     * Mock getEntity() with consecutive calls
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param array $entities
+     *   Entity return. Array index is name given as parameters and value is the mocked entity return or null to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetEntity_consecutive(PhpUnitCallMethod $count, array $entities): self
     {
-        $mock = function(string $method) use ($count) {
+        $mock = function(string $method) use ($entities, $count): void {
+            $args = [];
+            $returned = [];
+            foreach ($entities as $name => $entity) {
+                $args[][] = $name;
+                $returned[] = (null === $entity) ? $this->throwException(new InvalidEntityException()) : $this->returnValue($entity);
+            }
             
+            $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
         };
+        
+        return $this->executeMock("getEntity", $mock, null);
     }
     
     /**
@@ -292,7 +363,7 @@ class ResourceMock extends Mock
      */
     public function mockGetBehaviour(PhpUnitCallMethod $count, int $behaviour): self
     {
-        $mock = function(string $method) use ($behaviour, $count) {
+        $mock = function(string $method) use ($behaviour, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($behaviour));
         };
         
@@ -310,7 +381,7 @@ class ResourceMock extends Mock
      */
     public function mockGetName(PhpUnitCallMethod $count): self
     {
-        $mock = function(string $method) use ($count) {
+        $mock = function(string $method) use ($count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($this->name)); 
         };
         

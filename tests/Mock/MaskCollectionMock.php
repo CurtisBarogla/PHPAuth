@@ -78,7 +78,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockTotal(PhpUnitCallMethod $count, string $identifier, Mask $total): self
     {
-        $mock = function(string $method) use ($identifier, $total, $count) {
+        $mock = function(string $method) use ($identifier, $total, $count): void {
             $this->mock->expects($count)->method($method)->with($identifier)->will($this->returnValue($total));
         };
         
@@ -98,7 +98,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockAdd(PhpUnitCallMethod $count, Mask $mask): self
     {
-        $mock = function(string $method) use ($mask, $count) {
+        $mock = function(string $method) use ($mask, $count): void {
             $this->mock->expects($count)->method($method)->with($mask)->will($this->returnValue(null)); 
         };
         
@@ -118,7 +118,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockAdd_consecutive(PhpUnitCallMethod $count, Mask ...$masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $args = [];
             $returned = [];
             foreach ($masks as $mask) {
@@ -147,7 +147,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockGet(PhpUnitCallMethod $count, string $maskName, ?Mask $maskReturned): self
     {
-        $mock = function(string $method) use ($maskName, $maskReturned, $count) {
+        $mock = function(string $method) use ($maskName, $maskReturned, $count): void {
             $return = (null === $maskReturned) ? $this->throwException(new InvalidMaskException()) : $this->returnValue($maskReturned);
             $this->mock->expects($count)->method($method)->with($maskName)->will($return);
         };
@@ -168,7 +168,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockGet_consecutive(PhpUnitCallMethod $count, array $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $args = [];
             $returned = [];
             foreach ($masks as $name => $mask) {
@@ -196,7 +196,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockHas(PhpUnitCallMethod $count, string $maskName, bool $result): self
     {
-        $mock = function(string $method) use ($maskName, $result, $count) {
+        $mock = function(string $method) use ($maskName, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($maskName)->will($this->returnValue($result)); 
         };
         
@@ -216,7 +216,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockHas_consecutive(PhpUnitCallMethod $count, array $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $args = [];
             $returned = [];
             $this->extractArrayVariadic($masks, $args, $returned);
@@ -242,7 +242,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockRefresh(PhpUnitCallMethod $count, Mask $mask, bool $exception): self
     {
-        $mock = function(string $method) use ($mask, $exception, $count) {
+        $mock = function(string $method) use ($mask, $exception, $count): void {
             $return = ($exception) ? $this->throwException(new InvalidMaskException()) : $this->returnValue(null);
             $this->mock->expects($count)->method($method)->with($mask)->will($return);
         };
@@ -263,7 +263,7 @@ class MaskCollectionMock extends Mock
      */
     public function mockRefresh_consecutive(PhpUnitCallMethod $count, array ...$masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $args = [];
             $returned = [];
             foreach ($masks as $variadicMasks) {

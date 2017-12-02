@@ -19,6 +19,9 @@ use ZoeTest\Component\Security\Mock\MaskMock;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use ZoeTest\Component\Security\Mock\EntityMock;
+use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Exception\InvalidEntityException;
 
 /**
  * ResourceMock testcase
@@ -138,6 +141,73 @@ class ResouceMockTest extends SecurityTestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockAddEntity()
+     */
+    public function testMockAddEntity(): void
+    {
+        $entity = EntityMock::initMock("Foo")->finalizeMock();
+        $resource = ResourceMock::initMock("Foo")->mockAddEntity($this->any(), $entity)->finalizeMock();
+        
+        $this->assertNull($resource->addEntity($entity));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockAddEntity_consecutive()
+     */
+    public function testMockAddEntity_consecutive(): void
+    {
+        $entities = [
+            EntityMock::initMock("Foo")->finalizeMock(),
+            EntityMock::initMock("Bar")->finalizeMock()
+        ];
+        $resource = ResourceMock::initMock("Foo")->mockAddEntity_consecutive($this->exactly(2), $entities[0], $entities[1])->finalizeMock();
+        
+        $this->assertNull($resource->addEntity($entities[0]));
+        $this->assertNull($resource->addEntity($entities[1]));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetEntity()
+     */
+    public function testMockGetEntity(): void
+    {
+        $entity = EntityMock::initMock("Foo")->finalizeMock();
+        $resource = ResourceMock::initMock("Foo")->mockGetEntity($this->any(), "Foo", $entity)->finalizeMock();
+        
+        $this->assertInstanceOf(Entity::class, $resource->getEntity("Foo"));
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetEntity($this->any(), "Foo", null)->finalizeMock();
+        $this->expectException(InvalidEntityException::class);
+        $resource->getEntity("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetEntity_consecutive()
+     */
+    public function testMockGetEntity_consecutive(): void
+    {
+        $entities = [
+            "Foo"   =>  EntityMock::initMock("Foo")->finalizeMock(),
+            "Bar"   =>  EntityMock::initMock("Bar")->finalizeMock(),
+            "Moz"   =>  EntityMock::initMock("Moz")->finalizeMock()
+        ];
+        $resource = ResourceMock::initMock("Foo")->mockGetEntity_consecutive($this->exactly(3), $entities)->finalizeMock();
+        
+        $this->assertInstanceOf(Entity::class, $resource->getEntity("Foo"));
+        $this->assertInstanceOf(Entity::class, $resource->getEntity("Bar"));
+        $this->assertInstanceOf(Entity::class, $resource->getEntity("Moz"));
+        
+        $entities = [
+            "Foo"   =>  EntityMock::initMock("Foo")->finalizeMock(),
+            "Bar"   =>  null,
+        ];
+        $resource = ResourceMock::initMock("Foo")->mockGetEntity_consecutive($this->exactly(2), $entities)->finalizeMock();
+        $this->expectException(InvalidEntityException::class);
+        $resource->getEntity("Foo");
+        $resource->getEntity("Bar");
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetBehaviour()
      */
     public function testMockGetBehaviour(): void
@@ -169,7 +239,5 @@ class ResouceMockTest extends SecurityTestCase
         
         $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->mockGetName($this->once())->finalizeMock();
     }
-    
-    
     
 }
