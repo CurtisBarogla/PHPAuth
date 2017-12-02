@@ -18,6 +18,7 @@ use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\Exception\ResourceNotFoundException;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use ZoeTest\Component\Security\Mock\MaskMock;
 
 /**
  * Common class for AclUser testing
@@ -39,7 +40,7 @@ abstract class AclUserTest extends SecurityTestCase
         $user = $this->getUser();
         if($user instanceof StorableAclUser) {
             $permissions = new MaskCollection("ACL_PERMISSIONS");
-            $permissions->add($this->getMockedMask("foo", 0x0000));
+            $permissions->add(MaskMock::initMock("foo")->mockGetIdentifier($this->exactly(3))->mockGetValue($this->once(), 0)->finalizeMock());
             
             $user->setPermissions($permissions);
         }
@@ -58,7 +59,7 @@ abstract class AclUserTest extends SecurityTestCase
         $user = $this->getUser();
         if($user instanceof StorableAclUser) {
             $permissions = new MaskCollection("ACL_PERMISSIONS");
-            $permissions->add($this->getMockedMask("foo", 0x0003));
+            $permissions->add(MaskMock::initMock("foo")->mockGetIdentifier($this->exactly(3))->mockGetValue($this->once(), 3)->finalizeMock());
             
             $user->setPermissions($permissions);
         }

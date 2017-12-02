@@ -22,32 +22,10 @@ use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\Exception\LogicException;
 use Zoe\Component\Security\User\Loader\UserLoaderInterface;
 use ZoeTest\Component\Security\Fixtures\Authentication\UserLoaderFixture;
-
-/**
- * Get Authentication implementation with mock setted
- * 
- * @param MutableUserInterface|null $user
- *   User passed to authentication
- * @param SecurityTestCase $case
- *   SecurityTestCase instance 
- * @param int $strategyResult
- *   Result given by the strategy mocked
- * 
- * @return AuthenticationInterface
- *   Authentication instance with mocked setted into it
- */
-function getAuthenticationForTest(
-    ?MutableUserInterface& $user, 
-    SecurityTestCase $case,
-    int $strategyResult): AuthenticationInterface
-{
-    $user = $case->getMockedUser(MutableUserInterface::class, "foo", true, 2, 2);
-    $loader = $case->getMockedUserLoader("foo");
-    $loader->method("loadUser")->with($user)->will($case->returnValue($user));
-    $strategy = $case->getMockedAuthenticationStrategy($strategyResult, $user);
-    
-    return new Authentication($loader, $strategy);
-}
+use ZoeTest\Component\Security\Mock\UserMock;
+use ZoeTest\Component\Security\Mock\AuthenticationStrategyMock;
+use ZoeTest\Component\Security\Mock\UserLoaderMock;
+use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
 
 /**
  * Authentication testcase
@@ -65,8 +43,8 @@ class AuthenticationTest extends SecurityTestCase
      */
     public function testSwitch(): void
     {
-        $loader = $this->getMockBuilder(UserLoaderInterface::class)->setMethods(["loadUser", "identify"])->getMock();
-        $strategy = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods(["process"])->getMock();
+        $loader = UserLoaderMock::initMock("Foo")->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->finalizeMock();
         
         $authentication = new Authentication($loader, $strategy);
         $reflection = new \ReflectionClass($authentication);
@@ -93,19 +71,37 @@ class AuthenticationTest extends SecurityTestCase
      */
     public function testAuthenticate(): void
     {
-        $user = null;
-        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SUCCESS);
-        $userAuthenticated = $authentication->authenticate($user);
-        $this->assertInstanceOf(StorableUserInterface::class, $userAuthenticated);
-        $this->assertSame("foo", $userAuthenticated->getName());
-        $this->assertTrue($userAuthenticated->isRoot());
-        $this->assertSame(["foo" => "foo", "bar" => "bar"], $userAuthenticated->getRoles());
-        $this->assertSame(["foo" => "bar", "bar" => "foo"], $userAuthenticated->getAttributes());
+        $userGiven = UserMock::initMock(CredentialUserInterface::class, "Foo")->finalizeMock();
+        $userLoaded = UserMock::initMock(MutableUserInterface::class, "Foo")->mockIsRoot($this->once(), true)->finalizeMock();
+        $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $userGiven, $userLoaded)->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")
+                                        ->mockProcess($this->once(), $userLoaded, $userGiven, AuthenticationStrategyInterface::SUCCESS)
+                                    ->finalizeMock();
         
-        $user = null;
-        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS);
-        $userAuthenticated = $authentication->authenticate($user);
-        $this->assertInstanceOf(StorableUserInterface::class, $userAuthenticated);
+        $authentication = new Authentication($loader, $strategy);
+        $authenticatedUser = $authentication->authenticate($userGiven);
+        
+        $this->assertInstanceOf(StorableUserInterface::class, $authenticatedUser);
+        $this->assertTrue($authenticatedUser->isRoot());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Authentication::authenticate()
+     */
+    public function testAuthenticationOnShunt(): void
+    {
+        $userGiven = UserMock::initMock(CredentialUserInterface::class, "Foo")->finalizeMock();
+        $userLoaded = UserMock::initMock(MutableUserInterface::class, "Foo")->mockIsRoot($this->once(), true)->finalizeMock();
+        $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $userGiven, $userLoaded)->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")
+                                        ->mockProcess($this->once(), $userLoaded, $userGiven, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS)
+                                    ->finalizeMock();
+        
+        $authentication = new Authentication($loader, $strategy);
+        $authenticatedUser = $authentication->authenticate($userGiven);
+        
+        $this->assertInstanceOf(StorableUserInterface::class, $authenticatedUser);
+        $this->assertTrue($authenticatedUser->isRoot());
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -118,8 +114,8 @@ class AuthenticationTest extends SecurityTestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage("UserLoader and AuthenticationStrategy cannot be both null during switching process");
         
-        $loader = $this->getMockBuilder(UserLoaderInterface::class)->setMethods(["loadUser", "identify"])->getMock();
-        $strategy = $this->getMockBuilder(AuthenticationStrategyInterface::class)->setMethods(["process"])->getMock();
+        $loader = UserLoaderMock::initMock("Foo")->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->finalizeMock();
         
         $authentication = new Authentication($loader, $strategy);
         $authentication->switch(null, null);
@@ -131,10 +127,15 @@ class AuthenticationTest extends SecurityTestCase
     public function testAuthenticateOnFail(): void
     {
         $this->expectException(AuthenticationFailedException::class);
-        $this->expectExceptionMessage("This user 'foo' cannot be authenticated");
+        $this->expectExceptionMessage("This user 'Foo' cannot be authenticated");
         
-        $user = null;
-        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::FAIL);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->mockGetName($this->once())->finalizeMock();
+        $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $user, $user)->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")
+                            ->mockProcess($this->atLeastOnce(), $user, $user, AuthenticationStrategyInterface::FAIL)
+                        ->finalizeMock();
+        
+        $authentication = new Authentication($loader, $strategy);
         
         $authentication->authenticate($user);
     }
@@ -145,10 +146,15 @@ class AuthenticationTest extends SecurityTestCase
     public function testAuthenticateOnSkip(): void
     {
         $this->expectException(AuthenticationFailedException::class);
-        $this->expectExceptionMessage("This user 'foo' cannot be authenticated");
+        $this->expectExceptionMessage("This user 'Foo' cannot be authenticated");
         
-        $user = null;
-        $authentication = getAuthenticationForTest($user, $this, AuthenticationStrategyInterface::SKIP);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->mockGetName($this->once())->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")
+                            ->mockProcess($this->once(), $user, $user, AuthenticationStrategyInterface::SKIP)
+                            ->finalizeMock();
+        $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $user, $user)->finalizeMock();
+        
+        $authentication = new Authentication($loader, $strategy);
         
         $authentication->authenticate($user);
     }
@@ -160,8 +166,13 @@ class AuthenticationTest extends SecurityTestCase
     {
         $this->expectException(\UnexpectedValueException::class);
         
-        $user = null;
-        $authentication = getAuthenticationForTest($user, $this, 5);
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->mockGetName($this->once())->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")
+                            ->mockProcess($this->once(), $user, $user, 6)
+                            ->finalizeMock();
+        $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $user, $user)->finalizeMock();
+        
+        $authentication = new Authentication($loader, $strategy);
         
         $authentication->authenticate($user);
     }

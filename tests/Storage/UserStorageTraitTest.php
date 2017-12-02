@@ -16,6 +16,7 @@ use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Exception\LogicException;
 use Zoe\Component\Security\Storage\UserStorageTrait;
 use Zoe\Component\Security\Storage\UserStorageInteface;
+use ZoeTest\Component\Security\Mock\UserStorageMock;
 
 /**
  * UserStorageTrait testcase
@@ -34,10 +35,8 @@ class UserStorageTraitTest extends SecurityTestCase
     public function testGetStorage(): void
     {
         $trait = $this->getMockedTrait();
-        $store = $this
-            ->getMockBuilder(UserStorageInteface::class)
-            ->setMethods($this->reflection_extractMethods(new \ReflectionClass(UserStorageInteface::class)))
-            ->getMock();
+        $store = UserStorageMock::initMock()->finalizeMock();
+
         $trait->setStorage($store);
         
         $this->assertInstanceOf(UserStorageInteface::class, $trait->getStorage());
@@ -49,10 +48,7 @@ class UserStorageTraitTest extends SecurityTestCase
     public function testSetStorage(): void
     {
         $trait = $this->getMockedTrait();
-        $store = $this
-                    ->getMockBuilder(UserStorageInteface::class)
-                    ->setMethods($this->reflection_extractMethods(new \ReflectionClass(UserStorageInteface::class)))
-                    ->getMock();
+        $store = UserStorageMock::initMock()->finalizeMock();
         
         $this->assertNull($trait->setStorage($store));
     }

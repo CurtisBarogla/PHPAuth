@@ -101,10 +101,10 @@ class NativeUserLoaderTest extends SecurityTestCase
     public function testExceptionWhenUserHasBeenNotFound(): void
     {
         $this->expectException(UserNotFoundException::class);
-        $this->expectExceptionMessage("This user 'foo' does not exist");
+        $this->expectExceptionMessage("This user 'Foo' does not exist");
         
         $loader = new NativeUserLoader([]);
-        $loader->loadUser($this->getMockedUser(UserInterface::class, "foo"));
+        $loader->loadUser(UserMock::initMock(UserInterface::class, "Foo")->mockGetName($this->exactly(2))->finalizeMock());
     }
     
 }

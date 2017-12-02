@@ -12,12 +12,13 @@ declare(strict_types = 1);
 
 namespace ZoeTest\Component\Security\User;
 
+use ZoeTest\Component\Security\Mock\MaskCollectionMock;
+use ZoeTest\Component\Security\Mock\MaskMock;
 use Zoe\Component\Security\User\AclUserTest;
-use Zoe\Component\Security\User\Contracts\AclUserInterface;
-use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\User\StorableAclUser;
+use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\User\Contracts\StorableUserInterface;
-use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use Zoe\Component\Security\User\Contracts\UserInterface;
 
 /**
  * StorableAclUser testcase
@@ -53,11 +54,11 @@ class StorableAclUserTest extends AclUserTest
     {
         $user = new StorableAclUser("foo");
         
-        $permissions = new MaskCollection("foo");
-        $permissions->add($this->getMockedMask("foo", 0x0001));
-        
+        $permission = MaskMock::initMock("Foo")->mockGetValue($this->once(), 3)->finalizeMock();
+        $permissions = MaskCollectionMock::initMock()->mockGet($this->once(), "Foo", $permission)->finalizeMock();
+
         $this->assertNull($user->setPermissions($permissions));
-        $this->assertSame(0x0001, $user->getPermission("foo")->getValue());
+        $this->assertSame(3, $user->getPermission("Foo")->getValue());
     }
     
     /**

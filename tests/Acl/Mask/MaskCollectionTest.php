@@ -16,6 +16,7 @@ use ZoeTest\Component\Security\SecurityTestCase;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Exception\InvalidMaskException;
+use ZoeTest\Component\Security\Mock\MaskMock;
 
 /**
  * MaskCollection testcase
@@ -34,12 +35,12 @@ class MaskCollectionTest extends SecurityTestCase
     public function testGetIterator(): void
     {
         $collection = new MaskCollection("Foo");
-        $mask1 = $this->getMockedMask("foo", 0x0000);
-        $mask2 = $this->getMockedMask("bar", 0x0001);
+        $mask1 = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->finalizeMock();
+        $mask2 = MaskMock::initMock("Bar")->mockGetIdentifier($this->once())->finalizeMock();
         $collection->add($mask1);
         $collection->add($mask2);
         
-        $expected = $this->getGenerator(["foo" => $mask1, "bar" => $mask2]);
+        $expected = $this->getGenerator(["Foo" => $mask1, "Bar" => $mask2]);
         
         $this->assertTrue($this->assertGeneratorEquals($expected, $collection->getIterator()));
     }
@@ -49,17 +50,15 @@ class MaskCollectionTest extends SecurityTestCase
      */
     public function testTotal(): void
     {
-        $mask1 = $this->getMockedMask("foo", 0x0001);
-        $mask2 = $this->getMockedMask("bar", 0x0002);
-        $mask3 = $this->getMockedMask("moz", 0x0004);
+        $mask1 = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->mockGetValue($this->any(), 1)->finalizeMock();
+        $mask2 = MaskMock::initMock("Bar")->mockGetIdentifier($this->once())->mockGetValue($this->any(), 2)->finalizeMock();
+        $mask3 = MaskMock::initMock("Moz")->mockGetIdentifier($this->once())->mockGetValue($this->any(), 4)->finalizeMock();
         $collection = new MaskCollection("foo");
         $collection->add($mask1);
         $collection->add($mask2);
         $collection->add($mask3);
-        
-        $expected = new Mask("total", 0x0007);
-        
-        $this->assertEquals($expected, $collection->total("total"));
+
+        $this->assertEquals(7, $collection->total("total")->getValue());
     }
     
     /**
@@ -67,8 +66,8 @@ class MaskCollectionTest extends SecurityTestCase
      */
     public function testAdd(): void
     {
-        $mask = $this->getMockedMask("foo", 0);
-        $collection = new MaskCollection("foo");
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->finalizeMock();
+        $collection = new MaskCollection("Foo");
         
         $this->assertNull($collection->add($mask));
     }
@@ -78,11 +77,11 @@ class MaskCollectionTest extends SecurityTestCase
      */
     public function testGet(): void
     {
-        $mask = $this->getMockedMask("foo", 0);
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->mockGetValue($this->once(), 1)->finalizeMock();
         $collection = new MaskCollection("foo");
         $collection->add($mask);
         
-        $this->assertSame($mask, $collection->get("foo"));
+        $this->assertSame(1, $collection->get("Foo")->getValue());
     }
     
     /**
@@ -90,14 +89,14 @@ class MaskCollectionTest extends SecurityTestCase
      */
     public function testHas(): void
     {
-        $mask = $this->getMockedMask("foo", 0);
+        $mask = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->finalizeMock();
         $collection = new MaskCollection("foo");
         
-        $this->assertFalse($collection->has("foo"));
+        $this->assertFalse($collection->has("Foo"));
         
         $collection->add($mask);
         
-        $this->assertTrue($collection->has("foo"));
+        $this->assertTrue($collection->has("Foo"));
     }
     
     /**
@@ -106,13 +105,13 @@ class MaskCollectionTest extends SecurityTestCase
     public function testRefresh(): void
     {
         $collection = new MaskCollection("foo");
-        $old = $this->getMockedMask("foo", 0x0002);
-        $new = $this->getMockedMask("foo", 0x0004);
+        $old = MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->mockGetValue($this->once(), 1)->finalizeMock();
+        $new = MaskMock::initMock("Foo")->mockGetIdentifier($this->exactly(2))->mockGetValue($this->once(), 4)->finalizeMock();
         $collection->add($old);
         
-        $this->assertSame($old, $collection->get("foo"));
+        $this->assertSame(1, $collection->get("Foo")->getValue());
         $this->assertNull($collection->refresh($new));
-        $this->assertSame($new, $collection->get("foo"));
+        $this->assertSame(4, $collection->get("Foo")->getValue());
     }
     
     /**
@@ -137,8 +136,8 @@ class MaskCollectionTest extends SecurityTestCase
     {
         $collection = new MaskCollection("foo");
         
-        $collection->add($this->getMockedMask("foo", 0));
-        $collection->add($this->getMockedMask("bar", 1));
+        $collection->add(MaskMock::initMock("Foo")->mockGetIdentifier($this->once())->finalizeMock());
+        $collection->add(MaskMock::initMock("Bar")->mockGetIdentifier($this->once())->finalizeMock());
         
         $this->assertSame(2, \count($collection));
     }
@@ -163,10 +162,10 @@ class MaskCollectionTest extends SecurityTestCase
     public function testExceptionOnRefreshNotRegisteredMask(): void
     {
         $this->expectException(InvalidMaskException::class);
-        $this->expectExceptionMessage("Cannot refresh this mask 'foo' into collection 'bar'. It does not correspond to an existing one");
+        $this->expectExceptionMessage("Cannot refresh this mask 'Foo' into collection 'bar'. It does not correspond to an existing one");
         
         $collection = new MaskCollection("bar");
-        $collection->refresh($this->getMockedMask("foo", 0x0000));
+        $collection->refresh(MaskMock::initMock("Foo")->mockGetIdentifier($this->exactly(2))->finalizeMock());
     }
     
 }

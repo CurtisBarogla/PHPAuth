@@ -13,10 +13,11 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Authentication\Strategy;
 
 use ZoeTest\Component\Security\SecurityTestCase;
-use Zoe\Component\Security\Authentication\Strategy\RoleAttributionStrategy;
-use Zoe\Component\Security\Role\RoleCollection;
-use Zoe\Component\Security\User\Contracts\MutableUserInterface;
+use ZoeTest\Component\Security\Mock\RoleCollectionMock;
+use ZoeTest\Component\Security\Mock\UserMock;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\Authentication\Strategy\RoleAttributionStrategy;
+use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 
 /**
  * RoleAttributionStrategy testcase
@@ -34,32 +35,47 @@ class RoleAttributionStrategyTest extends SecurityTestCase
      */
     public function testProcess(): void
     {
-        $collection = $this->getMockBuilder(RoleCollection::class)->setMethods(["get"])->disableOriginalConstructor()->getMock();
-        $collection
-            ->expects($this->exactly(2))
-            ->method("get")
-            ->withConsecutive(["Foo"], ["Moz"])
-            ->willReturnOnConsecutiveCalls(["Foo"], ["Foo", "Bar", "Moz"]);
-        $reflection = new \ReflectionClass(MutableUserInterface::class);
-        $users = [
-            $this->getMockBuilder(MutableUserInterface::class)->setMethods($this->reflection_extractMethods($reflection))->getMock(),
-            $this->getMockBuilder(MutableUserInterface::class)->setMethods($this->reflection_extractMethods($reflection))->getMock()
+        $roles = [
+            "Foo"   =>  ["Foo", "Bar"],
+            "Bar"   =>  ["Moz", "Poz"]
         ];
-        $users[0]
-            ->expects($this->once())
-            ->method("getRoles")
-            ->will($this->returnValue(["Foo", "Moz"]));
-        $users[0]
-            ->expects($this->exactly(3))
-            ->method("addRole")
-            ->withConsecutive(["Foo"], ["Bar"], ["Moz"]);
-        $users[1]
-            ->expects($this->never())
-            ->method("addRole");
-
-        $strategy = new RoleAttributionStrategy($collection, false);
+        $collection = RoleCollectionMock::initMock()->mockGet_consecutive($this->exactly(2), $roles)->finalizeMock();
+        $user1 = UserMock::initMock(MutableUserInterface::class, "Foo")
+                            ->mockGetRoles($this->once(), ["Foo", "Bar"])
+                            ->mockAddRole_consecutive($this->exactly(4), "Moz", "Poz", "Foo", "Bar")
+                        ->finalizeMock();
+        $user2 = UserMock::initMock(MutableUserInterface::class, "Foo")
+                            ->mockGetRoles($this->never(), ["Foo", "Bar"])
+                            ->mockAddRole_consecutive($this->never(), "Foo", "Bar", "Moz", "Poz")
+                        ->finalizeMock();
         
-        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($users[0], $users[1]));
+        $strategy = new RoleAttributionStrategy($collection);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user1, $user2));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\RoleAttributionStrategy::process()
+     */
+    public function testProcessExecutedOnBothUsers(): void
+    {
+        $roles = [
+            "Foo"   =>  ["Foo", "Bar"],
+            "Bar"   =>  ["Moz", "Poz"]
+        ];
+        $collection = RoleCollectionMock::initMock()->mockGet_consecutive($this->exactly(2), $roles)->finalizeMock();
+        $user1 = UserMock::initMock(MutableUserInterface::class, "Foo")
+                            ->mockGetRoles($this->once(), ["Foo", "Bar"])
+                            ->mockAddRole_consecutive($this->exactly(4), "Moz", "Poz", "Foo", "Bar")
+                        ->finalizeMock();
+        $user2 = UserMock::initMock(MutableUserInterface::class, "Foo")
+                            ->mockGetRoles($this->never(), ["Foo", "Bar"])
+                            ->mockAddRole_consecutive($this->exactly(4), "Moz", "Poz", "Foo", "Bar")
+                        ->finalizeMock();
+        
+        $strategy = new RoleAttributionStrategy($collection, true);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user1, $user2));
     }
     
 }

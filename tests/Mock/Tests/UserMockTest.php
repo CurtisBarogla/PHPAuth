@@ -316,6 +316,10 @@ class UserMockTest extends SecurityTestCase
         $user = UserMock::initMock(CredentialUserInterface::class, "Foo")->mockGetPassword($this->any(), "Foo")->finalizeMock();
         
         $this->assertSame("Foo", $user->getPassword());
+        
+        $user = UserMock::initMock(CredentialUserInterface::class, "Foo")->mockGetPassword($this->any(), null)->finalizeMock();
+        
+        $this->assertNull($user->getPassword());
     }
     
     /**

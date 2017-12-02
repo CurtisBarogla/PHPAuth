@@ -578,13 +578,13 @@ class UserMock extends Mock
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
      *   Number of time called
-     * @param string $password
-     *   Password to return
+     * @param string|null $password
+     *   Password to return - can return null
      *
      * @return self
      *   Fluent
      */
-    public function mockGetPassword(PhpUnitCallMethod $count, string $password): self
+    public function mockGetPassword(PhpUnitCallMethod $count, ?string $password): self
     {
         $mock = function(string $method) use ($password, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($password));            
