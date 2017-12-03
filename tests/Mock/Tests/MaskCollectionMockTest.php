@@ -178,6 +178,16 @@ class MaskCollectionMockTest extends SecurityTestCase
         $collection->refresh($maskBar);
     }
     
+    /**
+     * @see \ZoeTest\Component\Security\Mock\MaskCollectionMock::mockCount()
+     */
+    public function testMockCount(): void
+    {
+        $collection = MaskCollectionMock::initMock()->mockCount($this->once(), 0)->finalizeMock();
+        
+        $this->assertSame(0, \count($collection));
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**

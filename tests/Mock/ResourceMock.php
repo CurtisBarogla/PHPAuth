@@ -128,13 +128,13 @@ class ResourceMock extends Mock
     }
     
     /**
-     * Mock getPermission()
+     * Mock getPermissions()
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
      *   Number of time called
      * @param array|null $permissions
      *   Permissions to get
-     * @param MaskCollection
+     * @param MaskCollection $permissionsReturned
      *   Permissions as mask collection returned
      *
      * @return self
@@ -144,6 +144,38 @@ class ResourceMock extends Mock
     {
         $mock = function(string $method) use ($permissions, $permissionsReturned, $count): void {
             $this->mock->expects($count)->method($method)->with($permissions)->will($this->returnValue($permissionsReturned));
+        };
+        
+        return $this->executeMock("getPermissions", $mock, null);
+    }
+    
+    /**
+     * Mock getPermissions() with consecutive calls
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param array ...$valuesReturned
+     *   Variadic number of arrays with at first value array of permissions or null and second MaskCollection returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetPermissions_consecutive(PhpUnitCallMethod $count, array ...$valuesReturned): self
+    {
+        $mock = function(string $method) use ($valuesReturned, $count): void {
+            $args = [];
+            $returned = [];
+            $loop = 0;
+            foreach ($valuesReturned as $variadicValues) {
+                foreach ($variadicValues as $value) {
+                    if($value instanceof MaskCollection)
+                        $returned[$loop] = $value;
+                    else
+                        $args[$loop][] = $value;
+                }
+                $loop++;
+            }
+            $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
         };
         
         return $this->executeMock("getPermissions", $mock, null);

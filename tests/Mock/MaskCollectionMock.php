@@ -283,6 +283,26 @@ class MaskCollectionMock extends Mock
     }
     
     /**
+     * Mock count()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param int $countReturned
+     *   Returned by call to count()
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockCount(PhpUnitCallMethod $count, int $countReturned): self
+    {
+        $mock = function(string $method) use ($countReturned, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($countReturned));
+        };
+        
+        return $this->executeMock("count", $mock, null);
+    }
+    
+    /**
      * {@inheritDoc}
      * @see \ZoeTest\Component\Security\Mock\Mock::getMessageForExceptionIfMocked()
      */

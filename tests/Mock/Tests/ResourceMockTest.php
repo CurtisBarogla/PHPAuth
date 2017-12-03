@@ -70,6 +70,23 @@ class ResouceMockTest extends SecurityTestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermissions_consecutive()
+     */
+    public function testMockGetPermissions_consecutive(): void
+    {
+        $permissions1 = MaskCollectionMock::initMock()->mockCount($this->once(), 1)->finalizeMock();
+        $permissions2 = MaskCollectionMock::initMock()->mockCount($this->once(), 10)->finalizeMock();
+        $resource = ResourceMock::initMock("Foo")
+                            ->mockGetPermissions_consecutive(
+                                $this->exactly(2), 
+                                [null, $permissions1], [["Foo", "Bar", "Moz"], $permissions2])
+                            ->finalizeMock();
+        
+        $this->assertSame(1, $resource->getPermissions()->count());
+        $this->assertSame(10, $resource->getPermissions(["Foo", "Bar", "Moz"])->count());
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermission()
      */
     public function testMockGetPermission(): void
