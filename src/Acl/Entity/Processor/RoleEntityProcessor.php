@@ -43,7 +43,6 @@ class RoleEntityProcessor extends AbstractEntityProcessor
                 $map = [];
                 $lastCount = null;
                 foreach ($roles as $role) {
-                    \var_dump($role);
                     if(!$entity->has($role))
                         continue;
                     $clearPermissions = $entity->get($role);
