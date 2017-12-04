@@ -39,7 +39,7 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
     {
         $strategy = AuthenticationStrategyMock::initMock("Foo")->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy);
+        $collection = new AuthenticationStrategyCollection();
         
         $this->assertNull($collection->add($strategy));
     }
@@ -55,9 +55,29 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
         $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy1);
         $collection->add($strategy2);
         $collection->add($strategy3);
+        
+        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user2));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyCollection::process()
+     */
+    public function testProcessWithPriority(): void
+    {
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS)->finalizeMock();
+    
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy1, -50);
+        $collection->add($strategy2, 150);
+        $collection->add($strategy3, 258);
         
         $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user2));
     }
@@ -70,10 +90,11 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
         $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
         $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
         $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
-        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
-        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy1);
         $collection->add($strategy2);
         $collection->add($strategy3);
         
@@ -87,15 +108,16 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
     {
         $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
         $user2 = UserMock::initMock(UserInterface::class, "Foo")->finalizeMock();
-        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
-        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
-        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
+        $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::FAIL)->finalizeMock();
+        $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
+        $strategy3 = AuthenticationStrategyMock::initMock("Moz")->mockProcess($this->never(), $user, $user2, AuthenticationStrategyInterface::SUCCESS)->finalizeMock();
         $strategy4 = AuthenticationStrategyMock::initMock("Poz")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SHUNT_ON_SUCCESS)->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy1);
         $collection->add($strategy2);
         $collection->add($strategy3);
-        $collection->add($strategy4);
+        $collection->add($strategy4, 150);
         
         $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $collection->process($user, $user2));
     }
@@ -110,7 +132,8 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
         $strategy1 = AuthenticationStrategyMock::initMock("Foo")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         $strategy2 = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, AuthenticationStrategyInterface::SKIP)->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy1);
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy1);
         $collection->add($strategy2);
         
         $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user2));
@@ -129,7 +152,8 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
 
         $strategy = AuthenticationStrategyMock::initMock("Bar")->mockProcess($this->atLeastOnce(), $user, $user2, 5)->finalizeMock();
         
-        $collection = new AuthenticationStrategyCollection($strategy);
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy);
         
         $collection->process($user, $user2);
     }

@@ -32,26 +32,17 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
     private $strategies = [];
     
     /**
-     * Initialize strategy
-     * 
-     * @param AuthenticationStrategyInterface $strategy
-     *   First strategy processed
-     */
-    public function __construct(AuthenticationStrategyInterface $strategy)
-    {
-        $this->strategies[] = $strategy;
-    }
-    
-    /**
      * Add a strategy to the collection.
-     * For optimisation reason, you should add strategy that can return SHUNT_ON_SUCCESS at first position
+     * For optimisation reason, you should add strategy that can return SHUNT_ON_SUCCESS or FAIL at higher priority
      * 
      * @param AuthenticationStrategyInterface $strategy
      *   Authentication strategy
+     * @param int $priority
+     *   Order which the strategy is executed
      */
-    public function add(AuthenticationStrategyInterface $strategy): void
+    public function add(AuthenticationStrategyInterface $strategy, int $priority = 0): void
     {
-        $this->strategies[] = $strategy;
+        $this->strategies[$priority][] = $strategy;
     }
     
     /**
@@ -60,26 +51,30 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
      */
     public function process(MutableUserInterface $loadedUser, UserInterface $user): int
     {
-        $error = 0;
         $processed = 0;
-        foreach ($this->strategies as $strategy) {
-            $process = $strategy->process($loadedUser, $user);
-            if($process === AuthenticationStrategyInterface::SKIP)
-                continue;
-            else if($process === AuthenticationStrategyInterface::SHUNT_ON_SUCCESS)
-                return AuthenticationStrategyInterface::SUCCESS;
-            elseif ($process === AuthenticationStrategyInterface::FAIL) {
-                $processed++;
-                $error++;
-            } else if ($process === AuthenticationStrategyInterface::SUCCESS) {
-                $processed++;   
-            } else {
-                throw new \UnexpectedValueException(\sprintf("Invalid return value on '%s' strategy",
-                    \get_class($strategy)));
+        \krsort($this->strategies);
+        
+        foreach ($this->strategies as $strategies) {
+            foreach ($strategies as $strategy) {
+                $process = $strategy->process($loadedUser, $user);
+                if($process === AuthenticationStrategyInterface::SKIP)
+                    continue;
+                switch ($process) {
+                    case AuthenticationStrategyInterface::SHUNT_ON_SUCCESS:
+                        return AuthenticationStrategyInterface::SUCCESS;
+                    case AuthenticationStrategyInterface::FAIL:
+                        return $process;
+                    case AuthenticationStrategyInterface::SUCCESS:
+                        $processed++;
+                        break;
+                    default:
+                        throw new \UnexpectedValueException(\sprintf("Invalid return value on '%s' strategy",
+                        \get_class($strategy)));
+                }
             }
         }
         
-        return ($processed !== 0 && $error === 0) ? AuthenticationStrategyInterface::SUCCESS : AuthenticationStrategyInterface::FAIL;
+        return ($processed !== 0) ? AuthenticationStrategyInterface::SUCCESS : AuthenticationStrategyInterface::FAIL;     
     }
 
 }
