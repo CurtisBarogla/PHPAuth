@@ -167,6 +167,10 @@ class EntityMockTest extends SecurityTestCase
         $entity = EntityMock::initMock("Foo")->mockGetProcessor($this->any(), "Foo")->finalizeMock();
         
         $this->assertSame("Foo", $entity->getProcessor());
+        
+        $entity = EntityMock::initMock("Foo")->mockGetProcessor($this->any(), null)->finalizeMock();
+        
+        $this->assertNull($entity->getProcessor());
     }
     
     /**

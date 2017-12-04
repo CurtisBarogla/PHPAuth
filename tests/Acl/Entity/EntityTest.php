@@ -94,6 +94,10 @@ class EntityTest extends SecurityTestCase
         $entity = new Entity("Foo", "Bar");
         
         $this->assertSame("Bar", $entity->getProcessor());
+        
+        $entity = new Entity("Foo", null);
+        
+        $this->assertNull($entity->getProcessor());
     }
     
     /**

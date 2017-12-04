@@ -50,10 +50,10 @@ class Entity implements \JsonSerializable, \IteratorAggregate
      * 
      * @param string $name
      *   Entity name
-     * @param string $processor
-     *   Processor handling the entity
+     * @param string|null $processor
+     *   Processor handling the entity or null if entity does not build the user
      */
-    public function __construct(string $name, string $processor)
+    public function __construct(string $name, ?string $processor = null)
     {
         $this->name = $name;
         $this->processor = $processor;
@@ -137,10 +137,10 @@ class Entity implements \JsonSerializable, \IteratorAggregate
     /**
      * Get the processor handling this entity
      * 
-     * @return string
+     * @return string|null
      *   Processor name
      */
-    public function getProcessor(): string
+    public function getProcessor(): ?string
     {
         return $this->processor;        
     }

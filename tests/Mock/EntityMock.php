@@ -268,13 +268,13 @@ class EntityMock extends Mock
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
      *   Number of time called
-     * @param string $processor
+     * @param string|null $processor
      *   Processor name returned
      *
      * @return self
      *   Fluent
      */
-    public function mockGetProcessor(PhpUnitCallMethod $count, string $processor): self
+    public function mockGetProcessor(PhpUnitCallMethod $count, ?string $processor): self
     {
         $mock = function(string $method) use ($processor, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($processor));
