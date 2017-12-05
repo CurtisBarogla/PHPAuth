@@ -1,0 +1,75 @@
+<?php
+//StrictType
+declare(strict_types = 1);
+
+/*
+ * Zoe
+ * Security component
+ *
+ * Author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
+
+namespace ZoeTest\Component\Security\Mock\Tests;
+
+use ZoeTest\Component\Security\SecurityTestCase;
+use ZoeTest\Component\Security\Mock\ResourceLoaderMock;
+use ZoeTest\Component\Security\Mock\ResourceMock;
+use Zoe\Component\Security\Exception\ResourceNotFoundException;
+
+/**
+ * ResourceLoaderMock testcase 
+ * 
+ * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock
+ * 
+ * @author CurtisBarogla <curtis_barogla@outlook.fr>
+ *
+ */
+class ResourceLoaderMockTest extends SecurityTestCase
+{
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock::mockLoadResource()
+     */
+    public function testMockLoadResource(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->finalizeMock();
+        $loader = ResourceLoaderMock::initMock()->mockLoadResource($this->once(), "Foo", $resource)->finalizeMock();
+        
+        $this->assertSame("Foo", $loader->loadResource("Foo")->getName());
+        
+        $this->expectException(ResourceNotFoundException::class);
+        
+        $loader = ResourceLoaderMock::initMock()->mockLoadResource($this->once(), "Foo", null)->finalizeMock();
+        
+        $loader->loadResource("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock::mockRegister()
+     */
+    public function testMockRegister(): void
+    {   
+        $loader = ResourceLoaderMock::initMock()->mockRegister($this->once(), ["Foo", "Bar", "Poz"])->finalizeMock();
+        
+        $this->assertSame(["Foo", "Bar", "Poz"], $loader->register());
+    }
+    
+                    /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock)
+     */
+    public function testExceptionWhenMethodAlreadyMocked(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("This method 'register' for this resource loader has been already mocked");
+        
+        $loader = ResourceLoaderMock::initMock()
+                        ->mockRegister($this->once(), ["Foo", "Bar", "Poz"])
+                        ->mockRegister($this->once(), ["Foo", "Bar", "Poz"])
+                    ->finalizeMock();
+        
+    }
+    
+}
