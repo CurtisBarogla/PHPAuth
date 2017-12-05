@@ -49,6 +49,7 @@ class ResourceMock extends Mock
         if(null === $reflection)
             $reflection = new \ReflectionClass(ResourceInterface::class);
         $methods = $this->reflection_extractMethods($reflection);
+        $methods[] = "jsonSerialize";
             
         $this->mock = $this->getMockBuilder(ResourceInterface::class)->setMethods($methods)->disableOriginalConstructor()->getMock();
         $this->name = $name;
@@ -332,6 +333,26 @@ class ResourceMock extends Mock
     }
     
     /**
+     * Mock getEntities()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param array $entities
+     *   Entities returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetEntities(PhpUnitCallMethod $count, array $entities): self
+    {
+        $mock = function(string $method) use ($entities, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($entities));
+        };
+        
+        return $this->executeMock("getEntities", $mock, null);
+    }
+    
+    /**
      * Mock getEntity()
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
@@ -419,6 +440,27 @@ class ResourceMock extends Mock
         
         return $this->executeMock("getName", $mock, null);
     }
+    
+    /**
+     * Mock jsonSerialize()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param array $json
+     *   Json array representation of a resource
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockJsonSerialize(PhpUnitCallMethod $count, array $json): self
+    {
+        $mock = function(string $method) use ($json, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($json));   
+        };
+        
+        return $this->executeMock("jsonSerialize", $mock, null);
+    }
+    
     
     /**
      * {@inheritDoc}

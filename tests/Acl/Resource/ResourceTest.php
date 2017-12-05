@@ -22,6 +22,7 @@ use Zoe\Component\Security\Exception\InvalidResourceBehaviourException;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
 use Zoe\Component\Security\Exception\RuntimeException;
 use Zoe\Component\Security\Exception\InvalidEntityException;
+use ZoeTest\Component\Security\Mock\EntityMock;
 
 /**
  * Resource testcase
@@ -107,6 +108,33 @@ class ResourceTest extends SecurityTestCase
         
         $resource = new Resource("Foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
         $this->assertNull($resource->addEntity($entity));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntities()
+     */
+    public function testGetEntities(): void
+    {
+        $entityFoo = EntityMock::initMock("Foo")->mockGetName($this->exactly(2))->finalizeMock();
+        $entityBar = EntityMock::initMock("Bar")->mockGetName($this->exactly(2))->finalizeMock();
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST_BEHAVIOUR);
+        $resource->addEntity($entityFoo);
+        $resource->addEntity($entityBar);
+        
+        $loop = 0;
+        foreach ($resource->getEntities() as $entity) {
+            $this->assertInstanceOf(Entity::class, $entity);
+            switch ($loop) {
+                case 0:
+                    $this->assertSame("Foo", $entity->getName());
+                    break;
+                case 1:
+                    $this->assertSame("Bar", $entity->getName());
+                    break;
+            }
+            $loop++;
+        }
     }
     
     /**

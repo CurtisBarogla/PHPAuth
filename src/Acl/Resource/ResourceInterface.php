@@ -112,6 +112,14 @@ interface ResourceInterface
     public function addEntity(Entity $entity): void;
     
     /**
+     * Get all entities registered into this resource
+     * 
+     * @return Entity[]
+     *   All entities registered
+     */
+    public function getEntities(): array;
+    
+    /**
      * Get an entity from the resource
      * 
      * @param string $entity

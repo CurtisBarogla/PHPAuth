@@ -184,6 +184,32 @@ class ResouceMockTest extends SecurityTestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetEntities()
+     */
+    public function testMockGetEntities(): void
+    {
+        $foo = EntityMock::initMock("Foo")->mockGetName($this->once())->finalizeMock();
+        $bar = EntityMock::initMock("Bar")->mockGetName($this->once())->finalizeMock();
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetEntities($this->once(), [$foo, $bar])->finalizeMock();
+        
+        $loop = 0;
+        
+        foreach ($resource->getEntities() as $entity) {
+            $this->assertInstanceOf(Entity::class, $entity);
+            switch ($loop) {
+                case 0:
+                    $this->assertSame("Foo", $entity->getName());
+                    break;
+                case 1:
+                    $this->assertSame("Bar", $entity->getName());
+                    break;
+            }
+            $loop++;
+        }
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetEntity()
      */
     public function testMockGetEntity(): void
@@ -242,6 +268,16 @@ class ResouceMockTest extends SecurityTestCase
         $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->finalizeMock();
         
         $this->assertSame("Foo", $resource->getName());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockJsonSerialize()
+     */
+    public function testMockJsonSerialize(): void
+    {
+        $resource = ResourceMock::initMock("Foo")->mockJsonSerialize($this->once(), ["Foo" => "Bar"])->finalizeMock();
+        
+        $this->assertSame(["Foo" => "Bar"], $resource->jsonSerialize());
     }
     
                         /**_____EXCEPTIONS_____**/

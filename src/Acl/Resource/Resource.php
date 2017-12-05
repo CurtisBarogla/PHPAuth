@@ -65,7 +65,7 @@ class Resource implements ResourceInterface, \JsonSerializable
      * @param string $name
      *   Resource name
      * @param int $behaviour
-     *   Resource behaviour on entities (blacklist or whitelist)
+     *   Resource behaviour (blacklist or whitelist)
      */
     public function __construct(string $name, int $behaviour)
     {
@@ -140,6 +140,15 @@ class Resource implements ResourceInterface, \JsonSerializable
     public function addEntity(Entity $entity): void
     {
         $this->entities[$entity->getName()] = $entity;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntities()
+     */
+    public function getEntities(): array
+    {
+        return $this->entities;
     }
     
     /**
