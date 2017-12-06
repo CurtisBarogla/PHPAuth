@@ -89,10 +89,7 @@ class UserFactory
         
         if(isset($json["permissions"])) {
             $user = new StorableAclUser($json["name"], $json["root"], $json["roles"], $json["attributes"]);
-            $permissions = MaskFactory::createCollectionFromJson($json["permissions"]);
-            $user->setPermissions($permissions);
-            
-            unset($permissions);
+            $user->setPermissions(MaskFactory::createCollectionFromJson($json["permissions"]));
             
             return $user;
         }

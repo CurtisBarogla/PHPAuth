@@ -74,7 +74,10 @@ interface ResourceInterface
      *   If not null, will only set into the MaskCollection the given ones
      * 
      * @return MaskCollection
-     *   All permissions
+     *   All permissions     
+     *   
+     * @throws InvalidResourcePermissionException
+     *   When a permission is not registered
      */
     public function getPermissions(?array $permissions = null): MaskCollection;
     

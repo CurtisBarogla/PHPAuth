@@ -89,7 +89,7 @@ abstract class Mock extends SecurityTestCase
     }
     
     /**
-     * Execute a mock, check user type if needed, check if it has been already mocked and add it to the mocked methods
+     * Execute a mock, and consider the method mocked
      *
      * @param string $method
      *   Method name
@@ -113,7 +113,7 @@ abstract class Mock extends SecurityTestCase
     }
     
     /**
-     * Throw exception if a method has been already mocked for this user
+     * Throw exception if a method has been already mocked
      *
      * @param string $method
      *   Method name

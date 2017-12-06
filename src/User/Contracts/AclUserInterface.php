@@ -27,7 +27,7 @@ interface AclUserInterface extends UserInterface
 {
     
     /**
-     * Identifier to registering acl permissions into attributes user
+     * Identifier for registering acl permissions into attributes user
      * 
      * @var string
      */

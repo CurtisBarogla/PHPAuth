@@ -47,7 +47,7 @@ class RoleEntityProcessor extends AbstractEntityProcessor
                         continue;
                     $clearPermissions = $entity->get($role);
                     $permissions = $resource->getPermissions($clearPermissions);
-                    $count = count($permissions);
+                    $count = \count($permissions);
                     if($count === 0) {
                         unset($map);
                         unset($permissions);
@@ -63,7 +63,6 @@ class RoleEntityProcessor extends AbstractEntityProcessor
                     }
                     $value = -$permissions->total("TOTAL_{$role}")->getValue();
                     $map[$value]["clear"] = $clearPermissions;
-                    unset($value);
                 }
                 \ksort($map);
                 $permissions = \current($map);

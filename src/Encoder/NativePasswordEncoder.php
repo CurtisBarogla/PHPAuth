@@ -13,7 +13,7 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Encoder;
 
 use Zoe\Component\Security\Exception\InvalidArgumentException;
-use Zoe\Component\Internal\Exception\RuntimeException;
+use Zoe\Component\Security\Exception\RuntimeException;
 
 /**
  * Use the native password_* php function to encode and compare password 
