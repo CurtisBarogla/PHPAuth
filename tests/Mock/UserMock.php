@@ -22,6 +22,7 @@ use Zoe\Component\Security\User\Contracts\StorableUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use PHPUnit_Framework_MockObject_Matcher_Invocation as PhpUnitCallMethod;
 use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Exception\ResourceNotFoundException;
 
 /**
  * Generate mocked user
@@ -856,7 +857,7 @@ class UserMock extends Mock
     public function mockGetPermission(PhpUnitCallMethod $count, string $permission, ?Mask $mask): self
     {
         $mock = function(string $method) use($permission, $mask, $count): void {
-            $return = (null === $mask) ? $this->throwException(new \Exception()) : $this->returnValue($mask);
+            $return = (null === $mask) ? $this->throwException(new ResourceNotFoundException()) : $this->returnValue($mask);
             $this->mock->expects($count)->method($method)->with($permission)->will($return);
         };
         
