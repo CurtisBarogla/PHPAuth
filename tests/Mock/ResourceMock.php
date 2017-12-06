@@ -135,16 +135,29 @@ class ResourceMock extends Mock
      *   Number of time called
      * @param array|null $permissions
      *   Permissions to get
-     * @param MaskCollection $permissionsReturned
-     *   Permissions as mask collection returned
+     * @param MaskCollection|null $permissionsReturned
+     *   Permissions as mask collection returned. Set to null to simulate exception (only when permissions is not null)
+     * @param string $invalidPermissionOnException
+     *   Permission invalid setted in the exception message
      *
      * @return self
      *   Fluent
      */
-    public function mockGetPermissions(PhpUnitCallMethod $count, ?array $permissions, MaskCollection $permissionsReturned): self
+    public function mockGetPermissions(
+                PhpUnitCallMethod $count, 
+                ?array $permissions, 
+                ?MaskCollection $permissionsReturned, 
+                string $invalidPermissionOnException = "Foo"): self
     {
-        $mock = function(string $method) use ($permissions, $permissionsReturned, $count): void {
-            $this->mock->expects($count)->method($method)->with($permissions)->will($this->returnValue($permissionsReturned));
+        $mock = function(string $method) use ($permissions, $permissionsReturned, $invalidPermissionOnException, $count): void {
+            if(null === $permissions && null === $permissionsReturned) {
+                throw new \LogicException(\sprintf("Cannot set Permissions and PermissionsReturned both null for mock resource '%s'",
+                    $this->name));
+            }
+            $return = (null === $permissionsReturned) 
+                            ? $this->throwException(new InvalidResourcePermissionException($this->mock, $invalidPermissionOnException)) 
+                            : $this->returnValue($permissionsReturned);
+            $this->mock->expects($count)->method($method)->with($permissions)->will($return);
         };
         
         return $this->executeMock("getPermissions", $mock, null);

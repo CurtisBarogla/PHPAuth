@@ -67,6 +67,10 @@ class ResouceMockTest extends SecurityTestCase
         
         $resource = ResourceMock::initMock("Foo")->mockGetPermissions($this->once(), ["Foo", "Bar"], $permissions)->finalizeMock();
         $this->assertInstanceOf(MaskCollection::class, $resource->getPermissions(["Foo", "Bar"]));
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetPermissions($this->once(), ["foo", "bar"], null)->finalizeMock();
+        $this->expectException(InvalidResourcePermissionException::class);
+        $resource->getPermissions(["foo", "bar"]);
     }
     
     /**
@@ -291,6 +295,17 @@ class ResouceMockTest extends SecurityTestCase
         $this->expectExceptionMessage("This method 'getName' for mocked resource 'Foo' has been already mocked");
         
         $resource = ResourceMock::initMock("Foo")->mockGetName($this->once())->mockGetName($this->once())->finalizeMock();
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceMock::mockGetPermissions()
+     */
+    public function testExceptionOnInvalidBehaviourDuringMockingGetPermissions(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Cannot set Permissions and PermissionsReturned both null for mock resource 'Foo'");
+        
+        $resource = ResourceMock::initMock("Foo")->mockGetPermissions($this->once(), null, null);
     }
     
 }
