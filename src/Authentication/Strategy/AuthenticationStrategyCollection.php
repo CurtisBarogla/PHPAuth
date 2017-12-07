@@ -32,6 +32,13 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
     private $strategies = [];
     
     /**
+     * If the strategies has been already ordered
+     * 
+     * @var bool
+     */
+    private $ordered = false;
+    
+    /**
      * Add a strategy to the collection.
      * For optimisation reason, you should add strategy that can return SHUNT_ON_SUCCESS or FAIL at higher priority
      * 
@@ -52,7 +59,10 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
     public function process(MutableUserInterface $loadedUser, UserInterface $user): int
     {
         $processed = 0;
-        \krsort($this->strategies);
+        if(!$this->ordered) {
+            \krsort($this->strategies);
+            $this->ordered = true;
+        }
         
         foreach ($this->strategies as $strategies) {
             foreach ($strategies as $strategy) {
@@ -75,6 +85,32 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
         }
         
         return ($processed !== 0) ? AuthenticationStrategyInterface::SUCCESS : AuthenticationStrategyInterface::FAIL;     
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::handle()
+     */
+    public function handle(MutableUserInterface $user): ?MutableUserInterface
+    {
+        if(!$this->ordered) {
+            \krsort($this->strategies);
+            $this->ordered = true;
+        }
+        $handled = 0;
+        foreach ($this->strategies as $strategies) {
+            foreach ($strategies as $strategy) {
+                if(null !== $handledUser = $strategy->handle($user)) {
+                    $user = $handledUser;
+                    $handled++;
+                }
+            }
+        }
+        
+        if($handled !== 0)
+            return $user;
+        
+        return null;
     }
 
 }

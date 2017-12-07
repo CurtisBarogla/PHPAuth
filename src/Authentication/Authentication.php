@@ -96,6 +96,9 @@ class Authentication implements AuthenticationInterface
                     \get_class($this->strategy)));
         }
         
+        if(null !== $handled = $this->strategy->handle($loadedUser))
+            $loadedUser = $handled;
+        
         return UserFactory::createStorableUser($loadedUser);
     }
 

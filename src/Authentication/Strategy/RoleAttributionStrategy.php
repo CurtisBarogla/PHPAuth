@@ -34,24 +34,14 @@ class RoleAttributionStrategy implements AuthenticationStrategyInterface
     private $collection;
     
     /**
-     * If roles are setted into both user (loaded one and given one)
-     * 
-     * @var bool
-     */
-    private $both;
-    
-    /**
      * Initialiaze strategy
      * 
      * @param RoleCollection $collection
      *   RoleCollection
-     * @param bool $both
-     *   Set to true to alter role of both users (false by default)
      */
-    public function __construct(RoleCollection $collection, bool $both = false)
+    public function __construct(RoleCollection $collection)
     {
         $this->collection = $collection;
-        $this->both = $both;
     }
     
     /**
@@ -59,20 +49,27 @@ class RoleAttributionStrategy implements AuthenticationStrategyInterface
      * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */    
     public function process(MutableUserInterface $loadedUser, UserInterface $user): int
+    {        
+        return self::SKIP;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::handle()
+     */
+    public function handle(MutableUserInterface $user): ?MutableUserInterface
     {
         $roles = [];
-        foreach ($loadedUser->getRoles() as $role) {
+        foreach ($user->getRoles() as $role) {
             $roles = \array_merge($this->collection->get($role), $roles);
         }
         $roles = \array_unique($roles);
         
         foreach ($roles as $role) {
-            $loadedUser->addRole($role);
-            if($this->both && $user instanceof MutableUserInterface)
-                $user->addRole($role);
+            $user->addRole($role);
         }
         
-        return self::SKIP;
+        return $user;
     }
 
 }

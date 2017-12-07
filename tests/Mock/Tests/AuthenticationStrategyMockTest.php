@@ -18,6 +18,7 @@ use ZoeTest\Component\Security\Mock\UserMock;
 use Zoe\Component\Security\User\Contracts\MutableUserInterface;
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface;
+use Zoe\Component\Security\User\MutableAclUser;
 
 /**
  * AuthenticationStrategyMock testcase
@@ -42,6 +43,23 @@ class AuthenticationStrategyMockTest extends SecurityTestCase
                                 ->finalizeMock();
         
         $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user1, $user2));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\Mock\AuthenticationStrategyMock::mockHandle()
+     */
+    public function testMockHandle(): void
+    {
+        $userGiven = UserMock::initMock(MutableUserInterface::class, "Foo")->mockGetName($this->once())->finalizeMock();
+        $userReturned = UserMock::initMock(MutableAclUser::class, "Bar")->mockGetName($this->once())->finalizeMock();
+        
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->mockHandle($this->once(), $userGiven, $userReturned)->finalizeMock();
+        
+        $this->assertInstanceOf(MutableAclUser::class, $strategy->handle($userGiven));
+        
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->mockHandle($this->once(), $userGiven, null)->finalizeMock();
+        
+        $this->assertNull($strategy->handle($userGiven));
     }
     
                     /**_____EXCEPTIONS_____**/  

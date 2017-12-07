@@ -26,6 +26,7 @@ use ZoeTest\Component\Security\Mock\UserMock;
 use ZoeTest\Component\Security\Mock\AuthenticationStrategyMock;
 use ZoeTest\Component\Security\Mock\UserLoaderMock;
 use Zoe\Component\Security\User\Contracts\CredentialUserInterface;
+use Zoe\Component\Security\User\MutableAclUser;
 
 /**
  * Authentication testcase
@@ -73,9 +74,11 @@ class AuthenticationTest extends SecurityTestCase
     {
         $userGiven = UserMock::initMock(CredentialUserInterface::class, "Foo")->finalizeMock();
         $userLoaded = UserMock::initMock(MutableUserInterface::class, "Foo")->mockIsRoot($this->once(), true)->finalizeMock();
+        $userHandled = UserMock::initMock(MutableAclUser::class, "Foo")->mockIsRoot($this->once(), true)->finalizeMock();
         $loader = UserLoaderMock::initMock("Foo")->mockLoadUser($this->once(), $userGiven, $userLoaded)->finalizeMock();
         $strategy = AuthenticationStrategyMock::initMock("Foo")
                                         ->mockProcess($this->once(), $userLoaded, $userGiven, AuthenticationStrategyInterface::SUCCESS)
+                                        ->mockHandle($this->once(), $userLoaded, $userHandled)
                                     ->finalizeMock();
         
         $authentication = new Authentication($loader, $strategy);

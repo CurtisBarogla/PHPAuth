@@ -57,4 +57,13 @@ class UsernamePasswordStrategy implements AuthenticationStrategyInterface
         return (true === $this->encoder->compare($user->getPassword(), $loadedUser->getPassword())) ? self::SUCCESS : self::FAIL;
     }
     
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyInterface::handle()
+     */
+    public function handle(MutableUserInterface $user): ?MutableUserInterface
+    {
+        return null;
+    }
+    
 }

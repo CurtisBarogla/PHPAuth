@@ -89,4 +89,17 @@ class UsernamePasswordStrategyTest extends SecurityTestCase
         $this->assertSame(AuthenticationStrategyInterface::SKIP, $strategy->process($user2, $user));
     }
     
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\UsernamePasswordStrategy::handle()
+     */
+    public function testHandle(): void
+    {
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $encoder = PasswordEncoderMock::initMock()->finalizeMock();
+        
+        $strategy = new UsernamePasswordStrategy($encoder);
+        
+        $this->assertNull($strategy->handle($user));
+    }
+    
 }

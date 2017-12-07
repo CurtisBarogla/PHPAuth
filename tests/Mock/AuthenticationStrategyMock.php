@@ -105,6 +105,28 @@ class AuthenticationStrategyMock extends Mock
     }
     
     /**
+     * Mock handle()
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param MutableUserInterface $userGiven
+     *   Mocked user given to the handle process
+     * @param MutableUserInterface|null $userReturned
+     *   Mocked user handled
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockHandle(PhpUnitCallMethod $count, MutableUserInterface $userGiven, ?MutableUserInterface $userReturned): self
+    {
+        $mock = function(string $method) use ($userGiven, $userReturned, $count): void {
+            $this->mock->expects($count)->method($method)->with($userGiven)->will($this->returnValue($userReturned));   
+        };
+        
+        return $this->executeMock("handle", $mock, null);
+    }
+    
+    /**
      * {@inheritDoc}
      * @see \ZoeTest\Component\Security\Mock\Mock::getMessageForExceptionIfMocked()
      */

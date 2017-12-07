@@ -65,4 +65,16 @@ interface AuthenticationStrategyInterface
      */
     public function process(MutableUserInterface $loadedUser, UserInterface $user): int;
     
+    /**
+     * Handle the user after the authentication process.
+     * Be careful when generating a new instance of user to not loose informations from a previous strategy process
+     * 
+     * @param MutableUserInterface $user
+     *   This user is considered authenticated
+     * 
+     * @return MutableUserInterface|null
+     *   Can return a (new) version of a mutable user or null to skip this process
+     */
+    public function handle(MutableUserInterface $user): ?MutableUserInterface;
+    
 }

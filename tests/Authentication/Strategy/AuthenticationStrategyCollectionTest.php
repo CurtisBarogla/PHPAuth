@@ -19,6 +19,7 @@ use Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyCollect
 use Zoe\Component\Security\User\Contracts\UserInterface;
 use ZoeTest\Component\Security\Mock\AuthenticationStrategyMock;
 use ZoeTest\Component\Security\Mock\UserMock;
+use Zoe\Component\Security\User\MutableAclUser;
 
 
 /**
@@ -137,6 +138,36 @@ class AuthenticationStrategyCollectionTest extends SecurityTestCase
         $collection->add($strategy2);
         
         $this->assertSame(AuthenticationStrategyInterface::FAIL, $collection->process($user, $user2));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyCollection::handle()
+     */
+    public function testHandleWhenNull(): void
+    {
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->mockHandle($this->once(), $user, null)->finalizeMock();
+        
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy);
+        
+        $this->assertNull($collection->handle($user));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Authentication\Strategy\AuthenticationStrategyCollection::handle()
+     */
+    public function testHandle(): void
+    {
+        $user = UserMock::initMock(MutableUserInterface::class, "Foo")->finalizeMock();
+        $userReturn = UserMock::initMock(MutableAclUser::class, "Foo")->finalizeMock();
+        
+        $strategy = AuthenticationStrategyMock::initMock("Foo")->mockHandle($this->once(), $user, $userReturn)->finalizeMock();
+        
+        $collection = new AuthenticationStrategyCollection();
+        $collection->add($strategy);
+        
+        $this->assertInstanceOf(MutableAclUser::class, $collection->handle($user));
     }
     
                     /**_____EXCEPTIONS_____**/
