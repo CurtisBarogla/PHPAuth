@@ -12,9 +12,9 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl\Resource\Loader;
 
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Psr\SimpleCache\CacheInterface;
 use Zoe\Component\Security\Acl\Resource\Resource;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 
 /**
  * Wrap a loader over a PSR-16 Cache implementation
@@ -22,7 +22,7 @@ use Zoe\Component\Security\Acl\Resource\Resource;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class CacheWrapperResourceLoader implements ResourceLoaderInterface
+class CacheWrapperResourceLoader extends AbstractResourceLoader
 {
     
     /**
@@ -38,13 +38,6 @@ class CacheWrapperResourceLoader implements ResourceLoaderInterface
      * @var CacheInterface
      */
     private $cache;
-    
-    /**
-     * Resources hitted from cache
-     * 
-     * @var ResourceInterface[]
-     */
-    private $loaded = [];
     
     /**
      * Prefix used to register cached resource
@@ -66,25 +59,6 @@ class CacheWrapperResourceLoader implements ResourceLoaderInterface
         $this->loader = $loader;
         $this->cache = $cache;
     }
-    
-    /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\Acl\Resource\Loader\ResourceLoaderInterface::loadResource()
-     */
-    public function loadResource(string $name): ResourceInterface
-    {
-        if(null === $resource = $this->cache->get(self::CACHE_RESOURCE_PREFIX."_{$name}")) {
-            $resource = $this->loader->loadResource($name);
-            
-            $this->cache->set(self::CACHE_RESOURCE_PREFIX."_{$name}", \json_encode($resource));
-            
-            return $resource;
-        } else {
-            return (!isset($this->loaded[$name])) 
-                        ? $this->loaded[$name] = Resource::createResourceFromJson($resource) 
-                        : $this->loaded[$name];
-        }
-    }
 
     /**
      * {@inheritDoc}
@@ -92,10 +66,10 @@ class CacheWrapperResourceLoader implements ResourceLoaderInterface
      */
     public function register(): array
     {
-        if(null === $resources = $this->cache->get(self::CACHE_RESOURCE_PREFIX."_Names")) {
+        if(null === $resources = $this->cache->get(self::CACHE_RESOURCE_PREFIX."_Cached_Map_Names")) {
             $resources = $this->loader->register();
             
-            $this->cache->set(self::CACHE_RESOURCE_PREFIX."_Names", \json_encode($resources));
+            $this->cache->set(self::CACHE_RESOURCE_PREFIX."_Cached_Map_Names", \json_encode($resources));
             
             return $resources;
         } else {
@@ -115,9 +89,26 @@ class CacheWrapperResourceLoader implements ResourceLoaderInterface
         $resources = \array_map(function(string $name): string {
             return self::CACHE_RESOURCE_PREFIX."_{$name}";
         }, $this->loader->register());
-        $resources[] = self::CACHE_RESOURCE_PREFIX."_Names";
+        $resources[] = self::CACHE_RESOURCE_PREFIX."_Cached_Map_Names";
         
         return $this->cache->deleteMultiple($resources);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\Loader\AbstractResourceLoader::doLoadResource()
+     */
+    protected function doLoadResource(string $resource): ?ResourceInterface
+    {
+        if(null === $cache = $this->cache->get(self::CACHE_RESOURCE_PREFIX."_{$resource}")) {
+            $resourceInstance = $this->loader->loadResource($resource);
+            
+            $this->cache->set(self::CACHE_RESOURCE_PREFIX."_{$resource}", \json_encode($resourceInstance));
+            
+            return $resourceInstance;
+        } else {
+            return Resource::createResourceFromJson($cache);
+        }
     }
 
 }

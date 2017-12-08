@@ -57,5 +57,4 @@ class MutableAclUser extends MutableUser implements AclUserInterface
         return $this->attributes[AclUserInterface::ACL_ATTRIBUTES_IDENTIFIER];
     }
 
-
 }

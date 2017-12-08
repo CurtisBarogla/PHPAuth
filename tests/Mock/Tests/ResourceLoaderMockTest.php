@@ -46,6 +46,30 @@ class ResourceLoaderMockTest extends SecurityTestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock::mockLoadResource_consecutive()
+     */
+    public function testMockLoadResource_consecutive(): void
+    {
+        $resourceFoo = ResourceMock::initMock("Foo")->mockGetName($this->exactly(2))->finalizeMock();
+        $resourceBar = ResourceMock::initMock("Bar")->mockGetName($this->exactly(2))->finalizeMock();
+        
+        $loader = ResourceLoaderMock::initMock()
+                                ->mockLoadResource_consecutive(
+                                    $this->exactly(2), 
+                                    ["Foo" => $resourceFoo, "Bar" => $resourceBar])
+                            ->finalizeMock();
+        
+        $this->assertSame("Foo", $loader->loadResource("Foo")->getName());
+        $this->assertSame("Bar", $loader->loadResource("Bar")->getName());
+        
+        $loader = ResourceLoaderMock::initMock()
+                                ->mockLoadResource_consecutive($this->once(), ["Foo" => null])
+                            ->finalizeMock();
+        $this->expectException(ResourceNotFoundException::class);
+        $loader->loadResource("Foo");
+    }   
+    
+    /**
      * @see \ZoeTest\Component\Security\Mock\ResourceLoaderMock::mockRegister()
      */
     public function testMockRegister(): void

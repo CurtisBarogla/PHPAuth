@@ -91,6 +91,33 @@ class ResourceLoaderMock extends Mock
     }
     
     /**
+     * Mock loadResource() with consecutive calls
+     *
+     * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count
+     *   Number of time called
+     * @param array $resources
+     *   Array indexed by resource name and setted with a mocked resource or null to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockLoadResource_consecutive(PhpUnitCallMethod $count, array $resources): self
+    {
+        $mock = function(string $method) use ($resources, $count): void {
+            $args = [];
+            $returned = [];
+            foreach ($resources as $name => $resource) {
+                $returned[] = (null === $resource) ? $this->throwException(new ResourceNotFoundException()) : $resource;
+                $args[][] = $name;
+            }
+            
+            $this->mock->expects($count)->method($method)->withConsecutive(...$args)->willReturnOnConsecutiveCalls(...$returned);
+        };
+        
+        return $this->executeMock("loadResource", $mock, null);
+    }
+    
+    /**
      * Mock register()
      *
      * @param \PHPUnit_Framework_MockObject_Matcher_Invocation $count

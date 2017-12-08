@@ -12,10 +12,9 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl\Resource\Loader;
 
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\Exception\ResourceNotFoundException;
-use Zoe\Component\Security\Acl\Resource\Resource;
 use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Acl\Resource\Resource;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 
 /**
  * Load resource from an array defining all resources
@@ -23,7 +22,7 @@ use Zoe\Component\Security\Acl\Entity\Entity;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class NativeResourceLoader implements ResourceLoaderInterface
+class NativeResourceLoader extends AbstractResourceLoader
 {
     
     /**
@@ -46,41 +45,40 @@ class NativeResourceLoader implements ResourceLoaderInterface
     
     /**
      * {@inheritDoc}
-     * @see \Zoe\Component\Security\Acl\Resource\Loader\ResourceLoaderInterface::loadResource()
-     */
-    public function loadResource(string $name): ResourceInterface
-    {
-        if(!isset($this->resources[$name]))
-            throw new ResourceNotFoundException(\sprintf("This resource '%s' cannot be loaded",
-                $name));
-            
-        $behaviour = ($this->resources[$name]["behaviour"] === "whitelist") ? ResourceInterface::WHITELIST_BEHAVIOUR : ResourceInterface::BLACKLIST_BEHAVIOUR;
-        $resource = new Resource($name, $behaviour);
-        if(isset($this->resources[$name]["permissions"])) {
-            foreach ($this->resources[$name]["permissions"] as $permission) {
-                $resource->addPermission($permission);
-            }
-        }
-        if(isset($this->resources[$name]["entities"])) {
-            foreach ($this->resources[$name]["entities"] as $name => $entityValues) {
-                $entity = new Entity($name, $entityValues["processor"] ?? null);
-                foreach ($entityValues["values"] as $value => $permissions) {
-                    $entity->add($value, $permissions);
-                }
-                $resource->addEntity($entity);
-            }
-        }
-        
-        return $resource;
-    }
-    
-    /**
-     * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\Resource\Loader\ResourceLoaderInterface::register()
      */
     public function register(): array
     {
         return \array_keys($this->resources);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\Loader\AbstractResourceLoader::doLoadResource()
+     */
+    protected function doLoadResource(string $resource): ?ResourceInterface
+    {
+        if(!isset($this->resources[$resource]))
+            return null;
+            
+        $behaviour = ($this->resources[$resource]["behaviour"] === "whitelist") ? ResourceInterface::WHITELIST_BEHAVIOUR : ResourceInterface::BLACKLIST_BEHAVIOUR;
+        $resourceInstance = new Resource($resource, $behaviour);
+        if(isset($this->resources[$resource]["permissions"])) {
+            foreach ($this->resources[$resource]["permissions"] as $permission) {
+                $resourceInstance->addPermission($permission);
+            }
+        }
+        if(isset($this->resources[$resource]["entities"])) {
+            foreach ($this->resources[$resource]["entities"] as $name => $entityValues) {
+                $entity = new Entity($name, $entityValues["processor"] ?? null);
+                foreach ($entityValues["values"] as $value => $permissions) {
+                    $entity->add($value, $permissions);
+                }
+                $resourceInstance->addEntity($entity);
+            }
+        }
+        
+        return $resourceInstance;
     }
 
 }
