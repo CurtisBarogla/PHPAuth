@@ -22,7 +22,7 @@ use Zoe\Component\Security\User\Contracts\AclUserInterface;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class StorableAclUser extends StorableUser implements AclUserInterface, \JsonSerializable
+class StorableAclUser extends StorableUser implements AclUserInterface
 {
     
     use AclUserTrait;

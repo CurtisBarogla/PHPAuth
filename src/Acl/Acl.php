@@ -19,6 +19,7 @@ use Zoe\Component\Security\User\Contracts\AclUserInterface;
 use Zoe\Component\Security\Exception\InvalidResourcePermissionException;
 use Zoe\Component\Security\Exception\ResourceNotFoundException;
 use Zoe\Component\Security\Exception\RuntimeException;
+use Zoe\Component\Security\User\StorableAclUser;
 
 /**
  * Basic acl implementation
@@ -35,6 +36,13 @@ class Acl implements AclInterface
      * @var ResourceLoaderInterface
      */
     private $loader;
+    
+    /**
+     * Permissions values already processed 
+     * 
+     * @var int[]
+     */
+    private $permissions = [];
     
     /**
      * Entity processors
@@ -76,8 +84,7 @@ class Acl implements AclInterface
      */
     public function executeProcessables(AclUserInterface $user): void
     {
-        foreach ($this->loader->register() as $resourceName) {
-            $resource = $this->loader->loadResource($resourceName);
+        foreach ($this->getResources() as $name => $resource) {
             $entities = $resource->getEntities();
             if(!empty($entities)) {
                 foreach ($entities as $entity) {
@@ -87,7 +94,7 @@ class Acl implements AclInterface
                             throw new RuntimeException(\sprintf("This processor '%s' for entity '%s' on resource '%s' is not registered into the acl",
                                 $processor,
                                 $entity->getName(),
-                                $resourceName));
+                                $name));
                         }
                         $this->processors[$processor]->processUser($user, $resource, $entity);
                     }
@@ -104,6 +111,21 @@ class Acl implements AclInterface
     {
         return $this->loader->loadResource($resource);
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\AclInterface::getResources()
+     */
+    public function getResources(): array
+    {
+        $resources = [];
+        foreach ($this->loader->register() as $resource) {
+            $loaded = $this->getResource($resource);
+            $resources[$loaded->getName()] = $loaded;
+        }
+        
+        return $resources;
+    }
 
     /**
      * {@inheritDoc}
@@ -115,13 +137,26 @@ class Acl implements AclInterface
             return true;
         
         try {
-            $resourceLoaded = $this->loader->loadResource($resource);
-            $permissions = $resourceLoaded->getPermissions($permissions)->total("PERMISSIONS")->getValue();
-            
-            if(isset($this->binded[$resourceLoaded->getName()]))
-                $this->binded[$resourceLoaded->getName()]->_onBind($user, $resourceLoaded);
+            $resourceLoaded = $this->getResource($resource);
+            $permissionsNormalized = \implode(", ", $permissions);
+            $name = $resourceLoaded->getName();
+            if(isset($this->permissions[$name][$permissionsNormalized])) {
+                $permissions = $this->permissions[$name][$permissionsNormalized];
+            } else {
+                $permissions = $resourceLoaded->getPermissions($permissions)->total("PERMISSIONS")->getValue();
+                $this->permissions[$name][$permissionsNormalized] = $permissions;
+            }
 
-            return (bool)($user->getPermission($resource)->getValue() & $permissions);
+            if(isset($this->binded[$name])) {
+                $cloned = new StorableAclUser($user->getName());
+
+                $this->binded[$name]->_onBind($cloned, $resourceLoaded);
+            }
+            
+            if(isset($cloned))
+                return (bool)($cloned->getPermission($resource)->getValue() & $permissions);
+            else 
+                return (bool)($user->getPermission($resource)->getValue() & $permissions);
         } catch (ResourceNotFoundException $e) {
             return false;
         } catch (InvalidResourcePermissionException $e) {

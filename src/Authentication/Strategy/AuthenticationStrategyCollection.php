@@ -97,17 +97,17 @@ class AuthenticationStrategyCollection implements AuthenticationStrategyInterfac
             \krsort($this->strategies);
             $this->ordered = true;
         }
-        $handled = 0;
+        $handled = false;
         foreach ($this->strategies as $strategies) {
             foreach ($strategies as $strategy) {
                 if(null !== $handledUser = $strategy->handle($user)) {
                     $user = $handledUser;
-                    $handled++;
+                    $handled = true;
                 }
             }
         }
         
-        if($handled !== 0)
+        if($handled)
             return $user;
         
         return null;

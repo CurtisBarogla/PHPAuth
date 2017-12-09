@@ -62,6 +62,14 @@ interface AclInterface
     public function getResource(string $resource): ResourceInterface;
     
     /**
+     * Get all resources 
+     * 
+     * @return array
+     *   All resources setted in the acl
+     */
+    public function getResources(): array;
+    
+    /**
      * Check if a user has the permissions to do actions over a resource
      * 
      * @param AclUserInterface $user

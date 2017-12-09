@@ -94,19 +94,41 @@ class AclTest extends SecurityTestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\Acl::getResources()
+     */
+    public function testGetResources(): void
+    {
+        $resourceFoo = ResourceMock::initMock("Foo")
+                            ->mockGetName($this->exactly(2))
+                        ->finalizeMock();
+        $resourceBar = ResourceMock::initMock("Bar")
+                            ->mockGetName($this->exactly(2))
+                        ->finalizeMock();
+        $loader = ResourceLoaderMock::initMock()
+                            ->mockRegister($this->once(), ["Foo", "Bar"])
+                            ->mockLoadResource_consecutive($this->exactly(2), ["Foo" => $resourceFoo, "Bar" => $resourceBar])
+                        ->finalizeMock();
+        
+        $acl = new Acl($loader);
+        $resources = $acl->getResources();
+        $this->assertSame("Foo", $resources["Foo"]->getName());
+        $this->assertSame("Bar", $resources["Bar"]->getName());
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Acl::isGranted()
      */
     public function testIsGranted(): void
     {
         $mask = MaskMock::initMock("PERMISSIONS")
-                            ->mockGetValue($this->exactly(3), 4)
+                            ->mockGetValue($this->once(), 4)
                         ->finalizeMock();    
         $permissions = MaskCollectionMock::initMock()
-                            ->mockTotal($this->exactly(3), "PERMISSIONS", $mask)
+                            ->mockTotal($this->once(), "PERMISSIONS", $mask)
                         ->finalizeMock();
         $resource = ResourceMock::initMock("Foo")
-                            ->mockGetName($this->exactly(4))
-                            ->mockGetPermissions($this->exactly(3), ["foo", "bar"], $permissions)
+                            ->mockGetName($this->exactly(3))
+                            ->mockGetPermissions($this->once(), ["foo", "bar"], $permissions)
                         ->finalizeMock();
         $maskUser = MaskMock::initMock("Foo")
                             ->mockGetIdentifier($this->once())
@@ -219,6 +241,7 @@ class AclTest extends SecurityTestCase
                     ->mockGetProcessor($this->once(), "FooProcessor")
                 ->finalizeMock();
         $resource = ResourceMock::initMock("FooResource")
+                    ->mockGetName($this->once())
                     ->mockGetEntities($this->once(), [$entity])
                 ->finalizeMock();
         $processor = EntityProcessorMock::initMock("FooProcessor")
