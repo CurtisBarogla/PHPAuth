@@ -36,7 +36,7 @@
 	"require-dev" : {
 		"barogla/internal" : "dev-master"
 	},
-	"suggest": {
-		"psr/simple-cache": "Psr-16 Cache Implementation to use ACL CacheWrapperResourceLoader"
+	"suggest" : {
+		"psr/simple-cache" : "Psr-16 Cache Implementation to use ACL CacheWrapperResourceLoader"
 	}
 }
