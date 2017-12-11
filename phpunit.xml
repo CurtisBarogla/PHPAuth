@@ -24,6 +24,7 @@
             <directory>./tests/MockGeneration</directory>
             <exclude>
             	<directory>./tests/MockGeneration/Tests</directory>
+            	<file>./tests/MockGeneration/MockGeneration.php</file>
            	</exclude>
         </whitelist>
     </filter>
