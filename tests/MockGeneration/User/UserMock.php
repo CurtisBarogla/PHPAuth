@@ -16,6 +16,9 @@ use ZoeTest\Component\Security\MockGeneration\MockGeneration;
 use \PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
+use Zoe\Component\Security\User\AuthenticationUserInterface;
+use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
+use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
 
 /**
  * Responsible to mock user objects
@@ -32,7 +35,8 @@ class UserMock extends MockGeneration
      * @var array
      */
     private const USER_TYPES = [
-        UserInterface::class
+        UserInterface::class,
+        AuthenticationUserInterface::class
     ];
     
     /**
@@ -351,6 +355,453 @@ class UserMock extends MockGeneration
         };
         
         return $this->executeMock("hasRole", $mock);
+    }
+    
+    // AuthenticationUser
+    
+    /**
+     * Mock changeName()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $name
+     *   New name
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockChangeName(MethodCount $count, string $name): self
+    {
+        $method = "changeName";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($name, $count): void {
+            $this->mock->expects($count)->method($method)->with($name)->will($this->returnValue(null));   
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getPassword()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string|null $password
+     *   Password returned. Can be null
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetPassword(MethodCount $count, ?string $password): self
+    {
+        $method = "getPassword";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($password, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($password));   
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getPassword() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string ...$password
+     *   Variadic password returned on each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetPassword_consecutive(MethodCount $count, ?string ...$passwords): self
+    {
+        $method = "getPassword";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($passwords, $count): void {
+            $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$passwords);   
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock addRole()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $role
+     *   Role to add
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddRole(MethodCount $count, string $role): self
+    {
+        $method = "addRole";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($role, $count): void {
+            $this->mock->expects($count)->method($method)->with($role)->will($this->returnValue(null));   
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock addRole() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $roles
+     *   Arrays of array containing all params for each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddRole_consecutive(MethodCount $count, array $roles): self
+    {
+        $method = "addRole";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($roles, $count): void {
+            $this->mock->expects($count)->method($method)->withConsecutive(...$roles)->willReturnOnConsecutiveCalls($this->returnValue(null));  
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deleteRole()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $role
+     *   Role to delete
+     * @param bool $exception
+     *   Set to true to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteRole(MethodCount $count, string $role, bool $exception = false): self
+    {
+        $method = "deleteRole";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($role, $exception, $count): void {
+            $return = $this->stubThrowableOnBool(new InvalidUserRoleException($this->mock, $role), [$this->returnValue(null)], $exception);
+            $this->mock->expects($count)->method($method)->with($role)->will($return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deleteRole() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $roles
+     *   Arrays of array containing all params for each call
+     * @param bool ...$exceptions
+     *   True or false to throw exception for each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteRole_consecutive(MethodCount $count, array $roles, bool ...$exceptions): self
+    {
+        $method = "deleteRole";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($roles, $exceptions, $count): void {
+            $values = \array_fill(0, \count($roles), $this->returnValue(null));
+            $return = $this->stubThrowableOnBool(new InvalidUserRoleException($this->mock, "Foo"), $values, ...$exceptions);
+            $this->mock->expects($count)->method($method)
+                    ->withConsecutive(...$roles)
+                    ->willReturnOnConsecutiveCalls(...$return);   
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock addCredential()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $credential
+     *   Credential name
+     * @param mixed $value
+     *   Credential value
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddCredential(MethodCount $count, string $credential, $value): self
+    {
+        $method = "addCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credential, $value, $count): void {
+            $this->mock->expects($count)->method($method)->with($credential, $value)->will($this->returnValue(null));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock addCredential() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $roles
+     *   Arrays of array containing all params for each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddCredential_consecutive(MethodCount $count, array $credentials): self
+    {
+        $method = "addCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $count): void {
+            $this->mock->expects($count)->method($method)->withConsecutive(...$credentials)->willReturnOnConsecutiveCalls($this->returnValue(null));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getCredentials()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $credentials
+     *   Credentials returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetCredentials(MethodCount $count, array $credentials): self
+    {
+        $method = "getCredentials";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($credentials));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getCredentials() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array ...$credentials
+     *   Variadic arrays of credentials returned on each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetCredentials_consecutive(MethodCount $count, array ...$credentials): self
+    {
+        $method = "getCredentials";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $count): void {
+            $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$credentials);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getCredential()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $credential
+     *   Credential name
+     * @param mixed|\Throwable $value
+     *   Credential value. Set to a \Throwable to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetCredential(MethodCount $count, string $credential, $value): self
+    {
+        $method = "getCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credential, $value, $count): void {
+            $return = $this->stubThrowableOnValue(new InvalidUserCredentialException($this->mock, $credential), $value);
+            $this->mock->expects($count)->method($method)->with($credential)->will($return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getCredential() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $credentials
+     *   Arrays of array containing all params for each call
+     * @param mixed|\Throwable ...$values
+     *   Variadic values to return on each call. Set to a \Throwable to simualte exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetCredential_consecutive(MethodCount $count, array $credentials, ...$values): self
+    {
+        $method = "getCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $values, $count): void {
+            $return = $this->stubThrowableOnValue(new InvalidUserCredentialException($this->mock, "Foo"), ...$values);
+            $this->mock->expects($count)->method($method)->withConsecutive(...$credentials)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock hasCredential()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $credential
+     *   Credential name
+     * @param bool $result
+     *   Result
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockHasCredential(MethodCount $count, string $credential, bool $result): self
+    {
+        $method = "hasCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credential, $result, $count): void {
+            $this->mock->expects($count)->method($method)->with($credential)->will($this->returnValue($result));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock hasCredential() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $credentials
+     *   Arrays of array containing all params for each call
+     * @param bool ...$results
+     *   Variadic bool. Result on each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockHasCredential_consecutive(MethodCount $count, array $credentials, bool ...$results): self
+    {
+        $method = "hasCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $results, $count): void {
+            $this->mock->expects($count)->method($method)->withConsecutive(...$credentials)->willReturnOnConsecutiveCalls(...$results);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deleteCredential()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $credential
+     *   Credential name
+     * @param bool $exception
+     *   Set to true to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteCredential(MethodCount $count, string $credential, bool $exception): self
+    {
+        $method = "deleteCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credential, $exception, $count): void {
+            $return = $this->stubThrowableOnBool(
+                                new InvalidUserCredentialException($this->mock, $credential), 
+                                [$this->returnValue(null)], 
+                                $exception);
+            $this->mock->expects($count)->method($method)->with($credential)->will($return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deleteCredential() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $credentials
+     *   Arrays of array containing all params for each call
+     * @param bool ...$exceptions
+     *   Variadic bool. Set to true to simulate exceptions for the current call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteCredential_consecutive(MethodCount $count, array $credentials, bool ...$exceptions): self
+    {
+        $method = "deleteCredential";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($credentials, $exceptions, $count): void {
+            $values = \array_fill(0, \count($credentials), $this->returnValue(null));
+            $return = $this->stubThrowableOnBool(new InvalidUserCredentialException($this->mock, "Foo"), $values, ...$exceptions);
+            $this->mock->expects($count)->method($method)->withConsecutive(...$credentials)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deleteCredentials()
+     *
+     * @param MethodCount $count
+     *   Called count
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteCredentials(MethodCount $count): self
+    {
+        $method = "deleteCredentials";
+        $this->checkUser([AuthenticationUserInterface::class], $method);
+        $mock = function(string $method) use ($count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue(null));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Check if a user is valid for a mocked method
+     * 
+     * @param array $acceptedUsers
+     *   Accepted users for mocking this method
+     * @param string $method
+     *   Mocked method name
+     *  
+     * @throws \LogicException
+     *   If the method cannot be mocked for this user type
+     */
+    private function checkUser(array $acceptedUsers, string $method): void
+    {
+        if(!\in_array($this->objectName, $acceptedUsers))
+            throw new \LogicException(\sprintf("This user type '%s' for this method '%s' is not valid. Use : '%s'",
+                $this->objectName,
+                $method,
+                \implode(", ", $acceptedUsers)));
     }
     
 }

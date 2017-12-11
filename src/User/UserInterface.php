@@ -56,6 +56,9 @@ interface UserInterface
      * @param string $attribute
      *   Attribute name
      *   
+     * @return mixed
+     *   Attribute value
+     *   
      * @throws InvalidUserAttributeException
      *   When the given attribute is not setted
      */
@@ -85,7 +88,9 @@ interface UserInterface
      * 
      * @param string $role
      *   True if the user has the request role. False otherwise
+     *   
      * @return bool
+     *   True if the user has the requested role. False otherwise
      */
     public function hasRole(string $role): bool;
     

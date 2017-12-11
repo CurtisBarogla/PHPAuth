@@ -16,6 +16,9 @@ use PHPUnit\Framework\TestCase;
 use ZoeTest\Component\Security\MockGeneration\User\UserMock;
 use Zoe\Component\Security\User\UserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
+use Zoe\Component\Security\User\AuthenticationUserInterface;
+use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
+use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
 
 /**
  * UserMock testcase
@@ -221,6 +224,294 @@ class UserMockTest extends TestCase
         $this->assertTrue($user->hasRole("Foo"));
         $this->assertFalse($user->hasRole("Bar"));
         $this->assertTrue($user->hasRole("Moz"));
+    }
+    
+    // AuthenticationUser
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockChangeName()
+     */
+    public function testMockChangeName(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockChangeName($this->once(), "Foo")->finalizeMock();
+        
+        $this->assertNull($user->changeName("Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetPassword()
+     */
+    public function testMockGetPassword(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockGetPassword($this->once(), "Foo")->finalizeMock();
+        
+        $this->assertSame("Foo", $user->getPassword());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetPassword_consecutive()
+     */
+    public function testMockGetPassword_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockGetPassword_consecutive($this->exactly(2), "Foo", null)->finalizeMock();
+        
+        $this->assertSame("Foo", $user->getPassword());
+        $this->assertNull($user->getPassword());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAddRole()
+     */
+    public function testMockAddRole(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockAddRole($this->once(), "Foo")->finalizeMock();
+        
+        $this->assertNull($user->addRole("Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAddRole_consecutive()
+     */
+    public function testMockAddRole_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockAddRole_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]])
+                        ->finalizeMock();
+        
+        $this->assertNull($user->addRole("Foo"));
+        $this->assertNull($user->addRole("Bar"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteRole()
+     */
+    public function testMockDeleteRole(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockDeleteRole($this->once(), "Foo")->finalizeMock();
+        
+        $this->assertNull($user->deleteRole("Foo"));
+        
+        $this->expectException(InvalidUserRoleException::class);
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockDeleteRole($this->once(), "Foo", true)->finalizeMock();
+        $user->deleteRole("Foo");
+    }
+        
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteRole_consecutive()
+     */
+    public function testMockDelete_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockDeleteRole_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                false, false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deleteRole("Foo"));
+        $this->assertNull($user->deleteRole("Bar"));
+        
+        $this->expectException(InvalidUserRoleException::class);
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockDeleteRole_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                false, true)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deleteRole("Foo"));
+        $user->deleteRole("Bar");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAddCredential()
+     */
+    public function testMockAddCredential(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockAddCredential($this->once(), "Foo", "Bar")->finalizeMock();
+        
+        $this->assertNull($user->addCredential("Foo", "Bar"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAddCredential_consecutive()
+     */
+    public function testMockAddCredential_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockAddCredential_consecutive(
+                                $this->exactly(2), 
+                                [["Foo", "Bar"], ["Bar", "Foo"]])
+                        ->finalizeMock();
+        
+        $this->assertNull($user->addCredential("Foo", "Bar"));
+        $this->assertNull($user->addCredential("Bar", "Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetCredentials()
+     */
+    public function testMockGetCredentials(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockGetCredentials($this->once(), ["Foo" => "Bar", "Bar" => "Foo"])->finalizeMock();
+        
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $user->getCredentials());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetCredentials_consecutive()
+     */
+    public function testMockGetCredentials_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockGetCredentials_consecutive(
+                                $this->exactly(2), 
+                                ["Foo" => "Bar", "Bar" => "Foo"],
+                                ["Foo" => "Bar"])
+                        ->finalizeMock();
+        
+        $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $user->getCredentials());
+        $this->assertSame(["Foo" => "Bar"], $user->getCredentials());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetCredential()
+     */
+    public function testMockGetCredential(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockGetCredential($this->once(), "Foo", "Bar")->finalizeMock();
+        
+        $this->assertSame("Bar", $user->getCredential("Foo"));
+        
+        $this->expectException(InvalidUserCredentialException::class);
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockGetCredential($this->once(), "Foo", new \Exception())->finalizeMock();
+        
+        $user->getCredential("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetCredential_consecutive()
+     */
+    public function testMockGetCredential_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockGetCredential_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                "Bar", "Foo")
+                        ->finalizeMock();
+        
+        $this->assertSame("Bar", $user->getCredential("Foo"));
+        $this->assertSame("Foo", $user->getCredential("Bar"));
+        
+        $this->expectException(InvalidUserCredentialException::class);
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockGetCredential_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                "Bar", new \Exception())
+                        ->finalizeMock();
+        
+        $this->assertSame("Bar", $user->getCredential("Foo"));
+        $user->getCredential("Bar");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockHasCredential()
+     */
+    public function testMockHasCredential(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockHasCredential($this->once(), "Foo", true)->finalizeMock();
+        
+        $this->assertTrue($user->hasCredential("Foo"));
+        
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockHasCredential($this->once(), "Foo", false)->finalizeMock();
+        
+        $this->assertFalse($user->hasCredential("Foo"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockHasCredential_consecutive()
+     */
+    public function testMockHasCredential_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockHasCredential_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                true, false)
+                        ->finalizeMock();
+        
+        $this->assertTrue($user->hasCredential("Foo"));
+        $this->assertFalse($user->hasCredential("Bar"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteCredential()
+     */
+    public function testMockDeleteCredential(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockDeleteCredential($this->once(), "Foo", false)->finalizeMock();
+        
+        $this->assertNull($user->deleteCredential("Foo"));
+        
+        $this->expectException(InvalidUserCredentialException::class);
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockDeleteCredential($this->once(), "Foo", true)->finalizeMock();
+        
+        $user->deleteCredential("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteCredential_consecutive()
+     */
+    public function testMockDeleteCredential_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)
+                            ->mockDeleteCredential_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                false, false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deleteCredential("Foo"));
+        $this->assertNull($user->deleteCredential("Bar"));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteCredentials()
+     */
+    public function testMockDeleteCredentials(): void
+    {
+        $user = UserMock::init("Foo", AuthenticationUserInterface::class)->mockDeleteCredentials($this->once())->finalizeMock();
+        
+        $this->assertNull($user->deleteCredentials());
+    }
+    
+    
+                    /**_____EXCEPTIONS_____**/
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::init()
+     */
+    public function testExceptionInitWhenUserInvalid(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Given user type 'Bar' is invalid. Use : 'Zoe\Component\Security\User\UserInterface | Zoe\Component\Security\User\AuthenticationUserInterface'");
+        
+        $user = UserMock::init("Foo", "Bar");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock
+     */
+    public function testExceptionWhenUserTypeInvalidForMethodNeededAnAuthenticationUser(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("This user type 'Zoe\Component\Security\User\UserInterface' for this method 'getPassword' is not valid. Use : 'Zoe\Component\Security\User\AuthenticationUserInterface'");
+        
+        $user = UserMock::init("Foo", UserInterface::class)->mockGetPassword($this->once(), "Foo")->finalizeMock();
     }
     
 }
