@@ -75,7 +75,7 @@ abstract class MockGeneration extends TestCase
         if(empty($argsConstructor))
             $mock->disableOriginalConstructor();
         else
-            $mock->setConstructorArgs($argsConstructor);
+            $mock->setConstructorArgs(...$argsConstructor);
         
         $this->mock = $mock->getMock();
         $this->mockId = $mockId;
@@ -109,10 +109,33 @@ abstract class MockGeneration extends TestCase
     
     /**
      * Stub a value to simulate an exception
+     *
+     * @param \Throwable $exception
+     *   Exception thrown when the value is null
+     * @param mixed ...$values
+     *   Stubs to return. Set the value to null to simulate an exception or the current value will be returned
+     *
+     * @return \PHPUnit_Framework_MockObject_Stub|array[\PHPUnit_Framework_MockObject_Stub]
+     *   Stub value
+     */
+    protected function stubThrowableOnNull(\Throwable $exception, ...$values)
+    {
+        if(\count($values) === 1) {
+            return (null === $values[0]) ? $this->throwException($exception) : $this->returnValue($values[0]);
+        } else {
+            foreach ($values as $index => $value)
+                $returned[$index] = (null === $value) ? $this->throwException($exception) : $this->returnValue($value);
+                
+            return $returned;
+        }
+    }
+    
+    /**
+     * Stub a value to simulate an exception
      * 
-     * @param \Throwable $exceptionOnNull
+     * @param \Throwable $exception
      *   Exception thrown when the value is a throwable
-     * @param mixed ...$value
+     * @param mixed ...$values
      *   Stubs to return. Set the value to a throwable to simulate an exception or the current value will be returned
      * 
      * @return \PHPUnit_Framework_MockObject_Stub|array[\PHPUnit_Framework_MockObject_Stub]
@@ -124,16 +147,16 @@ abstract class MockGeneration extends TestCase
             return ($values[0] instanceof \Throwable) ? $this->throwException($exception) : $this->returnValue($values[0]);
         } else {
             foreach ($values as $index => $value)
-                $values[$index] = ($value instanceof \Throwable) ? $this->throwException($exception) : $this->returnValue($value);
+                $returned[$index] = ($value instanceof \Throwable) ? $this->throwException($exception) : $this->returnValue($value);
             
-            return $values;
+            return $returned;
         }
     }
     
     /**
      * Stub a value to simulate an exception
      *
-     * @param \Throwable $exceptionOnNull
+     * @param \Throwable $exception
      *   Exception thrown when setted to true for the current value
      * @param array $values
      *   Currents values to return on each call when throws is setted to false
