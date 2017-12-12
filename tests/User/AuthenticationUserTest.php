@@ -35,7 +35,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testInterface(): void
     {
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertInstanceOf(AuthenticationUserInterface::class, $user);
@@ -46,7 +46,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testChangeName(): void
     {
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $this->assertNull($user->changeName("Bar"));
         $this->assertSame("Bar", $user->getName());
@@ -57,7 +57,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testGetPassword(): void
     {
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $this->assertNull($user->getPassword());
         
@@ -71,7 +71,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testAddRole(): void
     {
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $this->assertNull($user->addRole("Foo"));
         $this->assertTrue($user->hasRole("Foo"));
@@ -94,7 +94,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testAddCredential(): void
     {
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         $this->assertNull($user->addCredential("Foo", "Bar"));
         $this->assertSame("Bar", $user->getCredential("Foo"));
     }
@@ -165,7 +165,7 @@ class AuthenticationUserTest extends TestCase
         $this->expectException(InvalidUserRoleException::class);
         $this->expectExceptionMessage("This role 'Bar' for user 'Foo' is not setted");
         
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $user->deleteRole("Bar");
     }
@@ -178,7 +178,7 @@ class AuthenticationUserTest extends TestCase
         $this->expectException(InvalidUserCredentialException::class);
         $this->expectExceptionMessage("This credential 'Bar' for user 'Foo' is invalid");
         
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $user->getCredential("Bar");
     }
@@ -191,7 +191,7 @@ class AuthenticationUserTest extends TestCase
         $this->expectException(InvalidUserCredentialException::class);
         $this->expectExceptionMessage("This credential 'Bar' for user 'Foo' is invalid");
         
-        $user = new AuthenticationUser("Foo", null);
+        $user = new AuthenticationUser("Foo");
         
         $user->deleteCredential("Bar");
     }

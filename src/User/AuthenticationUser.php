@@ -38,7 +38,7 @@ class AuthenticationUser extends User implements AuthenticationUserInterface
      * 
      * @param string $name
      *   User name
-     * @param string $password
+     * @param string|null $password
      *   User password
      * @param array $attributes
      *   Defaults user's attributes
@@ -47,7 +47,7 @@ class AuthenticationUser extends User implements AuthenticationUserInterface
      * @param array $credentials
      *   Defaults user's credentials
      */
-    public function __construct(string $name, ?string $password, array $attributes = [], array $roles = [], array $credentials = [])
+    public function __construct(string $name, ?string $password = null, array $attributes = [], array $roles = [], array $credentials = [])
     {
         parent::__construct($name, $attributes, $roles);
         $this->credentials = $credentials;
