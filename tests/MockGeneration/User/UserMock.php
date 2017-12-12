@@ -19,6 +19,7 @@ use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
 use Zoe\Component\Security\User\AuthenticationUserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
 use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
+use Zoe\Component\Security\User\AuthenticatedUserInterface;
 
 /**
  * Responsible to mock user objects
@@ -36,7 +37,8 @@ class UserMock extends MockGeneration
      */
     private const USER_TYPES = [
         UserInterface::class,
-        AuthenticationUserInterface::class
+        AuthenticationUserInterface::class,
+        AuthenticatedUserInterface::class
     ];
     
     /**
@@ -73,6 +75,8 @@ class UserMock extends MockGeneration
     {
         return $this->mock;
     }
+    
+    // Common
     
     /**
      * Mock getName()
@@ -779,6 +783,30 @@ class UserMock extends MockGeneration
         $this->checkUser([AuthenticationUserInterface::class], $method);
         $mock = function(string $method) use ($count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue(null));
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    // AuthenticatedUser
+    
+    /**
+     * Mock authenticatedAt()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param \DateTime $time
+     *   Time returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAuthenticatedAt(MethodCount $count, \DateTime $time): self
+    {
+        $method = "authenticatedAt";
+        $this->checkUser([AuthenticatedUserInterface::class], $method);
+        $mock = function(string $method) use ($time, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($time));
         };
         
         return $this->executeMock($method, $mock);

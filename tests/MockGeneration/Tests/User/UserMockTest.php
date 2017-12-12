@@ -19,6 +19,7 @@ use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
 use Zoe\Component\Security\User\AuthenticationUserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
 use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
+use Zoe\Component\Security\User\AuthenticatedUserInterface;
 
 /**
  * UserMock testcase
@@ -30,6 +31,8 @@ use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
  */
 class UserMockTest extends TestCase
 {
+    
+    // Common
     
     /**
      * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetName()
@@ -489,6 +492,20 @@ class UserMockTest extends TestCase
         $this->assertNull($user->deleteCredentials());
     }
     
+    // AuthenticatedUser
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAuthenticatedAt()
+     */
+    public function testMockAuthenticatedAt(): void
+    {
+        $user = UserMock::init("Foo", AuthenticatedUserInterface::class)->mockAuthenticatedAt($this->once(), new \DateTime())->finalizeMock();
+        
+        $now = (new \DateTime())->format("d/m/Y H:i:s");
+        
+        $this->assertSame($now, $user->authenticatedAt()->format("d/m/Y H:i:s"));
+    }
+    
     
                     /**_____EXCEPTIONS_____**/
     
@@ -498,7 +515,7 @@ class UserMockTest extends TestCase
     public function testExceptionInitWhenUserInvalid(): void
     {
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage("Given user type 'Bar' is invalid. Use : 'Zoe\Component\Security\User\UserInterface | Zoe\Component\Security\User\AuthenticationUserInterface'");
+        $this->expectExceptionMessage("Given user type 'Bar' is invalid. Use : 'Zoe\Component\Security\User\UserInterface | Zoe\Component\Security\User\AuthenticationUserInterface | Zoe\Component\Security\User\AuthenticatedUserInterface'");
         
         $user = UserMock::init("Foo", "Bar");
     }
