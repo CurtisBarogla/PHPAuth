@@ -33,12 +33,12 @@ class InvalidUserAttributeException extends UserException
     /**
      * Initialize exception
      * 
-     * @param UserInterface $user
+     * @param UserInterface|null $user
      *   User which error happen
      * @param string $attribute
      *   Invalid attribute name
      */
-    public function __construct(UserInterface $user, string $attribute)
+    public function __construct(?UserInterface $user, string $attribute)
     {
         $this->attribute = $attribute;
         

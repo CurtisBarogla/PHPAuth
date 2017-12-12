@@ -47,10 +47,10 @@ abstract class UserException extends \Exception
     /**
      * Initialize exception
      * 
-     * @param UserInterface $user
+     * @param UserInterface|null $user
      *   User which error happen
      */
-    public function __construct(UserInterface $user)
+    public function __construct(?UserInterface $user = null)
     {
         $this->user = $user;
         
