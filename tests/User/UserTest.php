@@ -38,6 +38,20 @@ class UserTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\User\User::isRoot()
+     */
+    public function testIsRoot(): void
+    {
+        $user = new UserFixture("Foo", false);
+        
+        $this->assertFalse($user->isRoot());
+        
+        $user = new UserFixture("Foo", true);
+        
+        $this->assertTrue($user->isRoot());
+    }
+    
+    /**
      * @see \Zoe\Component\Security\User\User::addAttribute()
      */
     public function testAddAttribute(): void
@@ -52,7 +66,7 @@ class UserTest extends TestCase
      */
     public function testGetAttributes(): void
     {
-        $user = new UserFixture("Foo", ["Foo" => "Bar"]);
+        $user = new UserFixture("Foo", false, ["Foo" => "Bar"]);
         $user->addAttribute("Bar", "Foo");
         
         $this->assertSame(["Foo" => "Bar", "Bar" => "Foo"], $user->getAttributes());
@@ -63,7 +77,7 @@ class UserTest extends TestCase
      */
     public function testGetAttribute(): void
     {
-        $user = new UserFixture("Foo", ["Foo" => "Bar"]);
+        $user = new UserFixture("Foo", false, ["Foo" => "Bar"]);
         
         $this->assertSame("Bar", $user->getAttribute("Foo"));
     }
@@ -73,7 +87,7 @@ class UserTest extends TestCase
      */
     public function testHasAttribute(): void
     {
-        $user = new UserFixture("Foo", ["Foo" => "Bar"]);
+        $user = new UserFixture("Foo", false, ["Foo" => "Bar"]);
         
         $this->assertTrue($user->hasAttribute("Foo"));
         $this->assertFalse($user->hasAttribute("Bar"));
@@ -84,7 +98,7 @@ class UserTest extends TestCase
      */
     public function testGetRoles(): void
     {
-        $user = new UserFixture("Foo", [], ["Foo", "Bar"]);
+        $user = new UserFixture("Foo", false, [], ["Foo", "Bar"]);
         
         $this->assertSame(["Foo" => "Foo", "Bar" => "Bar"], $user->getRoles());
     }
@@ -94,7 +108,7 @@ class UserTest extends TestCase
      */
     public function testHasRole(): void
     {
-        $user = new UserFixture("Foo", [], ["Foo"]);
+        $user = new UserFixture("Foo", false, [], ["Foo"]);
         
         $this->assertTrue($user->hasRole("Foo"));
         $this->assertFalse($user->hasRole("Bar"));

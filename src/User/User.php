@@ -31,6 +31,13 @@ abstract class User implements UserInterface
     protected $name;
     
     /**
+     * Root user
+     * 
+     * @var bool
+     */
+    protected $root;
+    
+    /**
      * User's attributes
      * 
      * @var array
@@ -49,14 +56,17 @@ abstract class User implements UserInterface
      * 
      * @param string $name
      *   Username
+     * @param bool $root
+     *   Root user
      * @param array $attributes
      *   Defaults user's attributes
      * @param string[] $roles
      *   Defaults user's roles
      */
-    public function __construct(string $name, array $attributes = [], array $roles = [])
+    public function __construct(string $name, bool $root = false, array $attributes = [], array $roles = [])
     {
         $this->name = $name;
+        $this->root = $root;
         $this->attributes = $attributes;
         $this->roles = \array_combine($roles, $roles);
     }
@@ -68,6 +78,15 @@ abstract class User implements UserInterface
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\AuthenticatedUserInterface::isRoot()
+     */
+    public function isRoot(): bool
+    {
+        return $this->root;
     }
 
     /**

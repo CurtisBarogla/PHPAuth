@@ -45,6 +45,31 @@ class UserMockTest extends TestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockIsRoot()
+     */
+    public function testMockIsRoot(): void
+    {
+        $user = UserMock::init("Foo", AuthenticatedUserInterface::class)->mockIsRoot($this->once(), true)->finalizeMock();
+        
+        $this->assertTrue($user->isRoot());
+        
+        $user = UserMock::init("Foo", AuthenticatedUserInterface::class)->mockIsRoot($this->once(), false)->finalizeMock();
+        
+        $this->assertFalse($user->isRoot());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockIsRoot_consecutive()
+     */
+    public function testMockIsRoot_consecutive(): void
+    {
+        $user = UserMock::init("Foo", AuthenticatedUserInterface::class)->mockIsRoot_consecutive($this->exactly(2), true, false)->finalizeMock();
+        
+        $this->assertTrue($user->isRoot());
+        $this->assertFalse($user->isRoot());
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockAddAttribute()
      */
     public function testMockAddAttribute(): void
@@ -505,7 +530,6 @@ class UserMockTest extends TestCase
         
         $this->assertSame($now, $user->authenticatedAt()->format("d/m/Y H:i:s"));
     }
-    
     
                     /**_____EXCEPTIONS_____**/
     

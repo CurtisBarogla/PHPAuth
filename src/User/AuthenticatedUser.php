@@ -36,15 +36,17 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
      *   User name
      * @param \DateTime $authenticationTime
      *   Time which the user has been authenticated
+     * @param bool $root
+     *   Root user
      * @param array $attributes
      *   Defaults user's attributes
      * @param string[] $roles
      *   Defaults user's roles
      */
-    public function __construct(string $name, \DateTime $authenticationTime, array $attributes = [], array $roles = []) 
+    public function __construct(string $name, \DateTime $authenticationTime, bool $root = false, array $attributes = [], array $roles = []) 
     {
         $this->authenticationTime = $authenticationTime;
-        parent::__construct($name, $attributes, $roles);
+        parent::__construct($name, $root, $attributes, $roles);
     }
     
     /**
@@ -66,6 +68,7 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
             "name"          =>  $this->name,
             "attributes"    =>  $this->attributes,
             "roles"         =>  $this->roles,
+            "root"          =>  $this->root,
             "timestamp"     =>  $this->authenticationTime->getTimestamp(),
             "timezone"      =>  $this->authenticationTime->getTimezone()->getName()
         ];
@@ -88,7 +91,7 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
         $zone = new \DateTimeZone($json["timezone"]);
         $authenticationTime = (new \DateTime())->setTimestamp($json["timestamp"])->setTimezone($zone);
         
-        return new AuthenticatedUser($json["name"], $authenticationTime, $json["attributes"], $json["roles"]);
+        return new AuthenticatedUser($json["name"], $authenticationTime, $json["root"], $json["attributes"], $json["roles"]);
     }
 
 }

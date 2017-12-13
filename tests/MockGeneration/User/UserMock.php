@@ -99,6 +99,46 @@ class UserMock extends MockGeneration
     }
     
     /**
+     * Mock isRoot()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param bool $result
+     *   Result
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockIsRoot(MethodCount $count, bool $result): self
+    {
+        $mock = function(string $method) use ($result, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($result));
+        };
+        
+        return $this->executeMock("isRoot", $mock);
+    }
+    
+    /**
+     * Mock isRoot() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param bool ...$results
+     *   Variadic bool. Result on each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockIsRoot_consecutive(MethodCount $count, bool ...$results): self
+    {
+        $mock = function(string $method) use ($results, $count): void {
+            $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$results);
+        };
+        
+        return $this->executeMock("isRoot", $mock);
+    }
+    
+    /**
      * Mock addAttribute()
      *
      * @param MethodCount $count

@@ -53,7 +53,7 @@ class AuthenticatedUserTest extends TestCase
      */
     public function testJsonSerialize(): void
     {
-        $user = new AuthenticatedUser("Foo", new \DateTime(), ["Foo" => "Bar", "Bar" => "Foo"], ["Foo", "Bar"]);
+        $user = new AuthenticatedUser("Foo", new \DateTime(), false, ["Foo" => "Bar", "Bar" => "Foo"], ["Foo", "Bar"]);
         
         $this->assertNotFalse(\json_encode($user));
     }
@@ -65,7 +65,7 @@ class AuthenticatedUserTest extends TestCase
     {
         // nedeed to skip microseconds checking
         $time = \DateTime::createFromFormat("U", (string)\time());
-        $user = new AuthenticatedUser("Foo", $time, ["Foo" => "Bar", "Bar" => "Foo"], ["Foo", "Bar"]);
+        $user = new AuthenticatedUser("Foo", $time, true, ["Foo" => "Bar", "Bar" => "Foo"], ["Foo", "Bar"]);
         
         $json = \json_encode($user);
         

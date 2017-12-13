@@ -58,6 +58,7 @@ class NativeUserLoader implements UserLoaderInterface
         return new AuthenticationUser(
             $name, 
             $infos["password"]      ?? null, 
+            $infos["root"]          ?? false,
             $infos["attributes"]    ?? [],
             $infos["roles"]         ?? [],
             $infos["credentials"]   ?? []);

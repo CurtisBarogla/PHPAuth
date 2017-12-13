@@ -82,7 +82,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testDeleteRole(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], ["Foo"]);
+        $user = new AuthenticationUser("Foo", null, false, [], ["Foo"]);
         
         $this->assertTrue($user->hasRole("Foo"));
         $this->assertNull($user->deleteRole("Foo"));
@@ -104,7 +104,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testGetCredentials(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], [], ["Foo" => "Bar"]);
+        $user = new AuthenticationUser("Foo", null, false, [], [], ["Foo" => "Bar"]);
         
         $this->assertSame(["Foo" => "Bar", "USER_PASSWORD" => null], $user->getCredentials());
     }
@@ -114,7 +114,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testGetCredential(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], [], ["Foo" => "Bar"]);
+        $user = new AuthenticationUser("Foo", null, false, [], [], ["Foo" => "Bar"]);
         
         $this->assertSame("Bar", $user->getCredential("Foo"));
     }
@@ -124,7 +124,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testHasCredential(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], [], ["Foo" => "Bar"]);
+        $user = new AuthenticationUser("Foo", null, false, [], [], ["Foo" => "Bar"]);
         
         $this->assertTrue($user->hasCredential("Foo"));
         $this->assertFalse($user->hasCredential("Bar"));
@@ -136,7 +136,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testDeleteCredentials(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], [], ["Foo" => "Bar"]);
+        $user = new AuthenticationUser("Foo", null, false, [], [], ["Foo" => "Bar"]);
         
         $this->assertSame(["Foo" => "Bar", "USER_PASSWORD" => null], $user->getCredentials());
         $this->assertNull($user->deleteCredentials());
@@ -148,7 +148,7 @@ class AuthenticationUserTest extends TestCase
      */
     public function testDeleteCredential(): void
     {
-        $user = new AuthenticationUser("Foo", null, [], [], ["Foo" => "Bar"]);
+        $user = new AuthenticationUser("Foo", null, false, [], [], ["Foo" => "Bar"]);
         
         $this->assertTrue($user->hasCredential("Foo"));
         $this->assertNull($user->deleteCredential("Foo"));

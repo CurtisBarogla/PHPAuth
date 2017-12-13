@@ -32,6 +32,15 @@ interface UserInterface
      */
     public function getName(): string;
     
+    
+    /**
+     * Check if the user is root
+     *
+     * @return bool
+     *   True if the user if root. False otherwise
+     */
+    public function isRoot(): bool;
+    
     /**
      * Add an attribute to the user
      * 
