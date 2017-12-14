@@ -62,7 +62,7 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
      * {@inheritDoc}
      * @see \JsonSerializable::jsonSerialize()
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             "name"          =>  $this->name,

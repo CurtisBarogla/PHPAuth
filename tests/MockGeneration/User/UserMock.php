@@ -314,6 +314,53 @@ class UserMock extends MockGeneration
     }
     
     /**
+     * Mock deleteAttribute()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $attribute
+     *   Attribute name
+     * @param bool $exception
+     *   Set to true to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteAttribute(MethodCount $count, string $attribute, bool $exception): self
+    {
+        $mock = function(string $method) use ($attribute, $exception, $count) {
+            $return = $this->stubThrowableOnBool(new InvalidUserAttributeException($this->mock, $attribute), [$attribute], $exception);
+            $this->mock->expects($count)->method($method)->with($attribute)->will($return);
+        };
+        
+        return $this->executeMock("deleteAttribute", $mock);
+    }
+    
+    /**
+     * Mock deleteAttribute() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $attributes
+     *   Arrays of array containing all params for each call
+     * @param bool ...$exceptions
+     *   Variadic bool. Set to true to simulate exception for the current call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeleteAttribute_consecutive(MethodCount $count, array $attributes, bool ...$exceptions): self
+    {
+        $mock = function(string $method) use ($attributes, $exceptions, $count) {
+            $values = \array_fill(0, \count($attributes), $this->returnValue(null));
+            $return = $this->stubThrowableOnBool(new InvalidUserAttributeException($this->mock, "Foo"), $values, ...$exceptions);
+            $this->mock->expects($count)->method($method)->withConsecutive(...$attributes)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock("deleteAttribute", $mock);
+    }
+    
+    /**
      * Mock getRoles()
      *
      * @param MethodCount $count

@@ -201,6 +201,47 @@ class UserMockTest extends TestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteAttribute()
+     */
+    public function testMockDeleteAttribute(): void
+    {
+        $user = UserMock::init("Foo", UserInterface::class)->mockDeleteAttribute($this->once(), "Foo", false)->finalizeMock();
+        
+        $this->assertNull($user->deleteAttribute("Foo"));
+        
+        $this->expectException(InvalidUserAttributeException::class);
+        $user = UserMock::init("Foo", UserInterface::class)->mockDeleteAttribute($this->once(), "Foo", true)->finalizeMock();
+        $user->deleteAttribute("Foo");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeleteAttribute_consecutive()
+     */
+    public function testMockDeleteAttribute_consecutive(): void
+    {
+        $user = UserMock::init("Foo", UserInterface::class)
+                            ->mockDeleteAttribute_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                false, false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deleteAttribute("Foo"));
+        $this->assertNull($user->deleteAttribute("Bar"));
+        
+        $this->expectException(InvalidUserAttributeException::class);
+        $user = UserMock::init("Foo", UserInterface::class)
+                            ->mockDeleteAttribute_consecutive(
+                                $this->exactly(2), 
+                                [["Foo"], ["Bar"]], 
+                                false, true)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deleteAttribute("Foo"));
+        $user->deleteAttribute("Bar");
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetRoles()
      */
     public function testMockGetRoles(): void

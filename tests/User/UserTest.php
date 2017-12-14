@@ -94,6 +94,17 @@ class UserTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\User\User::deleteAttribute()
+     */
+    public function testDeleteAttribute(): void
+    {
+        $user = new UserFixture("Foo", false, ["Foo" => "Bar"]);
+        
+        $this->assertNull($user->deleteAttribute("Foo"));
+        $this->assertFalse($user->hasAttribute("Foo"));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\User\User::getRoles()
      */
     public function testGetRoles(): void
@@ -127,6 +138,18 @@ class UserTest extends TestCase
         $user = new UserFixture("Foo");
         
         $user->getAttribute("Bar");
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\User\User::deleteAttribute()
+     */
+    public function testExceptionDeleteAttributeOnInvalidAttribute(): void
+    {
+        $this->expectException(InvalidUserAttributeException::class);
+        $this->expectExceptionMessage("This attribute 'Bar' for user 'Foo' is invalid");
+        
+        $user = new UserFixture("Foo");
+        $user->deleteAttribute("Bar");
     }
     
 }

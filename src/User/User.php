@@ -119,7 +119,6 @@ abstract class User implements UserInterface
         return $this->attributes[$attribute];
     }
 
-
     /**
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\UserInterface::hasAttribute()
@@ -127,6 +126,18 @@ abstract class User implements UserInterface
     public function hasAttribute(string $attribute): bool
     {
         return isset($this->attributes[$attribute]);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\User\UserInterface::deleteAttribute()
+     */
+    public function deleteAttribute(string $attribute): void
+    {
+        if(!isset($this->attributes[$attribute]))
+            throw new InvalidUserAttributeException($this, $attribute);
+        
+        unset($this->attributes[$attribute]);
     }
 
     /**

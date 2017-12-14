@@ -32,7 +32,6 @@ interface UserInterface
      */
     public function getName(): string;
     
-    
     /**
      * Check if the user is root
      *
@@ -83,6 +82,17 @@ interface UserInterface
      *   True if the user has the requested attribute. False otherwise
      */
     public function hasAttribute(string $attribute): bool;
+    
+    /**
+     * Delete a user's attribute
+     * 
+     * @param string $attribute
+     *   Attribute name
+     *   
+     * @throws InvalidUserAttributeException
+     *   When the given attribute is not setted
+     */
+    public function deleteAttribute(string $attribute): void;
     
     /**
      * Get all user's roles
