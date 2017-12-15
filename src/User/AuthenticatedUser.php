@@ -87,9 +87,10 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
     {
         if(!\is_array($json))
             $json = \json_decode($json, true);
-        
-        $zone = new \DateTimeZone($json["timezone"]);
-        $authenticationTime = (new \DateTime())->setTimestamp($json["timestamp"])->setTimezone($zone);
+
+        $authenticationTime = (new \DateTime())
+                                    ->setTimestamp($json["timestamp"])
+                                    ->setTimezone(new \DateTimeZone($json["timezone"]));
         
         return new AuthenticatedUser($json["name"], $authenticationTime, $json["root"], $json["attributes"], $json["roles"]);
     }

@@ -93,8 +93,8 @@ class NativeSessionStorage implements UserStorageInterface
         
         if($this->json)
             $user = AuthenticatedUser::restoreFromJson($user);
-
-        // check user integrity
+        
+        // check user integrity (should not happen)
         if(!$user instanceof AuthenticatedUserInterface) {
             unset($this->session[$user]);
             throw new UserNotFoundException(null, UserNotFoundException::GENERAL_ERROR_CODE);
