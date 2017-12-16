@@ -20,5 +20,34 @@ namespace Zoe\Component\Security\Exception\Acl;
  */
 class InvalidPermissionException extends \InvalidArgumentException
 {
-    //
+    
+    /**
+     * Invalid resource permission name
+     * 
+     * @var string
+     */
+    private $invalidPermission;
+    
+    /**
+     * Set invalid permission
+     * 
+     * @param string $invalidPermission
+     *   Invalid permission
+     */
+    public function setInvalidPermission(string $invalidPermission): void
+    {
+        $this->invalidPermission = $invalidPermission;
+    }
+    
+    /**
+     * Get the setted invalid permission
+     * 
+     * @return string|null
+     *   Invalid permission
+     */
+    public function getInvalidPermission(): ?string
+    {
+        return $this->invalidPermission;
+    }
+    
 }

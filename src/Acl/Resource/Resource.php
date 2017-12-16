@@ -121,9 +121,12 @@ class Resource implements ResourceInterface, \JsonSerializable
         try {
             return $this->permissions->get($permission);
         } catch (InvalidMaskException $e) {
-            throw new InvalidPermissionException(\sprintf("This permission '%s' is not defined into '%s' resource",
+            $exception = (new InvalidPermissionException(\sprintf("This permission '%s' is not defined into '%s' resource",
                 $permission,
-                $this->name));
+                $this->name)));
+            $exception->setInvalidPermission($permission);
+            
+            throw $exception;
         }
     }
 
