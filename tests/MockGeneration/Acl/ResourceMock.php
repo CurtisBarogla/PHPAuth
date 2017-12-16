@@ -18,6 +18,7 @@ use \PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 
 /**
  * Responsible to mock resource
@@ -29,23 +30,40 @@ class ResourceMock extends MockGeneration
 {
     
     /**
+     * Resource types
+     * 
+     * @var array
+     */
+    private const RESOURCE_TYPES = [
+        ResourceInterface::class,
+        ImmutableResourceInterface::class
+    ];
+    
+    /**
      * Initialize a new resource mocked generation
      *
      * @param string $mockId
      *   Mock id
+     * @param string $type
+     *   Resource type to mock (ResourceInterface or ImmutableResourceInterface)
      *
      * @return ResourceMock
      *   New resource mock generation
      */
-    public static function init(string $mockId): ResourceMock
+    public static function init(string $mockId, string $type): ResourceMock
     {
-        return new ResourceMock($mockId, ResourceInterface::class);
+        if(!\in_array($type, self::RESOURCE_TYPES))
+            throw new \LogicException(\sprintf("Given resource type '%s' is invalid. Use : '%s'",
+                $type,
+                \implode(" | ", self::RESOURCE_TYPES)));
+        
+        return new ResourceMock($mockId, $type);
     }
     
     /**
      * Finalize the mocked resource
      *
-     * @return ResourceInterface
+     * @return ResourceInterface|ImmutableResourceInterface
      *   Mocked resource
      */
     public function finalizeMock(): ResourceInterface
@@ -87,7 +105,10 @@ class ResourceMock extends MockGeneration
     public function mockAddPermission(MethodCount $count, string $permission): self
     {
         $mock = function(string $method) use ($permission, $count) {
-            $this->mock->expects($count)->method($method)->with($permission)->will($this->returnValue(null));
+            if($this->objectName === ImmutableResourceInterface::class)
+                $this->mock->expects($count)->method($method)->with($permission)->will($this->throwException(new \BadMethodCallException()));
+            else
+                $this->mock->expects($count)->method($method)->with($permission)->will($this->returnValue(null));
         };
         
         return $this->executeMock("addPermission", $mock);
@@ -107,7 +128,10 @@ class ResourceMock extends MockGeneration
     public function mockAddPermission_consecutive(MethodCount $count, array $permissions): self
     {
         $mock = function(string $method) use ($permissions, $count) {
-            $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->willReturnOnConsecutiveCalls($this->returnValue(null)); 
+            if($this->objectName === ImmutableResourceInterface::class)
+                $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->will($this->throwException(new \BadMethodCallException()));
+            else
+                $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->willReturnOnConsecutiveCalls($this->returnValue(null)); 
         };
         
         return $this->executeMock("addPermission", $mock);
