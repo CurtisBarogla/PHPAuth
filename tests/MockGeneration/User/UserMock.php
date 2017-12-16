@@ -20,6 +20,9 @@ use Zoe\Component\Security\User\AuthenticationUserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
 use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use Zoe\Component\Security\Acl\AclUserInterface;
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 
 /**
  * Responsible to mock user objects
@@ -38,7 +41,8 @@ class UserMock extends MockGeneration
     private const USER_TYPES = [
         UserInterface::class,
         AuthenticationUserInterface::class,
-        AuthenticatedUserInterface::class
+        AuthenticatedUserInterface::class,
+        AclUserInterface::class
     ];
     
     /**
@@ -68,7 +72,7 @@ class UserMock extends MockGeneration
     /**
      * Finalize the mocked user
      * 
-     * @return UserInterface
+     * @return UserInterface|AuthenticatedUserInterface|AuthenticationUserInterface
      *   Mocked user
      */
     public function finalizeMock(): UserInterface
@@ -882,13 +886,13 @@ class UserMock extends MockGeneration
      *
      * @param MethodCount $count
      *   Called count
-     * @param \DateTime $time
+     * @param \DateTimeInterface $time
      *   Time returned
      *
      * @return self
      *   Fluent
      */
-    public function mockAuthenticatedAt(MethodCount $count, \DateTime $time): self
+    public function mockAuthenticatedAt(MethodCount $count, \DateTimeInterface $time): self
     {
         $method = "authenticatedAt";
         $this->checkUser([AuthenticatedUserInterface::class], $method);
@@ -898,6 +902,117 @@ class UserMock extends MockGeneration
         
         return $this->executeMock($method, $mock);
     }
+    
+    // AclUser
+    
+    /**
+     * Mock grant()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param ImmutableResourceInterface $resource
+     *   Mocked resource
+     * @param array $permissions
+     *   Permissions to grant
+     * @param bool $exception
+     *   Set to true to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGrant(MethodCount $count, ImmutableResourceInterface $resource, array $permissions, bool $exception): self
+    {
+        $method = "grant";
+        $this->checkUser([AclUserInterface::class], $method);
+        $mock = function(string $method) use ($resource, $permissions, $exception, $count): void {
+            $return = $this->stubThrowableOnBool(new InvalidPermissionException(), [$this->returnValue(null)], $exception);
+            $this->mock->expects($count)->method($method)->with($resource, $permissions)->will($return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock grant() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $resourcesAndPermissions
+     *   Arrays of array containing all params for each call
+     * @param bool ...$exceptions
+     *   Variadic bool. Set to true to simulate exceptions for the current call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGrant_consecutive(MethodCount $count, array $resourcesAndPermissions, bool ...$exceptions): self
+    {
+        $method = "grant";
+        $this->checkUser([AclUserInterface::class], $method);
+        $mock = function(string $method) use ($resourcesAndPermissions, $exceptions, $count): void {
+            $values = \array_fill(0, \count($resourcesAndPermissions), $this->returnValue(null));
+            $return = $this->stubThrowableOnBool(new InvalidPermissionException(), $values, ...$exceptions);
+            
+            $this->mock->expects($count)->method($method)->withConsecutive(...$resourcesAndPermissions)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deny()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param ImmutableResourceInterface $resource
+     *   Mocked resource
+     * @param array $permissions
+     *   Permissions to deny
+     * @param bool $exception
+     *   Set to true to simulate exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeny(MethodCount $count, ImmutableResourceInterface $resource, array $permissions, bool $exception): self
+    {
+        $method = "deny";
+        $this->checkUser([AclUserInterface::class], $method);
+        $mock = function(string $method) use ($resource, $permissions, $exception, $count): void {
+            $return = $this->stubThrowableOnBool(new InvalidPermissionException(), [$this->returnValue(null)], $exception);
+            $this->mock->expects($count)->method($method)->with($resource, $permissions)->will($return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock deny() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $resourcesAndPermissions
+     *   Arrays of array containing all params for each call
+     * @param bool ...$exceptions
+     *   Variadic bool. Set to true to simulate exceptions for the current call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockDeny_consecutive(MethodCount $count, array $resourcesAndPermissions, bool ...$exceptions): self
+    {
+        $method = "deny";
+        $this->checkUser([AclUserInterface::class], $method);
+        $mock = function(string $method) use ($resourcesAndPermissions, $exceptions, $count): void {
+            $values = \array_fill(0, \count($resourcesAndPermissions), $this->returnValue(null));
+            $return = $this->stubThrowableOnBool(new InvalidPermissionException(), $values, ...$exceptions);
+            
+            $this->mock->expects($count)->method($method)->withConsecutive(...$resourcesAndPermissions)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
     
     /**
      * Check if a user is valid for a mocked method

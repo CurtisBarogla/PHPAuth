@@ -20,6 +20,10 @@ use Zoe\Component\Security\User\AuthenticationUserInterface;
 use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
 use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Acl\AclUserInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 
 /**
  * UserMock testcase
@@ -572,6 +576,122 @@ class UserMockTest extends TestCase
         $this->assertSame($now, $user->authenticatedAt()->format("d/m/Y H:i:s"));
     }
     
+    // AclUser
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGrant()
+     */
+    public function testMockGrant(): void
+    {
+        $resource = ResourceMock::init("ResourceForMockGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockGrant($this->once(), $resource, ["Foo", "Bar"], false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->grant($resource, ["Foo", "Bar"]));
+        
+        $this->expectException(InvalidPermissionException::class);
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockGrant($this->once(), $resource, ["Foo", "Bar"], true)
+                        ->finalizeMock();
+        
+        $user->grant($resource, ["Foo", "Bar"]);
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeny_consecutive()
+     */
+    public function testMockGrant_consecutive(): void
+    {
+        $resourceFoo = ResourceMock::init("ResourceFooTestGrant", ImmutableResourceInterface::class)->finalizeMock();
+        $resourceBar = ResourceMock::init("ResourceBarGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockGrant_consecutive(
+                                $this->exactly(2), 
+                                [
+                                    [$resourceFoo, ["Foo", "Bar"]], 
+                                    [$resourceBar, ["Moz", "Poz"]]
+                                ], 
+                                false, false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->grant($resourceFoo, ["Foo", "Bar"]));
+        $this->assertNull($user->grant($resourceBar, ["Moz", "Poz"]));
+        
+        $this->expectException(InvalidPermissionException::class);
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockGrant_consecutive(
+                                $this->exactly(2),
+                                [
+                                    [$resourceFoo, ["Foo", "Bar"]],
+                                    [$resourceBar, ["Moz", "Poz"]]
+                                ],
+                                false, true)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->grant($resourceFoo, ["Foo", "Bar"]));
+        $user->grant($resourceBar, ["Moz", "Poz"]);
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeny()
+     */
+    public function testMockDeny(): void
+    {
+        $resource = ResourceMock::init("ResourceForMockDenyTest", ImmutableResourceInterface::class)->finalizeMock();
+        
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockDeny($this->once(), $resource, ["Foo", "Bar"], false)
+                        ->finalizeMock();
+        
+        $this->assertNull($user->deny($resource, ["Foo", "Bar"]));
+        
+        $this->expectException(InvalidPermissionException::class);
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockDeny($this->once(), $resource, ["Foo", "Bar"], true)
+                        ->finalizeMock();
+        
+        $user->deny($resource, ["Foo", "Bar"]);
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockDeny_consecutive()
+     */
+    public function testMockDeny_consecutive(): void
+    {
+        $resourceFoo = ResourceMock::init("ResourceFooTestGrant", ImmutableResourceInterface::class)->finalizeMock();
+        $resourceBar = ResourceMock::init("ResourceBarGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockDeny_consecutive(
+                            $this->exactly(2),
+                            [
+                                [$resourceFoo, ["Foo", "Bar"]],
+                                [$resourceBar, ["Moz", "Poz"]]
+                            ],
+                            false, false)
+                        ->finalizeMock();
+            
+        $this->assertNull($user->deny($resourceFoo, ["Foo", "Bar"]));
+        $this->assertNull($user->deny($resourceBar, ["Moz", "Poz"]));
+        
+        $this->expectException(InvalidPermissionException::class);
+        $user = UserMock::init("Foo", AclUserInterface::class)
+                            ->mockDeny_consecutive(
+                                $this->exactly(2),
+                                [
+                                    [$resourceFoo, ["Foo", "Bar"]],
+                                    [$resourceBar, ["Moz", "Poz"]]
+                                ],
+                                false, true)
+                        ->finalizeMock();
+                
+        $this->assertNull($user->deny($resourceFoo, ["Foo", "Bar"]));
+        $user->deny($resourceBar, ["Moz", "Poz"]);
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**
@@ -580,7 +700,7 @@ class UserMockTest extends TestCase
     public function testExceptionInitWhenUserInvalid(): void
     {
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage("Given user type 'Bar' is invalid. Use : 'Zoe\Component\Security\User\UserInterface | Zoe\Component\Security\User\AuthenticationUserInterface | Zoe\Component\Security\User\AuthenticatedUserInterface'");
+        $this->expectExceptionMessage("Given user type 'Bar' is invalid. Use : 'Zoe\Component\Security\User\UserInterface | Zoe\Component\Security\User\AuthenticationUserInterface | Zoe\Component\Security\User\AuthenticatedUserInterface | Zoe\Component\Security\Acl\AclUserInterface'");
         
         $user = UserMock::init("Foo", "Bar");
     }

@@ -53,7 +53,7 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
      * {@inheritDoc}
      * @see \Zoe\Component\Security\User\AuthenticatedUserInterface::authenticatedAt()
      */
-    public function authenticatedAt(): \DateTime
+    public function authenticatedAt(): \DateTimeInterface
     {
         return $this->authenticationTime;
     }

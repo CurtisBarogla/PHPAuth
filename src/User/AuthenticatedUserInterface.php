@@ -24,9 +24,9 @@ interface AuthenticatedUserInterface extends UserInterface
     /**
      * Time which the user has been authenticated
      * 
-     * @return \DateTime
+     * @return \DateTimeInterface
      *   Datetime instance corresponding to the creation of the user
      */
-    public function authenticatedAt(): \DateTime;
+    public function authenticatedAt(): \DateTimeInterface;
     
 }
