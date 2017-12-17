@@ -13,6 +13,7 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\User;
 
 use PHPUnit\Framework\TestCase;
+use Zoe\Component\Security\Common\JsonSerializable;
 
 /**
  * AuthenticatedUser testcase
@@ -34,7 +35,7 @@ class AuthenticatedUserTest extends TestCase
         
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertInstanceOf(AuthenticatedUserInterface::class, $user);
-        $this->assertInstanceOf(\JsonSerializable::class, $user);
+        $this->assertInstanceOf(JsonSerializable::class, $user);
     }
     
     /**

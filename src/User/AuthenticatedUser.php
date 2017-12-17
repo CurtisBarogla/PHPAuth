@@ -12,6 +12,8 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\User;
 
+use Zoe\Component\Security\Common\JsonSerializable;
+
 /**
  * Authenticated user is considered valid by the authentication process.
  * At this state, user is considered immutable, except for attributes, and credentials are unsetted
@@ -19,7 +21,7 @@ namespace Zoe\Component\Security\User;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class AuthenticatedUser extends User implements AuthenticatedUserInterface, \JsonSerializable
+class AuthenticatedUser extends User implements AuthenticatedUserInterface
 {
     
     /**
@@ -75,15 +77,13 @@ class AuthenticatedUser extends User implements AuthenticatedUserInterface, \Jso
     }
     
     /**
-     * Restore an AuthenticatedUser from his json representation
+     * @return AuthenticatedUser
+     *   Restored AuthenticatedUser
      * 
-     * @param string|array $json
-     *   Array or string json representation of the user to restore
-     * 
-     * @return AuthenticatedUserInterface
-     *   Restored user
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Common\JsonSerializable
      */
-    public static function restoreFromJson($json): AuthenticatedUserInterface
+    public static function restoreFromJson($json): AuthenticatedUser
     {
         if(!\is_array($json))
             $json = \json_decode($json, true);
