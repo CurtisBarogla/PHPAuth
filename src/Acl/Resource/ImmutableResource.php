@@ -14,6 +14,7 @@ namespace Zoe\Component\Security\Acl\Resource;
 
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use Zoe\Component\Security\Acl\Entity\EntityInterface;
 
 /**
  * Wrapper around resource to set it as immutable
@@ -90,6 +91,34 @@ class ImmutableResource implements ImmutableResourceInterface
     {
         return $this->resource->hasPermission($permission);
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::addEntity()
+     */
+    public function addEntity(EntityInterface $entity): void
+    {
+        throw new \BadMethodCallException(\sprintf("Cannot add entity on resource '%s' as it is set to an immutable state",
+            $this->resource->getName()));
+    }
+       
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntities()
+     */
+    public function getEntities(): array
+    {
+        return $this->resource->getEntities();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntity()
+     */
+    public function getEntity(string $entity): EntityInterface
+    {
+        return $this->resource->getEntity($entity);
+    }
 
     /**
      * {@inheritDoc}
@@ -98,6 +127,25 @@ class ImmutableResource implements ImmutableResourceInterface
     public function getBehaviour(): int
     {
         return $this->resource->getBehaviour();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \JsonSerializable::jsonSerialize()
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            "wrapped"   =>  \json_encode($this->resource)
+        ];
+    }
+    
+    public static function restoreFromJson($json): ImmutableResource 
+    {
+        if(!\is_array($json))
+            $json = \json_decode($json, true);
+        
+        return new ImmutableResource(Resource::restoreFromJson($json["wrapped"]));
     }
     
 }

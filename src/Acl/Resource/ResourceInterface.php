@@ -15,6 +15,9 @@ namespace Zoe\Component\Security\Acl\Resource;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Common\JsonSerializable;
 
 /**
  * Resource are registered into an acl.
@@ -23,7 +26,7 @@ use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-interface ResourceInterface
+interface ResourceInterface extends JsonSerializable
 {
     
     /**
@@ -106,6 +109,36 @@ interface ResourceInterface
      *   True if the permission is setted. False otherwise
      */
     public function hasPermission(string $permission): bool;
+    
+    /**
+     * Add an entity to the resource
+     * 
+     * @param EntityInterface $entity
+     *   Resource entity
+     */
+    public function addEntity(EntityInterface $entity): void;
+    
+    /**
+     * Get all entities registered for this resource
+     * 
+     * @return EntityInterface[]
+     *   All entitied registered
+     */
+    public function getEntities(): array;
+    
+    /**
+     * Get a resource entity
+     * 
+     * @param string $entity
+     *   Entity name
+     * 
+     * @return EntityInterface
+     *   Entity instance
+     *   
+     * @throws InvalidEntityException
+     *   When the given entity is not registered
+     */
+    public function getEntity(string $entity): EntityInterface;
     
     /**
      * Get resource behaviour

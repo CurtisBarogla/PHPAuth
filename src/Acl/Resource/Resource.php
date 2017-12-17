@@ -17,6 +17,9 @@ use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Exception\Acl\InvalidMaskException;
 use Zoe\Component\Security\Exception\Acl\InvalidResourceBehaviour;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Acl\Entity\Entity;
 
 /**
  * Basic implementation of ResourceInterface
@@ -25,7 +28,7 @@ use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class Resource implements ResourceInterface, \JsonSerializable
+class Resource implements ResourceInterface
 {
     
     /**
@@ -49,6 +52,13 @@ class Resource implements ResourceInterface, \JsonSerializable
      */
     private $permissions;
     
+    /**
+     * Registered entities
+     * 
+     * @var EntityInterface[]
+     */
+    private $entities;
+
     /**
      * Initialize a resource
      * 
@@ -138,6 +148,38 @@ class Resource implements ResourceInterface, \JsonSerializable
     {
         return $this->permissions->has($permission);
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::addEntity()
+     */
+    public function addEntity(EntityInterface $entity): void
+    {
+        $this->entities[$entity->getIdentifier()] = $entity;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntities()
+     */
+    public function getEntities(): array
+    {
+        return $this->entities;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntity()
+     */
+    public function getEntity(string $entity): EntityInterface
+    {
+        if(!isset($this->entities[$entity]))
+            throw new InvalidEntityException(\sprintf("This entity '%s' for resource '%s' is not registered",
+                $entity,
+                $this->name));
+            
+        return $this->entities[$entity];
+    }
 
     /**
      * {@inheritDoc}
@@ -157,8 +199,30 @@ class Resource implements ResourceInterface, \JsonSerializable
         return [
             "name"          =>  $this->name,
             "behaviour"     =>  $this->behaviour,
-            "permissions"   =>  $this->permissions
+            "permissions"   =>  $this->permissions,
+            "entities"      =>  $this->entities
         ];
+    }
+    
+    /**
+     * @return Resource
+     *   Restored resource
+     * 
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Common\JsonSerializable
+     */
+    public static function restoreFromJson($json): Resource
+    {
+        if(!\is_array($json))
+            $json = \json_decode($json, true);
+        
+        $resource = new Resource($json["name"], $json["behaviour"]);
+        $resource->permissions = MaskCollection::restoreFromJson($json["permissions"]);
+        $resource->entities = \array_map(function(array $entity): EntityInterface {
+            return Entity::restoreFromJson($entity); 
+        }, $json["entities"]);
+        
+        return $resource;
     }
     
     /**

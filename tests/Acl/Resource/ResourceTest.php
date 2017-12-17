@@ -18,6 +18,10 @@ use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidResourceBehaviour;
 use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Common\JsonSerializable;
+use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Acl\Entity\Entity;
 
 /**
  * Resource testcase
@@ -37,7 +41,7 @@ class ResourceTest extends TestCase
     {
         $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
         
-        $this->assertInstanceOf(\JsonSerializable::class, $resource);
+        $this->assertInstanceOf(JsonSerializable::class, $resource);
     }
     
     /**
@@ -106,6 +110,43 @@ class ResourceTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::addEntity()
+     */
+    public function testAddEntity(): void
+    {
+        $entity = EntityMock::init("AddedToResource")->finalizeMock();
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        
+        $this->assertNull($resource->addEntity($entity));
+    }
+    
+    public function testGetEntities(): void
+    {
+        $fooEntity = EntityMock::init("EntityFooAdded")->mockGetIdentifier($this->once(), "Foo")->finalizeMock();
+        $barEntity = EntityMock::init("EntityBarAdded")->mockGetIdentifier($this->once(), "Bar")->finalizeMock();
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        $resource->addEntity($fooEntity);
+        $resource->addEntity($barEntity);
+        $expected = ["Foo" => $fooEntity, "Bar" => $barEntity];
+        
+        $this->assertSame($expected, $resource->getEntities());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntity()
+     */
+    public function testGetEntity(): void
+    {
+        $entity = EntityMock::init("GettedFromResource")->mockGetIdentifier($this->once(), "Foo")->finalizeMock();
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        
+        $resource->addEntity($entity);
+        
+        $this->assertSame($entity, $resource->getEntity("Foo"));
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Resource\Resource::getBehaviour()
      */
     public function testGetBehaviour(): void
@@ -128,8 +169,31 @@ class ResourceTest extends TestCase
         $resource->addPermission("Foo");
         $resource->addPermission("Bar");
         $resource->addPermission("Moz");
+        $entityFoo = new Entity("Foo");
+        $entityBar = new Entity("Bar");
+        $resource->addEntity($entityFoo);
+        $resource->addEntity($entityBar);
         
         $this->assertNotFalse(\json_encode($resource));
+    }
+    
+    public function testResourceFromJson(): void
+    {
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        $resource->addPermission("Foo");
+        $resource->addPermission("Bar");
+        $resource->addPermission("Moz");
+        $entityFoo = new Entity("Foo", "FooProcessor");
+        $entityBar = new Entity("Bar");
+        $entityFoo->add("Foo", ["Foo", "Bar"]);
+        $entityBar->add("Foo", ["Foo", "Bar"]);
+        
+        $resource->addEntity($entityFoo);
+        $resource->addEntity($entityBar);
+        
+        $json = \json_encode($resource);
+        
+        $this->assertEquals($resource, Resource::restoreFromJson($json));
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -183,4 +247,15 @@ class ResourceTest extends TestCase
         $resource->getPermission("Bar");
     }
     
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntity()
+     */
+    public function testExceptionGetEntityWhenNotRegistered(): void
+    {
+        $this->expectException(InvalidEntityException::class);
+        $this->expectExceptionMessage("This entity 'Foo' for resource 'Bar' is not registered");
+        
+        $resource = new Resource("Bar", ResourceInterface::BLACKLIST);
+        $resource->getEntity("Foo");
+    }
 }
