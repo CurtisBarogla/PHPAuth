@@ -230,6 +230,30 @@ class AclUserTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\AclUser::jsonSerialize()
+     */
+    public function testExceptionWhenJsonEncodeAclUser(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+        $this->expectExceptionMessage("Acl user cannot be jsonified");
+        
+        $user = new AclUser($this->getMockMaskPermission(0), $this->getMockAuthenticatedUser());
+        
+        $json = \json_encode($user);
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\AclUser::restoreFromJson()
+     */
+    public function testExceptionWhenRestoreFromJsonAclUser(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+        $this->expectExceptionMessage("Acl user cannot be restored from a json representation");
+        
+        AclUser::restoreFromJson("Foo");
+    }
+    
+    /**
      * Get a fully mocked mask permission
      * 
      * @param int $value

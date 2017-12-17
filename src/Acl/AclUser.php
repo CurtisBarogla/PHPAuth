@@ -174,6 +174,27 @@ class AclUser implements AclUserInterface
     }
     
     /**
+     * {@inheritDoc}
+     * @see \JsonSerializable::jsonSerialize()
+     */
+    public function jsonSerialize(): void
+    {
+        throw new \BadMethodCallException(\sprintf("Acl user cannot be jsonified"));
+    }
+    
+    /**
+     * @throws \BadMethodCallException
+     *   Cannot be called on acl user
+     * 
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Common\JsonSerializable
+     */
+    public static function restoreFromJson($json)
+    {
+        throw new \BadMethodCallException(\sprintf("Acl user cannot be restored from a json representation"));
+    }
+    
+    /**
      * Proceed attribution
      * 
      * @param ImmutableResourceInterface $resource
