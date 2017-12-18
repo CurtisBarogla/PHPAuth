@@ -140,6 +140,13 @@ class ImmutableResource implements ImmutableResourceInterface
         ];
     }
     
+    /**
+     * @return ImmutableResource
+     *   Restored immutable resource
+     * 
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Common\JsonSerializable::restoreFromJson()     
+     */
     public static function restoreFromJson($json): ImmutableResource 
     {
         if(!\is_array($json))

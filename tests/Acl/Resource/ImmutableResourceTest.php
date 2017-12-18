@@ -18,6 +18,10 @@ use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
 use Zoe\Component\Security\Acl\Resource\ImmutableResource;
+use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
+use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Acl\Resource\Resource;
 
 /**
  * ImmutableResource testcase
@@ -87,6 +91,42 @@ class ImmutableResourceTest extends TestCase
     }
     
     /**
+     * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::addEntity()
+     */
+    public function testAddEntity(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+        $this->expectExceptionMessage("Cannot add entity on resource 'Foo' as it is set to an immutable state");
+        
+        $entity = EntityMock::init("EntityAddOnImmutableResource")->finalizeMock();
+        $immutable = new ImmutableResource($this->getMockedResource());
+        
+        $immutable->addEntity($entity);
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::getEntities()
+     */
+    public function testGetEntities(): void
+    {
+        $immutable = new ImmutableResource($this->getMockedResource());
+        
+        foreach ($immutable->getEntities() as $entity) {
+            $this->assertInstanceOf(EntityInterface::class, $entity);
+        }
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::getEntity()
+     */
+    public function testGetEntity(): void
+    {
+        $immutable = new ImmutableResource($this->getMockedResource());
+        
+        $this->assertSame("Foo", $immutable->getEntity("Foo")->getIdentifier());
+    }
+    
+    /**
      * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::getBehaviour()
      */
     public function testGetBehaviour(): void
@@ -95,6 +135,42 @@ class ImmutableResourceTest extends TestCase
         $immutable = new ImmutableResource($mutable);
         
         $this->assertSame(ResourceInterface::BLACKLIST, $immutable->getBehaviour());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::jsonSerialize()
+     */
+    public function testJsonSerialize(): void
+    {
+        $entity = new Entity("Foo");
+        $entity->add("Foo", ["Foo", "Bar"]);
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        $resource->addPermission("Foo");
+        $resource->addEntity($entity);
+        $immutable = new ImmutableResource($resource);
+        
+        $this->assertNotFalse(\json_encode($immutable));
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\ImmutableResource::restoreFromJson()
+     */
+    public function testRestoreFromJson(): void
+    {
+        $entity = new Entity("Foo");
+        $entity->add("Foo", ["Foo", "Bar"]);
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        $resource->addPermission("Foo");
+        $resource->addEntity($entity);
+        $immutable = new ImmutableResource($resource);
+        
+        $json = \json_encode($immutable);
+        
+        $this->assertEquals($immutable, ImmutableResource::restoreFromJson($json));
+        
+        $json = \json_decode($json, true);
+        
+        $this->assertEquals($immutable, ImmutableResource::restoreFromJson($json));
     }
     
     /**
@@ -113,12 +189,17 @@ class ImmutableResourceTest extends TestCase
                                 ->mockGetIdentifier($this->once(), "Foo")            
                             ->finalizeMock();
         
+        $entityFoo = EntityMock::init("EntityFoo")->mockGetIdentifier($this->once(), "Foo")->finalizeMock();
+        $entityBar = EntityMock::init("EntityBar")->finalizeMock();
+        
         return ResourceMock::init("ResourceWrappedToimmutable", ResourceInterface::class)
                                 ->mockGetName($this->once(), "Foo")
                                 ->mockAddPermission($this->never(), "Foo")
                                 ->mockGetPermissions($this->once(), ["Foo", "Bar"], $permissions)
                                 ->mockGetPermission($this->once(), "Foo", $permission)
                                 ->mockHasPermission($this->once(), "Foo", true)
+                                ->mockGetEntities($this->exactly(1), ["Foo" => $entityFoo, "Bar" => $entityBar])
+                                ->mockGetEntity($this->exactly(1), "Foo", $entityFoo)
                                 ->mockGetBehaviour($this->once(), ResourceInterface::BLACKLIST)
                             ->finalizeMock();     
     }

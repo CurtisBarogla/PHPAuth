@@ -19,6 +19,8 @@ use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
 
 /**
  * Responsible to mock resource
@@ -271,6 +273,117 @@ class ResourceMock extends MockGeneration
         };
         
         return $this->executeMock("hasPermission", $mock);
+    }
+    
+    /**
+     * Mock addEntity().
+     * Will throw \BadMethodCallException if Resource type given is ImmutableResourceInterface
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param EntityInterface $entity
+     *   Entity to add
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddEntity(MethodCount $count, EntityInterface $entity): self
+    {
+        $mock = function(string $method) use ($entity, $count) {
+            $return = ($this->objectName === ImmutableResourceInterface::class) ? $this->throwException(new \BadMethodCallException()) : $this->returnValue(null);
+            $this->mock->expects($count)->method($method)->with($entity)->will($return);
+        };
+        
+        return $this->executeMock("addEntity", $mock);
+    }
+    
+    /**
+     * Mock addEntity() with consecutive calls.
+     * Will throw \BadMethodCallException if Resource type given is ImmutableResourceInterface
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $permissions
+     *   Arrays of array containing all params for each call
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockAddEntity_consecutive(MethodCount $count, array $entities): self
+    {
+        $mock = function(string $method) use ($entities, $count) {
+            $values = \array_fill(0, \count($entities), $this->returnValue(null));
+            $return = ($this->objectName === ImmutableResourceInterface::class) ? $this->throwException(new \BadMethodCallException()) : $values;
+            $this->mock->expects($count)->method($method)->withConsecutive(...$entities)->willReturnOnConsecutiveCalls($return);
+        };
+        
+        return $this->executeMock("addEntity", $mock);
+    }
+    
+    /**
+     * Mock getEntities()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array $entities
+     *   Entities returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetEntities(MethodCount $count, array $entities): self
+    {
+        $mock = function(string $method) use ($entities, $count) {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($entities));
+        };
+        
+        return $this->executeMock("getEntities", $mock);
+    }
+    
+    /**
+     * Mock getEntity()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param string $entity
+     *   Entity name
+     * @param EntityInterface|null $entityReturned
+     *   Entity returned. Set to null ti simultate an exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetEntity(MethodCount $count, string $entity, ?EntityInterface $entityReturned): self
+    {
+        $mock = function(string $method) use ($entity, $entityReturned, $count) {
+            $return = $this->stubThrowableOnNull(new InvalidEntityException(), $entityReturned);
+            $this->mock->expects($count)->method($method)->with($entity)->will($return);
+        };
+        
+        return $this->executeMock("getEntity", $mock);
+    }
+    
+    /**
+     * Mock getEntity() with consecutive calls
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param array[array] $permissions
+     *   Arrays of array containing all params for each call
+     * @param EntityInterface|null ... $entitiesReturned
+     *   Entity returned on each call. Set to null to simulate an exception
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetEntity_consecutive(MethodCount $count, array $entities, ?EntityInterface ...$entitiesReturned): self
+    {
+        $mock = function(string $method) use ($entities, $entitiesReturned, $count) {
+            $return = $this->stubThrowableOnNull(new InvalidEntityException(), ...$entitiesReturned);
+            $this->mock->expects($count)->method($method)->withConsecutive(...$entities)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock("getEntity", $mock);
     }
     
     /**
