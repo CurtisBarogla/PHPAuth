@@ -13,6 +13,7 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Acl\Mask;
 
 use Zoe\Component\Security\Exception\Acl\InvalidMaskException;
+use Zoe\Component\Security\Common\JsonSerializable;
 
 /**
  * Collection of masks
@@ -20,7 +21,7 @@ use Zoe\Component\Security\Exception\Acl\InvalidMaskException;
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
  */
-class MaskCollection implements \JsonSerializable, \IteratorAggregate, \Countable
+class MaskCollection implements JsonSerializable, \IteratorAggregate, \Countable
 {
     
     /**
@@ -151,13 +152,11 @@ class MaskCollection implements \JsonSerializable, \IteratorAggregate, \Countabl
     }
     
     /**
-     * Restore a MaskCollection from his json representation
-     * 
-     * @param string|array $json
-     *   Array or string json representation of the collection to restore
-     *   
      * @return MaskCollection
-     *   Restored user 
+     *   MaskCollection restored
+     * 
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Common\JsonSerializable::restoreFromJson()
      */
     public static function restoreFromJson($json): MaskCollection
     {
@@ -165,7 +164,7 @@ class MaskCollection implements \JsonSerializable, \IteratorAggregate, \Countabl
             $json = \json_decode($json, true);
         
         $collection = new MaskCollection($json["identifier"]);
-        $collection->masks = \array_map(function(array $mask) {
+        $collection->masks = \array_map(function(array $mask): Mask {
             return new Mask($mask["identifier"], $mask["value"]);
         }, $json["masks"]);
         
