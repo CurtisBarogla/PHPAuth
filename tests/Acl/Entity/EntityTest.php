@@ -13,14 +13,14 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Acl\Entity;
 
 use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
+use Zoe\Component\Internal\GeneratorTrait;
 use Zoe\Component\Security\Acl\Entity\Entity;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareInterface;
 use Zoe\Component\Security\Common\JsonSerializable;
-use Zoe\Component\Internal\GeneratorTrait;
-use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * Entity testcase
@@ -204,7 +204,7 @@ class EntityTest extends TestCase
      */
     public function testExceptionGetWhenEntityValueIsInvalidWhenAResourceIsLinked(): void
     {
-        $this->expectException(InvalidEntityException::class);
+        $this->expectException(InvalidEntityValueException::class);
         $this->expectExceptionMessage("This value 'Foo' for entity 'Bar' linked to 'Moz' resource is invalid");
         
         $resource = ResourceMock::init("ResourceLinkedToEntityForExceptionTest", ImmutableResourceInterface::class)
@@ -221,7 +221,7 @@ class EntityTest extends TestCase
      */
     public function testExceptionGetWhenEntityValueIsInvalidWhenAResouceIsNotLinked(): void
     {
-        $this->expectException(InvalidEntityException::class);
+        $this->expectException(InvalidEntityValueException::class);
         $this->expectExceptionMessage("This value 'Foo' for entity 'Bar' not linked is invalid");
         
         $entity = new Entity("Bar");

@@ -12,10 +12,10 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl\Entity;
 
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareTrait;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * Native implementation of EntityInterface
@@ -115,8 +115,10 @@ class Entity implements EntityInterface, ResourceAwareInterface
                         $this->identifier,
                         $this->getResource()->getName());
             
-            throw new InvalidEntityException($message);
+            $exception = new InvalidEntityValueException($message);
+            $exception->setInvalidValue($value);
             
+            throw $exception;
         }
             
         return $this->values[$value];

@@ -13,9 +13,9 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\MockGeneration\Tests\Acl;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Internal\GeneratorTrait;
 use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Internal\GeneratorTrait;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * EntityMock testcase
@@ -118,7 +118,7 @@ class EntityMockTest extends TestCase
         
         $this->assertSame(["Foo", "Bar"], $entity->get("Foo"));
         
-        $this->expectException(InvalidEntityException::class);
+        $this->expectException(InvalidEntityValueException::class);
         $entity = EntityMock::init("Foo")->mockGet($this->once(), "Foo", null)->finalizeMock();
         
         $entity->get("Foo");
@@ -139,7 +139,7 @@ class EntityMockTest extends TestCase
         $this->assertSame(["Foo", "Bar"], $entity->get("Foo"));
         $this->assertSame(["Moz", "Poz"], $entity->get("Bar"));
         
-        $this->expectException(InvalidEntityException::class);
+        $this->expectException(InvalidEntityValueException::class);
         $entity = EntityMock::init("Foo")
                                 ->mockGet_consecutive(
                                     $this->exactly(2), 

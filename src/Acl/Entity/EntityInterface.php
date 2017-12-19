@@ -13,8 +13,8 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Acl\Entity;
 
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
 use Zoe\Component\Security\Common\JsonSerializable;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * Entities are linked to resource.
@@ -57,7 +57,7 @@ interface EntityInterface extends JsonSerializable, \IteratorAggregate
      * @return array
      *   Array of permissions associated to this value
      *   
-     * @throws InvalidEntityException
+     * @throws InvalidEntityValueException
      *   If the entity value if not registered
      */
     public function get(string $value): array;

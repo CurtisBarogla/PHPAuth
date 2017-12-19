@@ -14,8 +14,8 @@ namespace ZoeTest\Component\Security\MockGeneration\Acl;
 
 use ZoeTest\Component\Security\MockGeneration\MockGeneration;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
-use \PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
+use PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
 
 /**
  * Responsible to mock entity
@@ -156,7 +156,7 @@ class EntityMock extends MockGeneration
     public function mockGet(MethodCount $count, string $value, ?array $permissionsReturned): self
     {
         $mock = function(string $method) use ($value, $permissionsReturned, $count): void {
-            $return = $this->stubThrowableOnNull(new InvalidEntityException(), $permissionsReturned);
+            $return = $this->stubThrowableOnNull(new InvalidEntityValueException(), $permissionsReturned);
             $this->mock->expects($count)->method($method)->with($value)->will($return);
         };
         
@@ -179,7 +179,7 @@ class EntityMock extends MockGeneration
     public function mockGet_consecutive(MethodCount $count, array $values, ?array ...$permissionsReturned): self
     {
         $mock = function(string $method) use ($values, $permissionsReturned, $count): void {
-            $return = $this->stubThrowableOnNull(new InvalidEntityException(), ...$permissionsReturned);
+            $return = $this->stubThrowableOnNull(new InvalidEntityValueException(), ...$permissionsReturned);
             $this->mock->expects($count)->method($method)->withConsecutive(...$values)->willReturnOnConsecutiveCalls(...$return);
         };
         
