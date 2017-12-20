@@ -13,14 +13,13 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\MockGeneration\Acl;
 
 use ZoeTest\Component\Security\MockGeneration\MockGeneration;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use \PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
-use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\Acl\Mask\Mask;
-use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
 
 /**
  * Responsible to mock resource
@@ -32,40 +31,23 @@ class ResourceMock extends MockGeneration
 {
     
     /**
-     * Resource types
-     * 
-     * @var array
-     */
-    private const RESOURCE_TYPES = [
-        ResourceInterface::class,
-        ImmutableResourceInterface::class
-    ];
-    
-    /**
      * Initialize a new resource mocked generation
      *
      * @param string $mockId
      *   Mock id
-     * @param string $type
-     *   Resource type to mock (ResourceInterface or ImmutableResourceInterface)
      *
      * @return ResourceMock
      *   New resource mock generation
      */
-    public static function init(string $mockId, string $type): ResourceMock
-    {
-        if(!\in_array($type, self::RESOURCE_TYPES))
-            throw new \LogicException(\sprintf("Given resource type '%s' is invalid. Use : '%s'",
-                $type,
-                \implode(" | ", self::RESOURCE_TYPES)));
-        
-        return new ResourceMock($mockId, $type);
+    public static function init(string $mockId): ResourceMock
+    {   
+        return new ResourceMock($mockId, ResourceInterface::class);
     }
     
     /**
      * Finalize the mocked resource
      *
-     * @return ResourceInterface|ImmutableResourceInterface
+     * @return ResourceInterface
      *   Mocked resource
      */
     public function finalizeMock(): ResourceInterface
@@ -91,52 +73,6 @@ class ResourceMock extends MockGeneration
         };
         
         return $this->executeMock("getName", $mock);
-    }
-    
-    /**
-     * Mock addPermission()
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param string $permission
-     *   Permission name
-     *
-     * @return self
-     *   Fluent
-     */
-    public function mockAddPermission(MethodCount $count, string $permission): self
-    {
-        $mock = function(string $method) use ($permission, $count) {
-            if($this->objectName === ImmutableResourceInterface::class)
-                $this->mock->expects($count)->method($method)->with($permission)->will($this->throwException(new \BadMethodCallException()));
-            else
-                $this->mock->expects($count)->method($method)->with($permission)->will($this->returnValue(null));
-        };
-        
-        return $this->executeMock("addPermission", $mock);
-    }
-    
-    /**
-     * Mock addPermission() with consecutive calls
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param array[array] $permissions
-     *   Arrays of array containing all params for each call 
-     * 
-     * @return self
-     *   Fluent
-     */
-    public function mockAddPermission_consecutive(MethodCount $count, array $permissions): self
-    {
-        $mock = function(string $method) use ($permissions, $count) {
-            if($this->objectName === ImmutableResourceInterface::class)
-                $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->will($this->throwException(new \BadMethodCallException()));
-            else
-                $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->willReturnOnConsecutiveCalls($this->returnValue(null)); 
-        };
-        
-        return $this->executeMock("addPermission", $mock);
     }
     
     /**
@@ -294,51 +230,6 @@ class ResourceMock extends MockGeneration
         };
         
         return $this->executeMock("hasPermission", $mock);
-    }
-    
-    /**
-     * Mock addEntity().
-     * Will throw \BadMethodCallException if Resource type given is ImmutableResourceInterface
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param EntityInterface $entity
-     *   Entity to add
-     *
-     * @return self
-     *   Fluent
-     */
-    public function mockAddEntity(MethodCount $count, EntityInterface $entity): self
-    {
-        $mock = function(string $method) use ($entity, $count) {
-            $return = ($this->objectName === ImmutableResourceInterface::class) ? $this->throwException(new \BadMethodCallException()) : $this->returnValue(null);
-            $this->mock->expects($count)->method($method)->with($entity)->will($return);
-        };
-        
-        return $this->executeMock("addEntity", $mock);
-    }
-    
-    /**
-     * Mock addEntity() with consecutive calls.
-     * Will throw \BadMethodCallException if Resource type given is ImmutableResourceInterface
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param array[array] $permissions
-     *   Arrays of array containing all params for each call
-     *
-     * @return self
-     *   Fluent
-     */
-    public function mockAddEntity_consecutive(MethodCount $count, array $entities): self
-    {
-        $mock = function(string $method) use ($entities, $count) {
-            $values = \array_fill(0, \count($entities), $this->returnValue(null));
-            $return = ($this->objectName === ImmutableResourceInterface::class) ? $this->throwException(new \BadMethodCallException()) : $values;
-            $this->mock->expects($count)->method($method)->withConsecutive(...$entities)->willReturnOnConsecutiveCalls($return);
-        };
-        
-        return $this->executeMock("addEntity", $mock);
     }
     
     /**

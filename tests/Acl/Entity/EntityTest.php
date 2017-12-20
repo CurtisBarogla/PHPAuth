@@ -17,8 +17,8 @@ use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
 use Zoe\Component\Internal\GeneratorTrait;
 use Zoe\Component\Security\Acl\Entity\Entity;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareInterface;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Common\JsonSerializable;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
@@ -143,7 +143,7 @@ class EntityTest extends TestCase
      */
     public function testGetResource(): void
     {
-        $resource = ResourceMock::init("ResourceLinkedToEntity", ImmutableResourceInterface::class)->finalizeMock();
+        $resource = ResourceMock::init("ResourceLinkedToEntity")->finalizeMock();
         
         $entity = new Entity("Foo");
         $entity->setResource($resource);
@@ -182,24 +182,6 @@ class EntityTest extends TestCase
                     /**_____EXCEPTIONS_____**/
     
     /**
-     * @see \Zoe\Component\Security\Acl\Entity\Entity::add()
-     */
-    public function testExceptionAddWhenResourceIsImmutable(): void
-    {
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage("Cannot add value to this entity 'Foo' as the resource linked 'Bar' is in an immutable state");
-        
-        $resource = ResourceMock::init("ResourceLinkedToEntityForExceptionTest", ImmutableResourceInterface::class)
-                                    ->mockGetName($this->once(), "Bar")
-                                ->finalizeMock();
-        
-        $entity = new Entity("Foo");
-        $entity->setResource($resource);
-        
-        $entity->add("Foo", ["Foo", "Bar"]);
-    }
-    
-    /**
      * @see \Zoe\Component\Security\Acl\Entity\Entity::get()
      */
     public function testExceptionGetWhenEntityValueIsInvalidWhenAResourceIsLinked(): void
@@ -207,7 +189,7 @@ class EntityTest extends TestCase
         $this->expectException(InvalidEntityValueException::class);
         $this->expectExceptionMessage("This value 'Foo' for entity 'Bar' linked to 'Moz' resource is invalid");
         
-        $resource = ResourceMock::init("ResourceLinkedToEntityForExceptionTest", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("ResourceLinkedToEntityForExceptionTest", ResourceInterface::class)
                                     ->mockGetName($this->once(), "Moz")
                                 ->finalizeMock();
         

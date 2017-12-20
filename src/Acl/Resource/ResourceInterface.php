@@ -61,17 +61,6 @@ interface ResourceInterface extends JsonSerializable
     public function getName(): string;
     
     /**
-     * Add a permission
-     * 
-     * @param string $permission
-     *   Permission name
-     *   
-     * @throws \LogicException
-     *   When max permissions count is reached
-     */
-    public function addPermission(string $permission): void;
-    
-    /**
      * Get all permissions associated to this resource, or only defined ones
      * 
      * @param array|null $permissions
@@ -109,14 +98,6 @@ interface ResourceInterface extends JsonSerializable
      *   True if the permission is setted. False otherwise
      */
     public function hasPermission(string $permission): bool;
-    
-    /**
-     * Add an entity to the resource
-     * 
-     * @param EntityInterface $entity
-     *   Resource entity
-     */
-    public function addEntity(EntityInterface $entity): void;
     
     /**
      * Get all entities registered for this resource

@@ -85,9 +85,15 @@ class Resource implements ResourceInterface
         return $this->name;
     }
 
+    
     /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::addPermission()
+     * Add a permission for the resource
+     * 
+     * @param string $permission
+     *   Permission name
+     * 
+     * @throws \LogicException
+     *   When the permission cannot be added
      */
     public function addPermission(string $permission): void
     {
@@ -150,8 +156,10 @@ class Resource implements ResourceInterface
     }
     
     /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::addEntity()
+     * Register an entity into the resource
+     * 
+     * @param EntityInterface $entity
+     *   Entity instance
      */
     public function addEntity(EntityInterface $entity): void
     {

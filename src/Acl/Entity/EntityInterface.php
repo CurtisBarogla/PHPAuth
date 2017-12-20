@@ -35,20 +35,6 @@ interface EntityInterface extends JsonSerializable, \IteratorAggregate
     public function getIdentifier(): string;
     
     /**
-     * Add a value to the entity
-     * 
-     * @param string $entity
-     *   Entity name
-     * @param array $permissions
-     *   Permissions accorded to this value 
-     *   (all permissions defined must refer existing one from the resource which the entity is associated)
-     *   
-     * @throws \BadMethodCallException
-     *   If the resoure which the entity is linked is immutable
-     */
-    public function add(string $value, array $permissions): void;
-    
-    /**
      * Get a value from the entity
      * 
      * @param string $entity

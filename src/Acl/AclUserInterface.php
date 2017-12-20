@@ -12,7 +12,7 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl;
 
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
 
 /**
@@ -29,21 +29,21 @@ interface AclUserInterface extends AuthenticatedUserInterface
     /**
      * Grant some permissions over a resource
      * 
-     * @param ImmutableResourceInterface $resource
+     * @param ResourceInterface $resource
      *   Resource which permissions are granted
      * @param array $permissions
      *   Permissions to grant. Can be raw permissions setted into the resource or values setted into a resource entity
      */
-    public function grant(ImmutableResourceInterface $resource, array $permissions): void;
+    public function grant(ResourceInterface $resource, array $permissions): void;
     
     /**
      * Deny some permissions over a resource
      *
-     * @param ImmutableResourceInterface $resource
+     * @param ResourceInterface $resource
      *   Resource which permissions are granted
      * @param array $permissions
      *   Permissions to deny. Can be raw permissions setted into the resource or values setted into a resource entity
      */
-    public function deny(ImmutableResourceInterface $resource, array $permissions): void; 
+    public function deny(ResourceInterface $resource, array $permissions): void; 
     
 }

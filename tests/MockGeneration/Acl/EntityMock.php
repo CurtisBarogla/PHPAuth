@@ -92,55 +92,6 @@ class EntityMock extends MockGeneration
     }
     
     /**
-     * Mock add()
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param string $value
-     *   Value to add
-     * @param array $permissions
-     *   Permissions for this value
-     * @param bool $exceptionOnImmutable
-     *   Set to true to simulate exception from an immutable state
-     *
-     * @return self
-     *   Fluent
-     */
-    public function mockAdd(MethodCount $count, string $value, array $permissions, bool $exceptionOnImmutable = false): self
-    {
-        $mock = function(string $method) use ($value, $permissions, $exceptionOnImmutable, $count): void {
-            $return = $this->stubThrowableOnBool(new \BadMethodCallException(), [$this->returnValue(null)], $exceptionOnImmutable);
-            $this->mock->expects($count)->method($method)->with($value, $permissions)->will($return);
-        };
-        
-        return $this->executeMock("add", $mock);
-    }
-    
-    /**
-     * Mock add() with consecutive calls
-     *
-     * @param MethodCount $count
-     *   Called count
-     * @param array[array] $valuesAndPermissions
-     *   Arrays of array containing all params for each call
-     * @param bool ...$exceptionsOnImmutable
-     *   If an exception must be thrown on a call
-     *
-     * @return self
-     *   Fluent
-     */
-    public function mockAdd_consecutive(MethodCount $count, array $valuesAndPermissions, bool ...$exceptionsOnImmutable): self
-    {
-        $mock = function(string $method) use ($valuesAndPermissions, $exceptionsOnImmutable, $count): void {
-            $values = \array_fill(0, \count($valuesAndPermissions), $this->returnValue(null));
-            $return = $this->stubThrowableOnBool(new \BadMethodCallException(), $values, ...$exceptionsOnImmutable);
-            $this->mock->expects($count)->method($method)->withConsecutive(...$valuesAndPermissions)->willReturnOnConsecutiveCalls(...$return);
-        };
-        
-        return $this->executeMock("add", $mock);
-    }
-    
-    /**
      * Mock get()
      *
      * @param MethodCount $count

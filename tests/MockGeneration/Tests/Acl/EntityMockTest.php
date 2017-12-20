@@ -62,54 +62,6 @@ class EntityMockTest extends TestCase
     }
     
     /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockAdd()
-     */
-    public function testMockAdd(): void
-    {
-        $entity = EntityMock::init("Foo")->mockAdd($this->once(), "Foo", ["Foo", "Bar"])->finalizeMock();
-        
-        $this->assertNull($entity->add("Foo", ["Foo", "Bar"]));
-        
-        $this->expectException(\BadMethodCallException::class);
-        $entity = EntityMock::init("Foo")->mockAdd($this->once(), "Foo", ["Foo", "Bar"], true)->finalizeMock();
-        
-        $entity->add("Foo", ["Foo", "Bar"]);
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockAdd_consecutive()
-     */
-    public function testMockAdd_consecutive(): void
-    {
-        $entity = EntityMock::init("Foo")
-                                ->mockAdd_consecutive(
-                                    $this->exactly(2), 
-                                    [
-                                        ["Foo", ["Foo", "Bar"]],
-                                        ["Bar", ["Moz", "Poz"]]
-                                    ], 
-                                    false, false)
-                            ->finalizeMock();
-        
-        $this->assertNull($entity->add("Foo", ["Foo", "Bar"]));
-        $this->assertNull($entity->add("Bar", ["Moz", "Poz"]));
-        
-        $this->expectException(\BadMethodCallException::class);
-        $entity = EntityMock::init("Foo")
-                                ->mockAdd_consecutive(
-                                    $this->exactly(2),
-                                    [
-                                        ["Foo", ["Foo", "Bar"]],
-                                        ["Bar", ["Moz", "Poz"]]
-                                    ],
-                                    false, true)
-                            ->finalizeMock();
-                                    
-        $this->assertNull($entity->add("Foo", ["Foo", "Bar"]));
-        $entity->add("Bar", ["Moz", "Poz"]);
-    }
-    
-    /**
      * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockGet()
      */
     public function testMockGet(): void

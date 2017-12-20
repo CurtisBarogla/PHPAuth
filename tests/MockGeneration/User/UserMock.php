@@ -13,16 +13,16 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\MockGeneration\User;
 
 use ZoeTest\Component\Security\MockGeneration\MockGeneration;
-use \PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
-use Zoe\Component\Security\User\UserInterface;
-use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
-use Zoe\Component\Security\User\AuthenticationUserInterface;
-use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
-use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
-use Zoe\Component\Security\User\AuthenticatedUserInterface;
 use Zoe\Component\Security\Acl\AclUserInterface;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
+use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
+use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
+use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use Zoe\Component\Security\User\AuthenticationUserInterface;
+use Zoe\Component\Security\User\UserInterface;
+use PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
 
 /**
  * Responsible to mock user objects
@@ -910,7 +910,7 @@ class UserMock extends MockGeneration
      *
      * @param MethodCount $count
      *   Called count
-     * @param ImmutableResourceInterface $resource
+     * @param ResourceInterface $resource
      *   Mocked resource
      * @param array $permissions
      *   Permissions to grant
@@ -920,7 +920,7 @@ class UserMock extends MockGeneration
      * @return self
      *   Fluent
      */
-    public function mockGrant(MethodCount $count, ImmutableResourceInterface $resource, array $permissions, bool $exception): self
+    public function mockGrant(MethodCount $count, ResourceInterface $resource, array $permissions, bool $exception): self
     {
         $method = "grant";
         $this->checkUser([AclUserInterface::class], $method);
@@ -964,7 +964,7 @@ class UserMock extends MockGeneration
      *
      * @param MethodCount $count
      *   Called count
-     * @param ImmutableResourceInterface $resource
+     * @param ResourceInterface $resource
      *   Mocked resource
      * @param array $permissions
      *   Permissions to deny
@@ -974,7 +974,7 @@ class UserMock extends MockGeneration
      * @return self
      *   Fluent
      */
-    public function mockDeny(MethodCount $count, ImmutableResourceInterface $resource, array $permissions, bool $exception): self
+    public function mockDeny(MethodCount $count, ResourceInterface $resource, array $permissions, bool $exception): self
     {
         $method = "deny";
         $this->checkUser([AclUserInterface::class], $method);

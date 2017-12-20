@@ -13,14 +13,13 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\MockGeneration\Tests\Acl;
 
 use PHPUnit\Framework\TestCase;
-use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
-use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
-use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
-use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
-use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
+use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
+use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
+use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 
 /**
  * ResourceMock testcase
@@ -41,37 +40,7 @@ class ResourceMockTest extends TestCase
         $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetName($this->once(), "Foo")->finalizeMock();
         
         $this->assertSame("Foo", $resource->getName());
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockAddPermission()
-     */
-    public function testMockAddPermission(): void
-    {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockAddPermission($this->once(), "Foo")->finalizeMock();
-        
-        $this->assertNull($resource->addPermission("Foo"));
-        
-        $this->expectException(\BadMethodCallException::class);
-        
-        $resource = ResourceMock::init("Foo", ImmutableResourceInterface::class)->mockAddPermission($this->once(), "Foo")->finalizeMock();
-        $resource->addPermission("Foo");
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockAddPermission_consecutive()
-     */
-    public function testMockAddPermission_consecutive(): void
-    {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockAddPermission_consecutive($this->exactly(2), [["Foo"], ["Bar"]])->finalizeMock();
-        
-        $this->assertNull($resource->addPermission("Foo"));
-        $this->assertNull($resource->addPermission("Bar"));
-        
-        $this->expectException(\BadMethodCallException::class);
-        $resource = ResourceMock::init("Foo", ImmutableResourceInterface::class)->mockAddPermission_consecutive($this->exactly(1), [["Foo"], ["Bar"]])->finalizeMock();
-        $resource->addPermission("Foo");
-    }   
+    }  
     
     /**
      * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermissions()
@@ -283,47 +252,6 @@ class ResourceMockTest extends TestCase
     }
     
     /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockAddEntity()
-     */
-    public function testAddEntity(): void
-    {
-        $entity = EntityMock::init("EntityAdded")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockAddEntity($this->once(), $entity)->finalizeMock();
-        
-        $this->assertNull($resource->addEntity($entity));
-        
-        $this->expectException(\BadMethodCallException::class);
-        $resource = ResourceMock::init("Foo", ImmutableResourceInterface::class)->mockAddEntity($this->once(), $entity)->finalizeMock();
-        
-        $resource->addEntity($entity);
-    }
-    
-    /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockAddEntity_consecutive()
-     */
-    public function testAddEntity_consecutive(): void
-    {
-        $entityFoo = EntityMock::init("EntityFooAdded")->finalizeMock();
-        $entityBar = EntityMock::init("EntityBarAdded")->finalizeMock();
-        
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
-                                    ->mockAddEntity_consecutive(
-                                        $this->exactly(2), 
-                                        [[$entityFoo], [$entityBar]])
-                                ->finalizeMock();
-        
-        $this->assertNull($resource->addEntity($entityFoo));
-        $this->assertNull($resource->addEntity($entityBar));
-        
-        $this->expectException(\BadMethodCallException::class);
-        $resource = ResourceMock::init("Foo", ImmutableResourceInterface::class)
-                                    ->mockAddEntity_consecutive($this->exactly(1), [[$entityFoo]])    
-                                ->finalizeMock();
-        
-        $resource->addEntity($entityFoo);
-    }
-    
-    /**
      * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetEntities()
      */
     public function testGetEntities(): void
@@ -399,19 +327,6 @@ class ResourceMockTest extends TestCase
         $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetBehaviour($this->once(), ResourceInterface::BLACKLIST)->finalizeMock();
         
         $this->assertSame(ResourceInterface::BLACKLIST, $resource->getBehaviour());
-    }
-    
-                    /**_____EXCEPTIONS_____**/
-    
-    /**
-     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::init()
-     */
-    public function testExceptionOnInvalidResourceType(): void
-    {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage("Given resource type 'Foo' is invalid. Use : 'Zoe\Component\Security\Acl\Resource\ResourceInterface | Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface'");
-        
-        $resource = ResourceMock::init("Foo", "Foo");
     }
     
 }

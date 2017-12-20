@@ -13,10 +13,10 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Acl;
 
 use Zoe\Component\Security\Acl\Mask\Mask;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
-use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * AclUser interacts directly with an Acl.
@@ -160,7 +160,7 @@ class AclUser implements AclUserInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\AclUserInterface::grant()
      */
-    public function grant(ImmutableResourceInterface $resource, array $permissions): void
+    public function grant(ResourceInterface $resource, array $permissions): void
     {
         $this->set($resource, $permissions, "add");
     }
@@ -169,7 +169,7 @@ class AclUser implements AclUserInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\AclUserInterface::deny()
      */
-    public function deny(ImmutableResourceInterface $resource, array $permissions): void
+    public function deny(ResourceInterface $resource, array $permissions): void
     {
         $this->set($resource, $permissions, "sub");
     }
@@ -198,7 +198,7 @@ class AclUser implements AclUserInterface
     /**
      * Proceed attribution
      * 
-     * @param ImmutableResourceInterface $resource
+     * @param ResourceInterface $resource
      *   Resource 
      * @param array $permissions
      *   Permissions applied
@@ -208,7 +208,7 @@ class AclUser implements AclUserInterface
      * @throws InvalidPermissionException
      *   When error happen during attribute process
      */
-    private function set(ImmutableResourceInterface $resource, array $permissions, string $method): void
+    private function set(ResourceInterface $resource, array $permissions, string $method): void
     {
         foreach ($permissions as $permission) {
             try {

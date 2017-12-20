@@ -12,7 +12,6 @@ declare(strict_types = 1);
 
 namespace Zoe\Component\Security\Acl\Entity;
 
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareInterface;
 use Zoe\Component\Security\Acl\Resource\ResourceAwareTrait;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
@@ -86,16 +85,15 @@ class Entity implements EntityInterface, ResourceAwareInterface
     }
     
     /**
-     * {@inheritDoc}
-     * @see \Zoe\Component\Security\Acl\Entity\EntityInterface::add()
+     * Add a value to the entity
+     * 
+     * @param string $entity
+     *   Entity name
+     * @param array $permissions
+     *   Permissions accorded to this value
      */
     public function add(string $value, array $permissions): void
     {
-        if($this->resource instanceof ImmutableResourceInterface)
-            throw new \BadMethodCallException(\sprintf("Cannot add value to this entity '%s' as the resource linked '%s' is in an immutable state",
-                $this->identifier,
-                $this->resource->getName()));
-        
         $this->values[$value] = $permissions;
     }
 

@@ -14,16 +14,15 @@ namespace ZoeTest\Component\Security\Acl;
 
 use PHPUnit\Framework\TestCase;
 use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
+use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
 use ZoeTest\Component\Security\MockGeneration\User\UserMock;
 use Zoe\Component\Internal\ReflectionTrait;
 use Zoe\Component\Security\Acl\AclUser;
 use Zoe\Component\Security\Acl\Mask\Mask;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
-use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
 
 /**
  * AclUser testcase
@@ -163,7 +162,7 @@ class AclUserTest extends TestCase
         $collection = MaskCollectionMock::init("BarMozPermissionCollection")
                                             ->mockTotal($this->once(), null, null, $barMozPermission)
                                         ->finalizeMock();
-        $resource = ResourceMock::init("FooResource", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("FooResource")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["BAR"]], 
@@ -198,7 +197,7 @@ class AclUserTest extends TestCase
         $collection = MaskCollectionMock::init("BarMozPermissionCollection")
                                             ->mockTotal($this->once(), null, null, $barMozPermission)
                                         ->finalizeMock();
-        $resource = ResourceMock::init("FooResource", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("FooResource")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2),
                                         [["Foo"], ["BAR"]],
@@ -224,7 +223,7 @@ class AclUserTest extends TestCase
         $fooEntity = EntityMock::init("FooEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
         $barEntity = EntityMock::init("BarEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
 
-        $resource = ResourceMock::init("ResourceFoo", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("ResourceFoo")
                                     ->mockGetName($this->once(), "FooResource")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
@@ -251,7 +250,7 @@ class AclUserTest extends TestCase
         $fooEntity = EntityMock::init("FooEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
         $barEntity = EntityMock::init("BarEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
         
-        $resource = ResourceMock::init("ResourceFoo", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("ResourceFoo")
                                     ->mockGetName($this->once(), "FooResource")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2),
@@ -275,7 +274,7 @@ class AclUserTest extends TestCase
     {
         $this->expectException(InvalidPermissionException::class);
         $this->expectExceptionMessage("Permission 'Moz' not found into resource 'Bar' for user 'Foo'");
-        $resource = ResourceMock::init("ResourceNoEntityGrant", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("ResourceNoEntityGrant")
                                     ->mockGetPermission($this->once(), "Moz", null)
                                     ->mockGetName($this->once(), "Bar")
                                 ->finalizeMock();
@@ -291,7 +290,7 @@ class AclUserTest extends TestCase
     {
         $this->expectException(InvalidPermissionException::class);
         $this->expectExceptionMessage("Permission 'Moz' not found into resource 'Bar' for user 'Foo'");
-        $resource = ResourceMock::init("ResourceNoEntityDeny", ImmutableResourceInterface::class)
+        $resource = ResourceMock::init("ResourceNoEntityDeny")
                                     ->mockGetPermission($this->once(), "Moz", null)
                                     ->mockGetName($this->once(), "Bar")
                                 ->finalizeMock();
