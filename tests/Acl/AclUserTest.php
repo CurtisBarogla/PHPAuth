@@ -13,16 +13,17 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Acl;
 
 use PHPUnit\Framework\TestCase;
-use Zoe\Component\Security\User\AuthenticatedUserInterface;
-use ZoeTest\Component\Security\MockGeneration\User\UserMock;
-use Zoe\Component\Security\Acl\AclUser;
-use Zoe\Component\Security\Acl\Mask\Mask;
+use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
-use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
-use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use ZoeTest\Component\Security\MockGeneration\User\UserMock;
 use Zoe\Component\Internal\ReflectionTrait;
+use Zoe\Component\Security\Acl\AclUser;
+use Zoe\Component\Security\Acl\Mask\Mask;
+use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use ZoeTest\Component\Security\MockGeneration\Acl\MaskCollectionMock;
 
 /**
  * AclUser testcase
@@ -146,21 +147,34 @@ class AclUserTest extends TestCase
      */
     public function testGrant(): void
     {
-        $permission = MaskMock::init("PermissionMask")
-                                ->mockGetValue($this->once(), 5)
-                            ->finalizeMock();
-        $permissionUserMask = MaskMock::init("UserPermissionMask")
-                                        ->mockAdd($this->once(), $permission)
+        $fooPermission = MaskMock::init("FooPermission")->finalizeMock();
+        $barMozPermission = MaskMock::init("BarMozPermission")->finalizeMock();
+        $userPermission = MaskMock::init("UserPermission")
+                                        ->mockAdd_consecutive(
+                                            $this->exactly(2), 
+                                            [[$fooPermission], [$barMozPermission]])
                                     ->finalizeMock();
-        $permissions = MaskCollectionMock::init("ResourceGrantTestPermissions")
-                                            ->mockTotal($this->once(), null, null, $permission)
+        $fooEntity = EntityMock::init("FooEntity")
+                                    ->mockGet($this->once(), "BAR", null)            
+                                ->finalizeMock();
+        $barEntity = EntityMock::init("BarEntity")
+                                    ->mockGet($this->once(), "BAR", ["Bar", "Moz"])
+                                ->finalizeMock();
+        $collection = MaskCollectionMock::init("BarMozPermissionCollection")
+                                            ->mockTotal($this->once(), null, null, $barMozPermission)
                                         ->finalizeMock();
-        $resource = ResourceMock::init("ResourceGrantTest", ImmutableResourceInterface::class)
-                                    ->mockGetPermissions($this->once(), ["Foo", "Bar"], $permissions)
+        $resource = ResourceMock::init("FooResource", ImmutableResourceInterface::class)
+                                    ->mockGetPermission_consecutive(
+                                        $this->exactly(2), 
+                                        [["Foo"], ["BAR"]], 
+                                        null,
+                                        $fooPermission, null)
+                                    ->mockGetEntities($this->once(), [$fooEntity, $barEntity])
+                                    ->mockGetPermissions($this->once(), ["Bar", "Moz"], $collection)
                                 ->finalizeMock();
         
-        $user = new AclUser($permissionUserMask, $this->getMockAuthenticatedUser());
-        $this->assertNull($user->grant($resource, ["Foo", "Bar"]));
+        $user = new AclUser($userPermission, $this->getMockAuthenticatedUser());
+        $this->assertNull($user->grant($resource, ["Foo", "BAR"]));
     }
     
     /**
@@ -168,21 +182,34 @@ class AclUserTest extends TestCase
      */
     public function testDeny(): void
     {
-        $permission = MaskMock::init("PermissionMask")
-                                ->mockGetValue($this->once(), 5)
-                            ->finalizeMock();
-        $permissionUserMask = MaskMock::init("UserPermissionMask")
-                                        ->mockSub($this->once(), $permission)
+        $fooPermission = MaskMock::init("FooPermission")->finalizeMock();
+        $barMozPermission = MaskMock::init("BarMozPermission")->finalizeMock();
+        $userPermission = MaskMock::init("UserPermission")
+                                        ->mockSub_consecutive(
+                                            $this->exactly(2),
+                                            [[$fooPermission], [$barMozPermission]])
                                     ->finalizeMock();
-        $permissions = MaskCollectionMock::init("ResourceGrantTestPermissions")
-                                            ->mockTotal($this->once(), null, null, $permission)
-                                        ->finalizeMock();
-        $resource = ResourceMock::init("ResourceGrantTest", ImmutableResourceInterface::class)
-                                    ->mockGetPermissions($this->once(), ["Foo", "Bar"], $permissions)
+        $fooEntity = EntityMock::init("FooEntity")
+                                    ->mockGet($this->once(), "BAR", null)
                                 ->finalizeMock();
-        
-        $user = new AclUser($permissionUserMask, $this->getMockAuthenticatedUser());
-        $this->assertNull($user->deny($resource, ["Foo", "Bar"]));
+        $barEntity = EntityMock::init("BarEntity")
+                                    ->mockGet($this->once(), "BAR", ["Bar", "Moz"])
+                                ->finalizeMock();
+        $collection = MaskCollectionMock::init("BarMozPermissionCollection")
+                                            ->mockTotal($this->once(), null, null, $barMozPermission)
+                                        ->finalizeMock();
+        $resource = ResourceMock::init("FooResource", ImmutableResourceInterface::class)
+                                    ->mockGetPermission_consecutive(
+                                        $this->exactly(2),
+                                        [["Foo"], ["BAR"]],
+                                        null,
+                                        $fooPermission, null)
+                                    ->mockGetEntities($this->once(), [$fooEntity, $barEntity])
+                                    ->mockGetPermissions($this->once(), ["Bar", "Moz"], $collection)
+                                ->finalizeMock();
+                
+        $user = new AclUser($userPermission, $this->getMockAuthenticatedUser());
+        $this->assertNull($user->deny($resource, ["Foo", "BAR"]));
     }
     
                     /**_____EXCEPTIONS_____**/
@@ -192,20 +219,26 @@ class AclUserTest extends TestCase
      */
     public function testExceptionGrantWhenAPermissionIsNotValid(): void
     {
+        $fooPermission = MaskMock::init("FooPermission")->finalizeMock();
+        $userPermission = MaskMock::init("UserPermission")->mockAdd($this->once(), $fooPermission)->finalizeMock();
+        $fooEntity = EntityMock::init("FooEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
+        $barEntity = EntityMock::init("BarEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
+
+        $resource = ResourceMock::init("ResourceFoo", ImmutableResourceInterface::class)
+                                    ->mockGetName($this->once(), "FooResource")
+                                    ->mockGetPermission_consecutive(
+                                        $this->exactly(2), 
+                                        [["Foo"], ["BAR"]],
+                                        null,
+                                        $fooPermission, null)
+                                    ->mockGetEntities($this->once(), [$fooEntity, $barEntity])
+                                ->finalizeMock();
+        
+                                
         $this->expectException(InvalidPermissionException::class);
-        $this->expectExceptionMessage("Cannot grant this permission 'Bar' as it is not declared into the resource 'Foo'");
-        
-        $reflection = new \ReflectionClass(ImmutableResourceInterface::class);
-        $methods = $this->reflection_extractMethods($reflection);
-        
-        $exception = new InvalidPermissionException();
-        $exception->setInvalidPermission("Bar");
-        $resource = $this->getMockBuilder(ImmutableResourceInterface::class)->setMethods($methods)->getMock();
-        $resource->expects($this->once())->method("getPermissions")->with(["Foo", "Bar"])->will($this->throwException($exception));
-        $resource->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
-        
-        $user = new AclUser($this->getMockMaskPermission(0), $this->getMockAuthenticatedUser());
-        $user->grant($resource, ["Foo", "Bar"]);
+        $this->expectExceptionMessage("This permissions 'Foo, BAR' cannot be granted as 'BAR' is not setted as a permission nor as an entity value for 'FooResource' resource for user 'Foo'");
+        $user = new AclUser($userPermission, $this->getMockAuthenticatedUser());
+        $user->grant($resource, ["Foo", "BAR"]);
     }
     
     /**
@@ -213,20 +246,58 @@ class AclUserTest extends TestCase
      */
     public function testExceptionDenyWhenAPermissionIsNotValid(): void
     {
+        $userPermission = MaskMock::init("UserPermission")->mockSub($this->once(), MaskMock::init("Placeholder")->finalizeMock())->finalizeMock();
+        $fooPermission = MaskMock::init("FooPermission")->finalizeMock();
+        $fooEntity = EntityMock::init("FooEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
+        $barEntity = EntityMock::init("BarEntity")->mockGet($this->once(), "BAR", null)->finalizeMock();
+        
+        $resource = ResourceMock::init("ResourceFoo", ImmutableResourceInterface::class)
+                                    ->mockGetName($this->once(), "FooResource")
+                                    ->mockGetPermission_consecutive(
+                                        $this->exactly(2),
+                                        [["Foo"], ["BAR"]],
+                                        null,
+                                        $fooPermission, null)
+                                    ->mockGetEntities($this->once(), [$fooEntity, $barEntity])
+                                ->finalizeMock();
+            
+            
         $this->expectException(InvalidPermissionException::class);
-        $this->expectExceptionMessage("Cannot deny this permission 'Bar' as it is not declared into the resource 'Foo'");
-        
-        $reflection = new \ReflectionClass(ImmutableResourceInterface::class);
-        $methods = $this->reflection_extractMethods($reflection);
-        
-        $exception = new InvalidPermissionException();
-        $exception->setInvalidPermission("Bar");
-        $resource = $this->getMockBuilder(ImmutableResourceInterface::class)->setMethods($methods)->getMock();
-        $resource->expects($this->once())->method("getPermissions")->with(["Foo", "Bar"])->will($this->throwException($exception));
-        $resource->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
+        $this->expectExceptionMessage("This permissions 'Foo, BAR' cannot be denied as 'BAR' is not setted as a permission nor as an entity value for 'FooResource' resource for user 'Foo'");
+        $user = new AclUser($userPermission, $this->getMockAuthenticatedUser());
+        $user->deny($resource, ["Foo", "BAR"]);
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\AclUser::grant()
+     */
+    public function testExceptionGrantWhenAPermissionIsNotValidAndNoEntityAreRegistered(): void
+    {
+        $this->expectException(InvalidPermissionException::class);
+        $this->expectExceptionMessage("Permission 'Moz' not found into resource 'Bar' for user 'Foo'");
+        $resource = ResourceMock::init("ResourceNoEntityGrant", ImmutableResourceInterface::class)
+                                    ->mockGetPermission($this->once(), "Moz", null)
+                                    ->mockGetName($this->once(), "Bar")
+                                ->finalizeMock();
         
         $user = new AclUser($this->getMockMaskPermission(0), $this->getMockAuthenticatedUser());
-        $user->deny($resource, ["Foo", "Bar"]);
+        $user->grant($resource, ["Moz"]);
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\AclUser::deny()
+     */
+    public function testExceptionDenyWhenAPermissionIsNotValidAndNoEntityAreRegistered(): void
+    {
+        $this->expectException(InvalidPermissionException::class);
+        $this->expectExceptionMessage("Permission 'Moz' not found into resource 'Bar' for user 'Foo'");
+        $resource = ResourceMock::init("ResourceNoEntityDeny", ImmutableResourceInterface::class)
+                                    ->mockGetPermission($this->once(), "Moz", null)
+                                    ->mockGetName($this->once(), "Bar")
+                                ->finalizeMock();
+        
+        $user = new AclUser($this->getMockMaskPermission(0), $this->getMockAuthenticatedUser());
+        $user->deny($resource, ["Moz"]);
     }
     
     /**
@@ -280,7 +351,7 @@ class AclUserTest extends TestCase
     {
         return UserMock::init("AclWrappedAuthenticatedUser", AuthenticatedUserInterface::class)
                             // 3 times (getName() test + 2 times exception)
-                            ->mockGetName($this->exactly(3), "Foo")
+                            ->mockGetName($this->exactly(5), "Foo")
                             ->mockIsRoot($this->once(), true)
                             ->mockAddAttribute($this->never(), "Foo", "Bar")
                             ->mockGetAttributes($this->once(), ["Foo" => "Bar", "Bar" => "Foo"])
@@ -290,8 +361,7 @@ class AclUserTest extends TestCase
                             ->mockGetRoles($this->once(), ["Foo", "Bar"])
                             ->mockHasRole($this->once(), "Foo", true)
                             ->mockAuthenticatedAt($this->once(), new \DateTime())
-                        ->finalizeMock();
-                            
+                        ->finalizeMock();             
     }
     
 }

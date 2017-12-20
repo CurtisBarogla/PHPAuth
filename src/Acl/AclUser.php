@@ -16,6 +16,7 @@ use Zoe\Component\Security\Acl\Mask\Mask;
 use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 
 /**
  * AclUser interacts directly with an Acl.
@@ -85,7 +86,7 @@ class AclUser implements AclUserInterface
     public function addAttribute(string $attribute, $value): void
     {
         throw new \BadMethodCallException(\sprintf("Cannot add an attribute on this user '%s' as it is in an immutable state",
-            $this->user->getName()));
+            $this->getName()));
     }
     
     /**
@@ -125,7 +126,7 @@ class AclUser implements AclUserInterface
     public function deleteAttribute(string $attribute): void
     {
         throw new \BadMethodCallException(\sprintf("Cannot delete an attribute on this user '%s' as it is in an immutable state",
-            $this->user->getName()));
+            $this->getName()));
     }
         
     /**
@@ -209,14 +210,36 @@ class AclUser implements AclUserInterface
      */
     private function set(ImmutableResourceInterface $resource, array $permissions, string $method): void
     {
-        try {
-            $this->permissions->{$method}($resource->getPermissions($permissions)->total());
-        } catch (InvalidPermissionException $e) {
-            $method = ($method === "add") ? "grant" : "deny";
-            throw new InvalidPermissionException(\sprintf("Cannot %s this permission '%s' as it is not declared into the resource '%s'",
-                $method,
-                $e->getInvalidPermission(),
-                $resource->getName()));
+        foreach ($permissions as $permission) {
+            try {
+                $this->permissions->{$method}($resource->getPermission($permission));
+            } catch (InvalidPermissionException $e) {
+                $entities = $resource->getEntities();
+                
+                if(null === $entities)
+                    // no entity registered, no need to go further
+                    throw new InvalidPermissionException(\sprintf("Permission '%s' not found into resource '%s' for user '%s'",
+                        $e->getInvalidPermission(),
+                        $resource->getName(),
+                        $this->getName()));
+                    
+                while ($entity = \array_shift($entities)) {
+                    try {
+                        $this->permissions->{$method}($resource->getPermissions($entity->get($permission))->total());
+                        break;
+                    } catch (InvalidEntityValueException $e) {
+                        if(empty($entities))
+                            throw new InvalidPermissionException(
+                                \sprintf("This permissions '%s' cannot be %s as '%s' is not setted as a permission nor as an entity value for '%s' resource for user '%s'",
+                                    \implode(", ", $permissions),
+                                    ($method === "add") ? "granted" : "denied",
+                                    $e->getInvalidValue(),
+                                    $resource->getName(),
+                                    $this->getName()));
+                        continue;
+                    }
+                }
+            }
         }
     }
 
