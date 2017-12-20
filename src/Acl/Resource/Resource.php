@@ -226,9 +226,10 @@ class Resource implements ResourceInterface
         
         $resource = new Resource($json["name"], $json["behaviour"]);
         $resource->permissions = MaskCollection::restoreFromJson($json["permissions"]);
-        $resource->entities = \array_map(function(array $entity): EntityInterface {
-            return Entity::restoreFromJson($entity); 
-        }, $json["entities"]);
+        if(null !== $json["entities"])
+            $resource->entities = \array_map(function(array $entity): EntityInterface {
+                return Entity::restoreFromJson($entity); 
+            }, $json["entities"]);
         
         return $resource;
     }
