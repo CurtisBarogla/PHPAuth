@@ -87,8 +87,22 @@ class ResourceMockTest extends TestCase
         $this->assertSame($collection, $resource->getPermissions(["Foo", "Bar"]));
         
         $this->expectException(InvalidPermissionException::class);
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, null)->finalizeMock();
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
         $resource->getPermissions();
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermissions()
+     */
+    public function testExceptionParameterInvalidPermissionWhenMockGetPermissions(): void
+    {
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
+        
+        try {
+            $resource->getPermissions();
+        } catch (InvalidPermissionException $e) {
+            $this->assertSame("Foo", $e->getInvalidPermission());
+        }
     }
     
     /**
@@ -106,6 +120,7 @@ class ResourceMockTest extends TestCase
                                             [null], 
                                             [["Foo", "Bar"]]
                                         ], 
+                                        null,
                                         $collectionFoo, $collectionBar)
                                 ->finalizeMock();
         
@@ -120,11 +135,37 @@ class ResourceMockTest extends TestCase
                                             [null], 
                                             [["Foo", "Bar"]]
                                         ], 
+                                        null,
                                         $collectionFoo, null)
                                 ->finalizeMock();
         
         $this->assertSame($collectionFoo, $resource->getPermissions());
         $resource->getPermissions(["Foo", "Bar"]);
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermissions_consecutive()
+     */
+    public function testExceptionParameterInvalidPermissionWhenMockGetPermissions_consecutive(): void
+    {
+        $collection = MaskCollectionMock::init("Collection")->finalizeMock();
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+                                    ->mockGetPermissions_consecutive(
+                                        $this->exactly(2), 
+                                        [
+                                            [null],
+                                            [["Foo", "Bar"]]
+                                        ],
+                                        "Foo",
+                                        $collection, null)
+                                ->finalizeMock();
+        
+        try {
+            $resource->getPermissions();
+            $resource->getPermissions(["Foo", "Bar"]);
+        } catch (InvalidPermissionException $e) {
+            $this->assertSame("Foo", $e->getInvalidPermission());
+        }
     }
     
     /**
@@ -144,6 +185,20 @@ class ResourceMockTest extends TestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermission()
+     */
+    public function testExceptionParameterInvalidPermissionWhenMockGetPermission(): void
+    {
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermission($this->once(), "Foo", null)->finalizeMock();
+        
+        try {
+            $resource->getPermission("Foo");
+        } catch (InvalidPermissionException $e) {
+            $this->assertSame("Foo", $e->getInvalidPermission());
+        }
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermission_consecutive()
      */
     public function testMockGetPermission_consecutive(): void
@@ -155,6 +210,7 @@ class ResourceMockTest extends TestCase
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
+                                        null,
                                         $permissionFoo, $permissionBar)
                                 ->finalizeMock();
         
@@ -166,11 +222,34 @@ class ResourceMockTest extends TestCase
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
+                                        null,
                                         $permissionFoo, null)
                                 ->finalizeMock();
         
         $this->assertSame($permissionFoo, $resource->getPermission("Foo"));
         $resource->getPermission("Bar");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockGetPermission_consecutive()
+     */
+    public function testExceptionParameterInvalidPermissionWhenMockGetPermission_consecutive(): void
+    {
+        $mask = MaskMock::init("MaskPermission")->finalizeMock();
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+                                    ->mockGetPermission_consecutive(
+                                        $this->exactly(2), 
+                                        [["Foo"], ["Bar"]], 
+                                        "Bar", 
+                                        $mask, null)
+                                ->finalizeMock();
+        
+        try {
+            $resource->getPermission("Foo");
+            $resource->getPermission("Bar");
+        } catch (InvalidPermissionException $e) {
+            $this->assertSame("Bar", $e->getInvalidPermission());
+        }
     }
     
     /**
@@ -257,6 +336,10 @@ class ResourceMockTest extends TestCase
         $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntities($this->once(), $entities)->finalizeMock();
         
         $this->assertSame($entities, $resource->getEntities());
+        
+        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntities($this->once(), null)->finalizeMock();
+        
+        $this->assertNull($resource->getEntities());
     }
     
     /**

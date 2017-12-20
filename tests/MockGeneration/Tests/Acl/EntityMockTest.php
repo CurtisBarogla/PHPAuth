@@ -125,6 +125,20 @@ class EntityMockTest extends TestCase
     }
     
     /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockGet()
+     */
+    public function testExceptionParameterInvalidValueWhenMockGet(): void
+    {
+        $entity = EntityMock::init("Foo")->mockGet($this->once(), "Foo", null)->finalizeMock();
+        
+        try {
+            $entity->get("Foo");
+        } catch (InvalidEntityValueException $e) {
+            $this->assertSame("Foo", $e->getInvalidValue());
+        }
+    }
+    
+    /**
      * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockGet_consecutive()
      */
     public function testMockGet_consecutive(): void
@@ -132,7 +146,8 @@ class EntityMockTest extends TestCase
         $entity = EntityMock::init("Foo")
                                 ->mockGet_consecutive(
                                     $this->exactly(2), 
-                                    [["Foo"], ["Bar"]], 
+                                    [["Foo"], ["Bar"]],
+                                    null,
                                     ["Foo", "Bar"], ["Moz", "Poz"])
                             ->finalizeMock();
         
@@ -144,11 +159,33 @@ class EntityMockTest extends TestCase
                                 ->mockGet_consecutive(
                                     $this->exactly(2), 
                                     [["Foo"], ["Bar"]], 
+                                    null,
                                     ["Foo", "Bar"], null)
                             ->finalizeMock();
         
         $this->assertSame(["Foo", "Bar"], $entity->get("Foo"));
         $entity->get("Bar");
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockGet_consecutive()
+     */
+    public function testExceptionParameterInvalidValueWhenMockGet_consecutive(): void
+    {
+        $entity = EntityMock::init("Foo")
+                                ->mockGet_consecutive(
+                                    $this->exactly(2), 
+                                    [["Foo"], ["Bar"]], 
+                                    "Bar", 
+                                    ["Foo", "Bar"], null)
+                            ->finalizeMock();
+        
+        try {
+            $entity->get("Foo");
+            $entity->get("Bar");
+        } catch (InvalidEntityValueException $e) {
+            $this->assertSame("Bar", $e->getInvalidValue());
+        }
     }
     
     /**

@@ -156,7 +156,7 @@ class EntityMock extends MockGeneration
     public function mockGet(MethodCount $count, string $value, ?array $permissionsReturned): self
     {
         $mock = function(string $method) use ($value, $permissionsReturned, $count): void {
-            $return = $this->stubThrowableOnNull(new InvalidEntityValueException(), $permissionsReturned);
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($value), $permissionsReturned);
             $this->mock->expects($count)->method($method)->with($value)->will($return);
         };
         
@@ -170,16 +170,18 @@ class EntityMock extends MockGeneration
      *   Called count
      * @param array[array] $values
      *   Arrays of array containing all params for each call
+     * @param string|null $invalidValue
+     *   Invalid value setted into the exception.
      * @param array|null ... $permissionsReturned
      *   Permissions returned on each call. Set to null to simulate an exception
      *
      * @return self
      *   Fluent
      */
-    public function mockGet_consecutive(MethodCount $count, array $values, ?array ...$permissionsReturned): self
+    public function mockGet_consecutive(MethodCount $count, array $values, ?string $invalidValue, ?array ...$permissionsReturned): self
     {
-        $mock = function(string $method) use ($values, $permissionsReturned, $count): void {
-            $return = $this->stubThrowableOnNull(new InvalidEntityValueException(), ...$permissionsReturned);
+        $mock = function(string $method) use ($values, $invalidValue, $permissionsReturned, $count): void {
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($invalidValue), ...$permissionsReturned);
             $this->mock->expects($count)->method($method)->withConsecutive(...$values)->willReturnOnConsecutiveCalls(...$return);
         };
         
@@ -288,6 +290,24 @@ class EntityMock extends MockGeneration
         };
         
         return $this->executeMock("getProcessor", $mock);
+    }
+    
+    /**
+     * Set the invalid value name into the InvalidEntityValue exception
+     *
+     * @param string|null $invalidValue
+     *   Invalid value to set
+     *
+     * @return InvalidEntityValueException
+     *   InvalidEntityValueException with invalid value setted
+     */
+    private function setExceptionParameter(?string $invalidValue): InvalidEntityValueException
+    {
+        $exception = new InvalidEntityValueException();
+        if(null !== $invalidValue)
+            $exception->setInvalidValue($invalidValue);
+        
+        return $exception;
     }
     
 }

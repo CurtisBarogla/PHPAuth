@@ -148,14 +148,20 @@ class ResourceMock extends MockGeneration
      *   Permissions to get
      * @param MaskCollection|null $collection
      *   Collection return or null to simulate an exception
+     * @param string|null $invalidPermission
+     *   Invalid permission name setted into exception. Setted to null by default
      *
      * @return self
      *   Fluent
      */
-    public function mockGetPermissions(MethodCount $count, ?array $permissions, ?MaskCollection $collection): self
+    public function mockGetPermissions(
+        MethodCount $count, 
+        ?array $permissions, 
+        ?MaskCollection $collection,
+        ?string $invalidPermission = null): self
     {
-        $mock = function(string $method) use ($permissions, $collection, $count) {
-            $return = $this->stubThrowableOnNull(new InvalidPermissionException(), $collection);
+        $mock = function(string $method) use ($permissions, $collection, $invalidPermission, $count) {
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($invalidPermission), $collection);
             $this->mock->expects($count)->method($method)->with($permissions)->will($return); 
         };
         
@@ -169,16 +175,22 @@ class ResourceMock extends MockGeneration
      *   Called count
      * @param array[array] $permissions
      *   Arrays of array containing all params for each call
+     * @param string|null $invalidPermission
+     *   Invalid permission name setted into exception
      * @param MaskCollection|null $collections
      *   Variadic collection returned on each call. Set to null to simulate an exception
      *
      * @return self
      *   Fluent
      */
-    public function mockGetPermissions_consecutive(MethodCount $count, array $permissions, ?MaskCollection ...$collections): self
+    public function mockGetPermissions_consecutive(
+        MethodCount $count, 
+        array $permissions,
+        ?string $invalidPermission,
+        ?MaskCollection ...$collections): self
     {
-        $mock = function(string $method) use ($permissions, $collections, $count) {
-            $return = $this->stubThrowableOnNull(new InvalidPermissionException(), ...$collections);
+        $mock = function(string $method) use ($permissions, $invalidPermission, $collections, $count) {
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($invalidPermission), ...$collections);
             $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->willReturnOnConsecutiveCalls(...$return);
         };
         
@@ -198,10 +210,13 @@ class ResourceMock extends MockGeneration
      * @return self
      *   Fluent
      */
-    public function mockGetPermission(MethodCount $count, string $permission, ?Mask $permissionReturned): self
+    public function mockGetPermission(
+        MethodCount $count, 
+        string $permission, 
+        ?Mask $permissionReturned): self
     {
         $mock = function(string $method) use ($permission, $permissionReturned, $count) {
-            $return = $this->stubThrowableOnNull(new InvalidPermissionException(), $permissionReturned);
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($permission), $permissionReturned);
             $this->mock->expects($count)->method($method)->with($permission)->will($return);
         };
         
@@ -215,16 +230,22 @@ class ResourceMock extends MockGeneration
      *   Called count
      * @param array[array] $permissions
      *   Arrays of array containing all params for each call
+     * @param string|null $invalidPermission
+     *   Invalid permission name setted into exception
      * @param Mask|null ...$permissionsReturned
      *   Variadic masks permission returned. Set to null to simulate an exception
      *
      * @return self
      *   Fluent
      */
-    public function mockGetPermission_consecutive(MethodCount $count, array $permissions, ?Mask ...$permissionsReturned): self
+    public function mockGetPermission_consecutive(
+        MethodCount $count, 
+        array $permissions, 
+        ?string $invalidPermission,
+        ?Mask ...$permissionsReturned): self
     {
-        $mock = function(string $method) use ($permissions, $permissionsReturned, $count) {
-            $return = $this->stubThrowableOnNull(new InvalidPermissionException(), ...$permissionsReturned);
+        $mock = function(string $method) use ($permissions, $invalidPermission, $permissionsReturned, $count) {
+            $return = $this->stubThrowableOnNull($this->setExceptionParameter($invalidPermission), ...$permissionsReturned);
             $this->mock->expects($count)->method($method)->withConsecutive(...$permissions)->willReturnOnConsecutiveCalls(...$return);
         };
         
@@ -325,13 +346,13 @@ class ResourceMock extends MockGeneration
      *
      * @param MethodCount $count
      *   Called count
-     * @param array $entities
-     *   Entities returned
+     * @param array|null $entities
+     *   Entities returned. Can return null
      *
      * @return self
      *   Fluent
      */
-    public function mockGetEntities(MethodCount $count, array $entities): self
+    public function mockGetEntities(MethodCount $count, ?array $entities): self
     {
         $mock = function(string $method) use ($entities, $count) {
             $this->mock->expects($count)->method($method)->will($this->returnValue($entities));
@@ -404,6 +425,24 @@ class ResourceMock extends MockGeneration
         };
         
         return $this->executeMock("getBehaviour", $mock);
+    }
+    
+    /**
+     * Set the invalid permission name into the InvalidPermission exception
+     * 
+     * @param string|null $invalidPermission
+     *   Invalid permission name to set
+     * 
+     * @return InvalidPermissionException
+     *   InvalidPermissionException with invalid permission name setted
+     */
+    private function setExceptionParameter(?string $invalidPermission): InvalidPermissionException
+    {
+        $exception = new InvalidPermissionException();
+        if(null !== $invalidPermission)
+            $exception->setInvalidPermission($invalidPermission);
+        
+        return $exception;
     }
     
 }
