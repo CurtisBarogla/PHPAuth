@@ -55,7 +55,7 @@ class Resource implements ResourceInterface
     /**
      * Registered entities
      * 
-     * @var EntityInterface[]
+     * @var EntityInterface[]|null
      */
     private $entities;
 
@@ -162,7 +162,7 @@ class Resource implements ResourceInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntities()
      */
-    public function getEntities(): array
+    public function getEntities(): ?array
     {
         return $this->entities;
     }

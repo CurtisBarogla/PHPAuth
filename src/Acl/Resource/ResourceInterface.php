@@ -121,10 +121,10 @@ interface ResourceInterface extends JsonSerializable
     /**
      * Get all entities registered for this resource
      * 
-     * @return EntityInterface[]
-     *   All entitied registered
+     * @return EntityInterface[]|null
+     *   All entitied registered. Return null if no entity has been registered
      */
-    public function getEntities(): array;
+    public function getEntities(): ?array;
     
     /**
      * Get a resource entity

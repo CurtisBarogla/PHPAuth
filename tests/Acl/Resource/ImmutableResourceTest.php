@@ -114,6 +114,12 @@ class ImmutableResourceTest extends TestCase
         foreach ($immutable->getEntities() as $entity) {
             $this->assertInstanceOf(EntityInterface::class, $entity);
         }
+        
+        $resource = ResourceMock::init("ResourceForNullEntitiesWrapped", ResourceInterface::class)->mockGetEntities($this->once(), null)->finalizeMock();
+        
+        $immutable = new ImmutableResource($resource);
+        
+        $this->assertNull($immutable->getEntities());
     }
     
     /**

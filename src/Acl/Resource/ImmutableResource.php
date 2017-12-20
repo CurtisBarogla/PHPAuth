@@ -106,7 +106,7 @@ class ImmutableResource implements ImmutableResourceInterface
      * {@inheritDoc}
      * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::getEntities()
      */
-    public function getEntities(): array
+    public function getEntities(): ?array
     {
         return $this->resource->getEntities();
     }

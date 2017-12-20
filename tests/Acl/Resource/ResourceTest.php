@@ -131,6 +131,10 @@ class ResourceTest extends TestCase
         $expected = ["Foo" => $fooEntity, "Bar" => $barEntity];
         
         $this->assertSame($expected, $resource->getEntities());
+        
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        
+        $this->assertNull($resource->getEntities());
     }
     
     /**
