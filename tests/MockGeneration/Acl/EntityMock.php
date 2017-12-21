@@ -16,6 +16,7 @@ use ZoeTest\Component\Security\MockGeneration\MockGeneration;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
 use PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
+use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 
 /**
  * Responsible to mock entity
@@ -241,6 +242,26 @@ class EntityMock extends MockGeneration
         };
         
         return $this->executeMock("getProcessor", $mock);
+    }
+    
+    /**
+     * Mock getResource()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param ResourceInterface $resource
+     *   Resource returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetResource(MethodCount $count, ResourceInterface $resource): self
+    {
+        $mock = function(string $method) use ($resource, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($resource)); 
+        };
+        
+        return $this->executeMock("getResource", $mock);
     }
     
     /**

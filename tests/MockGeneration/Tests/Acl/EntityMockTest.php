@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
 use Zoe\Component\Internal\GeneratorTrait;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityValueException;
+use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
 
 /**
  * EntityMock testcase
@@ -198,6 +199,18 @@ class EntityMockTest extends TestCase
         $entity = EntityMock::init("Foo")->mockGetProcessor($this->once(), "Foo")->finalizeMock();
         
         $this->assertSame("Foo", $entity->getProcessor());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\EntityMock::mockGetResource()
+     */
+    public function testMockGetResource(): void
+    {
+        $resource = ResourceMock::init("ResourceSettedIntoEntity")->finalizeMock();
+        $entity = EntityMock::init("Foo")->mockGetResource($this->once(), $resource)->finalizeMock();
+        
+        $this->assertSame($resource, $entity->getResource());
+        
     }
     
 }
