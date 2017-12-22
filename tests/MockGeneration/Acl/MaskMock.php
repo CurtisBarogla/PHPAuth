@@ -63,7 +63,7 @@ class MaskMock extends MockGeneration
      */
     public function mockGetIdentifier(MethodCount $count, string $identifier): self
     {
-        $mock = function(string $method) use ($identifier, $count) {
+        $mock = function(string $method) use ($identifier, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($identifier));
         };
         
@@ -83,7 +83,7 @@ class MaskMock extends MockGeneration
      */
     public function mockGetValue(MethodCount $count, int $value): self
     {
-        $mock = function(string $method) use ($value, $count) {
+        $mock = function(string $method) use ($value, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($value));
         };
         
@@ -103,7 +103,7 @@ class MaskMock extends MockGeneration
      */
     public function mockGetValue_consecutive(MethodCount $count, int ...$values): self
     {
-        $mock = function(string $method) use ($values, $count) {
+        $mock = function(string $method) use ($values, $count): void {
             $this->mock->expects($count)->method($method)->willReturnOnConsecutiveCalls(...$values);
         };
         
@@ -123,7 +123,7 @@ class MaskMock extends MockGeneration
      */
     public function mockAdd(MethodCount $count, Mask $mask): self
     {
-        $mock = function(string $method) use ($mask, $count) {
+        $mock = function(string $method) use ($mask, $count): void {
             $this->mock->expects($count)->method($method)->with($mask)->will($this->returnValue(null));
         };
         
@@ -143,7 +143,7 @@ class MaskMock extends MockGeneration
      */
     public function mockAdd_consecutive(MethodCount $count, array $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$masks)->willReturnOnConsecutiveCalls($this->returnValue(null));
         };
         
@@ -163,7 +163,7 @@ class MaskMock extends MockGeneration
      */
     public function mockSub(MethodCount $count, Mask $mask): self
     {
-        $mock = function(string $method) use ($mask, $count) {
+        $mock = function(string $method) use ($mask, $count): void {
             $this->mock->expects($count)->method($method)->with($mask)->will($this->returnValue(null));
         };
         
@@ -183,7 +183,7 @@ class MaskMock extends MockGeneration
      */
     public function mockSub_consecutive(MethodCount $count, array $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$masks)->willReturnOnConsecutiveCalls($this->returnValue(null));
         };
         
@@ -203,7 +203,7 @@ class MaskMock extends MockGeneration
      */
     public function mockRshift(MethodCount $count, int $value): self
     {
-        $mock = function(string $method) use ($value, $count) {
+        $mock = function(string $method) use ($value, $count): void {
             $this->mock->expects($count)->method($method)->with($value)->will($this->returnValue(null));
         };
         
@@ -223,7 +223,7 @@ class MaskMock extends MockGeneration
      */
     public function mockRshift_consecutive(MethodCount $count, array $values): self
     {
-        $mock = function(string $method) use ($values, $count) {
+        $mock = function(string $method) use ($values, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$values)->willReturnOnConsecutiveCalls($this->returnValue(null));
         };
         
@@ -243,7 +243,7 @@ class MaskMock extends MockGeneration
      */
     public function mockLshift(MethodCount $count, int $value): self
     {
-        $mock = function(string $method) use ($value, $count) {
+        $mock = function(string $method) use ($value, $count): void {
             $this->mock->expects($count)->method($method)->with($value)->will($this->returnValue(null));
         };
         
@@ -263,7 +263,7 @@ class MaskMock extends MockGeneration
      */
     public function mockLshift_consecutive(MethodCount $count, array $values): self
     {
-        $mock = function(string $method) use ($values, $count) {
+        $mock = function(string $method) use ($values, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$values)->willReturnOnConsecutiveCalls($this->returnValue(null));
         };
         

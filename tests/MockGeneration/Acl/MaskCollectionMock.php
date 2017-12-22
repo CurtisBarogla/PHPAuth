@@ -65,7 +65,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockGetIterator(MethodCount $count, \Generator $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $this->mock->expects($count)->method($method)->will($this->returnValue($masks));
         }; 
         
@@ -89,7 +89,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockTotal(MethodCount $count, ?string $identifier, ?array $masks, ?Mask $total): self
     {
-        $mock = function(string $method) use ($identifier, $masks, $total) {
+        $mock = function(string $method) use ($identifier, $masks, $total): void {
             $return = $this->stubThrowableOnNull(new InvalidMaskException(), $total);
             $this->mock->method($method)->with($identifier, $masks)->will($return);
         };
@@ -112,7 +112,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockTotal_consecutive(MethodCount $count, array $identifiersAndMasks, ?Mask ...$total): self
     {
-        $mock = function(string $method) use ($identifiersAndMasks, $total, $count) {
+        $mock = function(string $method) use ($identifiersAndMasks, $total, $count): void {
             $return = $this->stubThrowableOnNull(new InvalidMaskException(), ...$total);
             $this->mock->expects($count)->method($method)->withConsecutive(...$identifiersAndMasks)->willReturnOnConsecutiveCalls(...$return);
         };
@@ -133,7 +133,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockAdd(MethodCount $count, Mask $mask): self
     {
-        $mock = function(string $method) use ($mask, $count) {
+        $mock = function(string $method) use ($mask, $count): void {
             $this->mock->expects($count)->method($method)->with($mask)->will($this->returnValue(null));
         }; 
         
@@ -153,7 +153,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockAdd_consecutive(MethodCount $count, array $masks): self
     {
-        $mock = function(string $method) use ($masks, $count) {
+        $mock = function(string $method) use ($masks, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$masks)->willReturnOnConsecutiveCalls($this->returnValue(null));
         };
         
@@ -175,7 +175,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockGet(MethodCount $count, string $mask, ?Mask $maskReturned): self
     {
-        $mock = function(string $method) use ($mask, $maskReturned, $count) {
+        $mock = function(string $method) use ($mask, $maskReturned, $count): void {
             $return = $this->stubThrowableOnNull(new InvalidMaskException(), $maskReturned);
             $this->mock->expects($count)->method($method)->with($mask)->will($return);
         };
@@ -221,7 +221,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockHas(MethodCount $count, string $mask, bool $result): self
     {
-        $mock = function(string $method) use ($mask, $result, $count) {
+        $mock = function(string $method) use ($mask, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($mask)->will($this->returnValue($result));
         };
         
@@ -243,7 +243,7 @@ class MaskCollectionMock extends MockGeneration
      */
     public function mockHas_consecutive(MethodCount $count, array $masks, bool ...$results): self
     {
-        $mock = function(string $method) use ($masks, $results, $count) {
+        $mock = function(string $method) use ($masks, $results, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$masks)->willReturnOnConsecutiveCalls(...$results);
         };
         

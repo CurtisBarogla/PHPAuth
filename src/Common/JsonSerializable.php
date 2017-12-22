@@ -13,7 +13,7 @@ declare(strict_types = 1);
 namespace Zoe\Component\Security\Common;
 
 /**
- * Extends basic interface to set a "factory like" object creation from a his json representation
+ * Extends basic interface to set a "factory like" object creation from his json representation
  *  
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *

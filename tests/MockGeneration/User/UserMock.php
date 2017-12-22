@@ -178,7 +178,7 @@ class UserMock extends MockGeneration
      */
     public function mockAddAttribute_consecutive(MethodCount $count, array ...$attributes): self
     {
-        $mock = function(string $method) use ($attributes, $count) {
+        $mock = function(string $method) use ($attributes, $count): void {
             $this->mock->expects($count)
                        ->method("addAttribute")
                        ->withConsecutive(...$attributes)
@@ -333,7 +333,7 @@ class UserMock extends MockGeneration
      */
     public function mockDeleteAttribute(MethodCount $count, string $attribute, bool $exception): self
     {
-        $mock = function(string $method) use ($attribute, $exception, $count) {
+        $mock = function(string $method) use ($attribute, $exception, $count): void {
             $return = $this->stubThrowableOnBool(new InvalidUserAttributeException($this->mock, $attribute), [$attribute], $exception);
             $this->mock->expects($count)->method($method)->with($attribute)->will($return);
         };
@@ -356,7 +356,7 @@ class UserMock extends MockGeneration
      */
     public function mockDeleteAttribute_consecutive(MethodCount $count, array $attributes, bool ...$exceptions): self
     {
-        $mock = function(string $method) use ($attributes, $exceptions, $count) {
+        $mock = function(string $method) use ($attributes, $exceptions, $count): void {
             $values = \array_fill(0, \count($attributes), $this->returnValue(null));
             $return = $this->stubThrowableOnBool(new InvalidUserAttributeException($this->mock, "Foo"), $values, ...$exceptions);
             $this->mock->expects($count)->method($method)->withConsecutive(...$attributes)->willReturnOnConsecutiveCalls(...$return);

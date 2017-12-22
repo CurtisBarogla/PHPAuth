@@ -36,7 +36,7 @@ class NativeUserLoader implements UserLoaderInterface
      * Initialize user loader
      * 
      * @param array $users
-     *   Arrays indexed by user name containing all information about all users 
+     *   Arrays indexed by user name containing all informations about all users 
      */
     public function __construct(array $users)
     {

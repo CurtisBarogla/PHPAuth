@@ -67,7 +67,7 @@ class ResourceLoaderMock extends MockGeneration
      */
     public function mockLoadResource(MethodCount $count, string $resource, ?ResourceInterface $resourceLoaded): self
     {
-        $mock = function(string $method) use ($resource, $resourceLoaded, $count) {
+        $mock = function(string $method) use ($resource, $resourceLoaded, $count): void {
             $return = $this->stubThrowableOnNull(new ResourceNotFoundException(), $resourceLoaded);
             $this->mock->expects($count)->method($method)->with($resource)->will($return); 
         };

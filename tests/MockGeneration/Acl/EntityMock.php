@@ -229,7 +229,7 @@ class EntityMock extends MockGeneration
      *
      * @param MethodCount $count
      *   Called count
-     * @param string $processor
+     * @param string|null $processor
      *   Processor returned
      *
      * @return self

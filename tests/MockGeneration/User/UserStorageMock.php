@@ -87,7 +87,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockAddUser_consecutive(MethodCount $count, array $identifiersAndUsers): self
     {
-        $mock = function(string $method) use ($identifiersAndUsers, $count) {
+        $mock = function(string $method) use ($identifiersAndUsers, $count): void {
             $return = \array_fill(0, \count($identifiersAndUsers), $this->returnValue(null));
             $this->mock->expects($count)->method($method)->withConsecutive(...$identifiersAndUsers)->willReturnOnConsecutiveCalls($return);
         }; 
@@ -110,7 +110,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockGetUser(MethodCount $count, string $identifier, ?AuthenticatedUserInterface $user): self
     {
-        $mock = function(string $method) use ($identifier, $user, $count) {
+        $mock = function(string $method) use ($identifier, $user, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $return = $this->stubThrowableOnNull(
                 new UserNotFoundException($userPlaceholder, UserNotFoundException::STORAGE_ERROR_CODE), 
@@ -136,7 +136,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockGetUser_consecutive(MethodCount $count, array $identifiers, ?AuthenticatedUserInterface ... $users): self
     {
-        $mock = function(string $method) use ($identifiers, $users, $count) {
+        $mock = function(string $method) use ($identifiers, $users, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $return = $this->stubThrowableOnNull(
                 new UserNotFoundException($userPlaceholder, UserNotFoundException::STORAGE_ERROR_CODE), 
@@ -162,7 +162,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockDeleteUser(MethodCount $count, string $identifier, bool $exception = false): self
     {
-        $mock = function(string $method) use ($identifier, $exception, $count) {
+        $mock = function(string $method) use ($identifier, $exception, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $return = $this->stubThrowableOnBool(
                 new UserNotFoundException($userPlaceholder, UserNotFoundException::STORAGE_ERROR_CODE), 
@@ -189,7 +189,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockDeleteUser_consecutive(MethodCount $count, array $identifiers, bool ...$exceptions): self
     {
-        $mock = function(string $method) use ($identifiers, $exceptions, $count) {
+        $mock = function(string $method) use ($identifiers, $exceptions, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $values = \array_fill(0, \count($identifiers), $this->returnValue(null));
             $return = $this->stubThrowableOnBool(
@@ -219,7 +219,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockRefreshUser(MethodCount $count, string $identifier, AuthenticatedUserInterface $user, bool $exception = false): self
     {
-        $mock = function(string $method) use ($identifier, $user, $exception, $count) {
+        $mock = function(string $method) use ($identifier, $user, $exception, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $return = $this->stubThrowableOnBool(
                 new UserNotFoundException($userPlaceholder, UserNotFoundException::STORAGE_ERROR_CODE), 
@@ -246,7 +246,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockRefreshUser_consecutive(MethodCount $count, array $identifiersAndUsers, bool ...$exceptions): self
     {
-        $mock = function(string $method) use($identifiersAndUsers, $exceptions, $count) {
+        $mock = function(string $method) use($identifiersAndUsers, $exceptions, $count): void {
             $userPlaceholder = UserMock::init("MockedUserException", AuthenticatedUserInterface::class)->finalizeMock();
             $values = \array_fill(0, \count($identifiersAndUsers), $this->returnValue(null));
             $return = $this->stubThrowableOnBool(
@@ -274,7 +274,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockIsStored(MethodCount $count, string $identifier, bool $result): self
     {
-        $mock = function(string $method) use ($identifier, $result, $count) {
+        $mock = function(string $method) use ($identifier, $result, $count): void {
             $this->mock->expects($count)->method($method)->with($identifier)->will($this->returnValue($result));   
         };
         
@@ -296,7 +296,7 @@ class UserStorageMock extends MockGeneration
      */
     public function mockIsStored_consecutive(MethodCount $count, array $identifiers, bool ...$results): self
     {
-        $mock = function(string $method) use ($identifiers, $results, $count) {
+        $mock = function(string $method) use ($identifiers, $results, $count): void {
             $this->mock->expects($count)->method($method)->withConsecutive(...$identifiers)->willReturnOnConsecutiveCalls(...$results);
         };
             
