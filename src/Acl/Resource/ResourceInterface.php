@@ -18,6 +18,8 @@ use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
 use Zoe\Component\Security\Common\JsonSerializable;
+use Zoe\Component\Security\Acl\Entity\Processor\EntityProcessorInterface;
+use Zoe\Component\Security\Acl\AclUserInterface;
 
 /**
  * Resource are registered into an acl.
@@ -129,5 +131,27 @@ interface ResourceInterface extends JsonSerializable
      *   Resource behaviour
      */
     public function getBehaviour(): int;
+    
+    /**
+     * Process all registered entities over a set of entity processors.
+     * All processors are indexed by their identifier
+     * 
+     * @param AclUserInterface $user
+     *   User processed
+     * @param EntityProcessorInterface[] $processors
+     *   Set of entity processors
+     *   
+     * @throws \RuntimeException
+     *   When a processor is not registered or invalid
+     */
+    public function process(AclUserInterface $user, array $processors): void;
+    
+    /**
+     * Check if entities associated to the resource has been processed
+     * 
+     * @return bool
+     *   True if all entities has been processed. False otherwise
+     */
+    public function isProcessed(): bool;
     
 }

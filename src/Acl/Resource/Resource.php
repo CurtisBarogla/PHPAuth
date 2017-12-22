@@ -20,6 +20,7 @@ use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\Acl\Entity\EntityInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
 use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Acl\AclUserInterface;
 
 /**
  * Basic implementation of ResourceInterface
@@ -58,6 +59,13 @@ class Resource implements ResourceInterface
      * @var EntityInterface[]|null
      */
     private $entities;
+    
+    /**
+     * If entities has been processed
+     * 
+     * @var bool
+     */
+    private $processed = false;
 
     /**
      * Initialize a resource
@@ -196,6 +204,46 @@ class Resource implements ResourceInterface
     public function getBehaviour(): int
     {
         return $this->behaviour;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::process()
+     */
+    public function process(AclUserInterface $user, array $processors): void
+    {
+        if(null === $this->entities) {
+            $this->processed = true;
+            return;
+        }
+        
+        foreach ($this->entities as $entity) {
+            $processor = $entity->getProcessor();
+            if(null === $processor || $entity->isEmpty())
+                continue;
+            
+            if(!isset($processors[$processor]))
+                throw new \RuntimeException(\sprintf("This processor '%s' for '%s' entity into '%s' resource is not registered",
+                    $processor,
+                    $entity->getIdentifier(),
+                    $this->name));
+            
+            if($entity instanceof ResourceAwareInterface)
+                $entity->setResource($this);
+            
+                $processors[$processor]->process($entity, $user);
+        }
+        
+        $this->processed = true;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceInterface::isProcessed()
+     */
+    public function isProcessed(): bool
+    {
+        return $this->processed;
     }
     
     /**

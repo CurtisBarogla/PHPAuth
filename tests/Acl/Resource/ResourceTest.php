@@ -13,15 +13,19 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\Acl\Resource;
 
 use PHPUnit\Framework\TestCase;
+use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
+use ZoeTest\Component\Security\MockGeneration\User\UserMock;
+use Zoe\Component\Internal\ReflectionTrait;
+use Zoe\Component\Security\Acl\AclUserInterface;
+use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Acl\Entity\Processor\EntityProcessorInterface;
+use Zoe\Component\Security\Acl\Mask\MaskCollection;
 use Zoe\Component\Security\Acl\Resource\Resource;
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
-use Zoe\Component\Security\Exception\Acl\InvalidResourceBehaviour;
-use Zoe\Component\Security\Acl\Mask\MaskCollection;
-use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
 use Zoe\Component\Security\Common\JsonSerializable;
-use ZoeTest\Component\Security\MockGeneration\Acl\EntityMock;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
-use Zoe\Component\Security\Acl\Entity\Entity;
+use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Exception\Acl\InvalidResourceBehaviour;
 
 /**
  * Resource testcase
@@ -33,6 +37,8 @@ use Zoe\Component\Security\Acl\Entity\Entity;
  */
 class ResourceTest extends TestCase
 {
+    
+    use ReflectionTrait;
     
     /**
      * @see \Zoe\Component\Security\Acl\Resource\Resource
@@ -120,6 +126,9 @@ class ResourceTest extends TestCase
         $this->assertNull($resource->addEntity($entity));
     }
     
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::getEntities()
+     */
     public function testGetEntities(): void
     {
         $fooEntity = EntityMock::init("EntityFooAdded")->mockGetIdentifier($this->once(), "Foo")->finalizeMock();
@@ -162,6 +171,69 @@ class ResourceTest extends TestCase
         $resource = new Resource("Foo", ResourceInterface::WHITELIST);
         
         $this->assertSame(ResourceInterface::WHITELIST, $resource->getBehaviour());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::process()
+     */
+    public function testProcess(): void
+    {
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        $user = UserMock::init("AclUser", AclUserInterface::class)->finalizeMock();
+        
+        $entityFoo = EntityMock::init("EmptyEntity")
+                                    ->mockGetIdentifier($this->once(), "Foo")
+                                    ->mockGetProcessor($this->once(), "FooProcessor")    
+                                    ->mockIsEmpty($this->once(), true)
+                                ->finalizeMock();
+        $entityBar = EntityMock::init("NullProcessorEntity")
+                                    ->mockGetIdentifier($this->once(), "Bar")
+                                    ->mockGetProcessor($this->once(), null)
+                                    ->mockIsEmpty($this->once(), false)
+                                ->finalizeMock();
+        $entityMoz = EntityMock::init("EntityProcessed1")
+                                    ->mockGetIdentifier($this->once(), "Moz")
+                                    ->mockIsEmpty($this->once(), false)
+                                    ->mockGetProcessor($this->once(), "FooProcessor")
+                                ->finalizeMock();
+        
+        $resource->addEntity($entityFoo);
+        $resource->addEntity($entityMoz);
+        $resource->addEntity($entityBar);
+        
+        // resource injection via interface
+        $concreteEntity = new Entity("Concrete", "FooProcessor");
+        $concreteEntity->add("Foo", ["Foo", "Bar"]);
+
+        $methods = $this->reflection_extractMethods(new \ReflectionClass(EntityProcessorInterface::class));
+        $processor = $this->getMockBuilder(EntityProcessorInterface::class)->setMethods($methods)->getMock();
+        $processor
+                ->expects($this->exactly(2))
+                ->method("process")
+                ->withConsecutive([$entityMoz, $user], [$concreteEntity, $user])
+                ->willReturnOnConsecutiveCalls($this->returnValue(null));
+        
+        $processors = ["FooProcessor" => $processor];
+
+        $resource->addEntity($concreteEntity);
+        
+        $this->assertNull($resource->process($user, $processors));
+        $this->assertTrue($resource->isProcessed());
+    }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::isProcessed()
+     */
+    public function testIsProcessed(): void
+    {
+        $user = UserMock::init("AclUserProcessed", AclUserInterface::class)->finalizeMock();
+        $resource = new Resource("Foo", ResourceInterface::BLACKLIST);
+        
+        $this->assertFalse($resource->isProcessed());
+        
+        $resource->process($user, []);
+        
+        $this->assertTrue($resource->isProcessed());
     }
     
     /**
@@ -262,4 +334,25 @@ class ResourceTest extends TestCase
         $resource = new Resource("Bar", ResourceInterface::BLACKLIST);
         $resource->getEntity("Foo");
     }
+    
+    /**
+     * @see \Zoe\Component\Security\Acl\Resource\Resource::process()
+     */
+    public function testExceptionProcessWhenAnEntityHasANonRegisteredProcessor(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("This processor 'InvalidProcessor' for 'Foo' entity into 'Bar' resource is not registered");
+        
+        $entity = EntityMock::init("InvalidProcessor")
+                                ->mockGetIdentifier($this->exactly(2), "Foo")
+                                ->mockIsEmpty($this->once(), false)
+                                ->mockGetProcessor($this->once(), "InvalidProcessor")
+                            ->finalizeMock();
+        $user = UserMock::init("AclUser", AclUserInterface::class)->finalizeMock();
+        
+        $resource = new Resource("Bar", ResourceInterface::BLACKLIST);
+        $resource->addEntity($entity);
+        $resource->process($user, []);
+    }
+    
 }

@@ -20,6 +20,8 @@ use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidEntityException;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use ZoeTest\Component\Security\MockGeneration\User\UserMock;
+use Zoe\Component\Security\Acl\AclUserInterface;
 
 /**
  * ResourceMock testcase
@@ -37,7 +39,7 @@ class ResourceMockTest extends TestCase
      */
     public function testMockGetName(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetName($this->once(), "Foo")->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetName($this->once(), "Foo")->finalizeMock();
         
         $this->assertSame("Foo", $resource->getName());
     }  
@@ -48,15 +50,15 @@ class ResourceMockTest extends TestCase
     public function testMockGetPermissions(): void
     {
         $collection = MaskCollectionMock::init("ResourceCollection")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, $collection)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermissions($this->once(), null, $collection)->finalizeMock();
         
         $this->assertSame($collection, $resource->getPermissions());
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), ["Foo", "Bar"], $collection)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermissions($this->once(), ["Foo", "Bar"], $collection)->finalizeMock();
         $this->assertSame($collection, $resource->getPermissions(["Foo", "Bar"]));
         
         $this->expectException(InvalidPermissionException::class);
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
         $resource->getPermissions();
     }
     
@@ -65,7 +67,7 @@ class ResourceMockTest extends TestCase
      */
     public function testExceptionParameterInvalidPermissionWhenMockGetPermissions(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermissions($this->once(), null, null, "Foo")->finalizeMock();
         
         try {
             $resource->getPermissions();
@@ -82,7 +84,7 @@ class ResourceMockTest extends TestCase
         $collectionFoo = MaskCollectionMock::init("ResourceCollectionFoo")->finalizeMock();
         $collectionBar = MaskCollectionMock::init("ResourceCollectionBar")->finalizeMock();
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermissions_consecutive(
                                         $this->exactly(2), 
                                         [
@@ -97,7 +99,7 @@ class ResourceMockTest extends TestCase
         $this->assertSame($collectionBar, $resource->getPermissions(["Foo", "Bar"]));
         
         $this->expectException(InvalidPermissionException::class);
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermissions_consecutive(
                                         $this->exactly(2), 
                                         [
@@ -118,7 +120,7 @@ class ResourceMockTest extends TestCase
     public function testExceptionParameterInvalidPermissionWhenMockGetPermissions_consecutive(): void
     {
         $collection = MaskCollectionMock::init("Collection")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermissions_consecutive(
                                         $this->exactly(2), 
                                         [
@@ -143,12 +145,12 @@ class ResourceMockTest extends TestCase
     public function testMockGetPermission(): void
     {
         $permission = MaskMock::init("Foo")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermission($this->once(), "Foo", $permission)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermission($this->once(), "Foo", $permission)->finalizeMock();
         
         $this->assertSame($permission, $resource->getPermission("Foo"));
         
         $this->expectException(InvalidPermissionException::class);
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermission($this->once(), "Foo", null)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermission($this->once(), "Foo", null)->finalizeMock();
         
         $resource->getPermission("Foo");
     }
@@ -158,7 +160,7 @@ class ResourceMockTest extends TestCase
      */
     public function testExceptionParameterInvalidPermissionWhenMockGetPermission(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetPermission($this->once(), "Foo", null)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetPermission($this->once(), "Foo", null)->finalizeMock();
         
         try {
             $resource->getPermission("Foo");
@@ -175,7 +177,7 @@ class ResourceMockTest extends TestCase
         $permissionFoo = MaskMock::init("Foo")->finalizeMock();
         $permissionBar = MaskMock::init("Bar")->finalizeMock();
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
@@ -187,7 +189,7 @@ class ResourceMockTest extends TestCase
         $this->assertSame($permissionBar, $resource->getPermission("Bar"));
         
         $this->expectException(InvalidPermissionException::class);
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
@@ -205,7 +207,7 @@ class ResourceMockTest extends TestCase
     public function testExceptionParameterInvalidPermissionWhenMockGetPermission_consecutive(): void
     {
         $mask = MaskMock::init("MaskPermission")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
@@ -226,11 +228,11 @@ class ResourceMockTest extends TestCase
      */
     public function testMockHasPermission(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockHasPermission($this->once(), "Foo", true)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockHasPermission($this->once(), "Foo", true)->finalizeMock();
         
         $this->assertTrue($resource->hasPermission("Foo"));
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockHasPermission($this->once(), "Foo", false)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockHasPermission($this->once(), "Foo", false)->finalizeMock();
         
         $this->assertFalse($resource->hasPermission("Foo"));
     }
@@ -240,7 +242,7 @@ class ResourceMockTest extends TestCase
      */
     public function testMockHasPermission_consecutive(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockHasPermission_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
@@ -261,11 +263,11 @@ class ResourceMockTest extends TestCase
             "Bar"   =>  EntityMock::init("EntityBarAdded")->finalizeMock()
         ];
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntities($this->once(), $entities)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetEntities($this->once(), $entities)->finalizeMock();
         
         $this->assertSame($entities, $resource->getEntities());
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntities($this->once(), null)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetEntities($this->once(), null)->finalizeMock();
         
         $this->assertNull($resource->getEntities());
     }
@@ -277,13 +279,13 @@ class ResourceMockTest extends TestCase
     {
         $entity = EntityMock::init("EntityGetted")->finalizeMock();
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntity($this->once(), "Foo", $entity)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetEntity($this->once(), "Foo", $entity)->finalizeMock();
         
         $this->assertSame($entity, $resource->getEntity("Foo"));
         
         $this->expectException(InvalidEntityException::class);
         $entity = null;
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetEntity($this->once(), "Foo", $entity)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetEntity($this->once(), "Foo", $entity)->finalizeMock();
         
         $resource->getEntity("Foo");
     }
@@ -296,7 +298,7 @@ class ResourceMockTest extends TestCase
         $entityFoo = EntityMock::init("EntityFooGetted")->finalizeMock();
         $entityBar = EntityMock::init("EntityBarGetted")->finalizeMock();
         
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetEntity_consecutive(
                                         $this->exactly(2), 
                                         [["Foo"], ["Bar"]], 
@@ -308,7 +310,7 @@ class ResourceMockTest extends TestCase
         
         $this->expectException(InvalidEntityException::class);        
         $entityFoo = EntityMock::init("EntityFooGetted")->finalizeMock();
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)
+        $resource = ResourceMock::init("Foo")
                                     ->mockGetEntity_consecutive(
                                         $this->exactly(2),
                                         [["Foo"], ["Bar"]],
@@ -324,9 +326,34 @@ class ResourceMockTest extends TestCase
      */
     public function testMockGetBehaviour(): void
     {
-        $resource = ResourceMock::init("Foo", ResourceInterface::class)->mockGetBehaviour($this->once(), ResourceInterface::BLACKLIST)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockGetBehaviour($this->once(), ResourceInterface::BLACKLIST)->finalizeMock();
         
         $this->assertSame(ResourceInterface::BLACKLIST, $resource->getBehaviour());
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockProcess()
+     */
+    public function testMockProcess(): void
+    {
+        $user = UserMock::init("UserProcessed", AclUserInterface::class)->finalizeMock();
+        $resource = ResourceMock::init("Foo")->mockProcess($this->once(), $user, [])->finalizeMock();
+        
+        $this->assertNull($resource->process($user, []));
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock::mockIsProcessed()
+     */
+    public function testMockIsProcessed(): void
+    {
+        $resource = ResourceMock::init("Foo")->mockIsProcessed($this->once(), true)->finalizeMock();
+        
+        $this->assertTrue($resource->isProcessed());
+        
+        $resource = ResourceMock::init("Foo")->mockIsProcessed($this->once(), false)->finalizeMock();
+        
+        $this->assertFalse($resource->isProcessed());
     }
     
 }
