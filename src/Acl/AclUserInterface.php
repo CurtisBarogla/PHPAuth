@@ -14,6 +14,7 @@ namespace Zoe\Component\Security\Acl;
 
 use Zoe\Component\Security\Acl\Resource\ResourceInterface;
 use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use Zoe\Component\Security\Acl\Mask\Mask;
 
 /**
  * Convenient way to set permission permission into user.
@@ -45,5 +46,13 @@ interface AclUserInterface extends AuthenticatedUserInterface
      *   Permissions to deny. Can be raw permissions setted into the resource or values setted into a resource entity
      */
     public function deny(ResourceInterface $resource, array $permissions): void; 
+    
+    /**
+     * Get the current user permission mask
+     * 
+     * @return Mask
+     *   Permission mask
+     */
+    public function getPermissions(): Mask;
     
 }

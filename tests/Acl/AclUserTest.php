@@ -211,6 +211,18 @@ class AclUserTest extends TestCase
         $this->assertNull($user->deny($resource, ["Foo", "BAR"]));
     }
     
+    /**
+     * @see \Zoe\Component\Security\Acl\AclUser::getPermissions()
+     */
+    public function testGetPermissions(): void
+    {
+        $permissions = $this->getMockMaskPermission(0);
+        
+        $user = new AclUser($permissions, $this->getMockAuthenticatedUser());
+        
+        $this->assertSame($permissions, $user->getPermissions());
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**

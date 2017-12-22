@@ -23,6 +23,7 @@ use Zoe\Component\Security\User\AuthenticatedUserInterface;
 use Zoe\Component\Security\User\AuthenticationUserInterface;
 use Zoe\Component\Security\User\UserInterface;
 use PHPUnit_Framework_MockObject_Matcher_Invocation as MethodCount;
+use Zoe\Component\Security\Acl\Mask\Mask;
 
 /**
  * Responsible to mock user objects
@@ -985,7 +986,7 @@ class UserMock extends MockGeneration
         
         return $this->executeMock($method, $mock);
     }
-    
+
     /**
      * Mock deny() with consecutive calls
      *
@@ -1008,6 +1009,28 @@ class UserMock extends MockGeneration
             $return = $this->stubThrowableOnBool(new InvalidPermissionException(), $values, ...$exceptions);
             
             $this->mock->expects($count)->method($method)->withConsecutive(...$resourcesAndPermissions)->willReturnOnConsecutiveCalls(...$return);
+        };
+        
+        return $this->executeMock($method, $mock);
+    }
+    
+    /**
+     * Mock getPermissions()
+     *
+     * @param MethodCount $count
+     *   Called count
+     * @param Mask $permissionMask
+     *   Permissions mask returned
+     *
+     * @return self
+     *   Fluent
+     */
+    public function mockGetPermissions(MethodCount $count, Mask $permissionMask): self
+    {
+        $method = "getPermissions";
+        $this->checkUser([AclUserInterface::class], $method);
+        $mock = function(string $method) use ($permissionMask, $count): void {
+            $this->mock->expects($count)->method($method)->will($this->returnValue($permissionMask));
         };
         
         return $this->executeMock($method, $mock);

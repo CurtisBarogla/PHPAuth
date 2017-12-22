@@ -13,17 +13,17 @@ declare(strict_types = 1);
 namespace ZoeTest\Component\Security\MockGeneration\Tests\User;
 
 use PHPUnit\Framework\TestCase;
-use ZoeTest\Component\Security\MockGeneration\User\UserMock;
-use Zoe\Component\Security\User\UserInterface;
-use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
-use Zoe\Component\Security\User\AuthenticationUserInterface;
-use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
-use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
-use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use ZoeTest\Component\Security\MockGeneration\Acl\MaskMock;
 use ZoeTest\Component\Security\MockGeneration\Acl\ResourceMock;
-use Zoe\Component\Security\Acl\Resource\ImmutableResourceInterface;
+use ZoeTest\Component\Security\MockGeneration\User\UserMock;
 use Zoe\Component\Security\Acl\AclUserInterface;
 use Zoe\Component\Security\Exception\Acl\InvalidPermissionException;
+use Zoe\Component\Security\Exception\User\InvalidUserAttributeException;
+use Zoe\Component\Security\Exception\User\InvalidUserCredentialException;
+use Zoe\Component\Security\Exception\User\InvalidUserRoleException;
+use Zoe\Component\Security\User\AuthenticatedUserInterface;
+use Zoe\Component\Security\User\AuthenticationUserInterface;
+use Zoe\Component\Security\User\UserInterface;
 
 /**
  * UserMock testcase
@@ -583,7 +583,7 @@ class UserMockTest extends TestCase
      */
     public function testMockGrant(): void
     {
-        $resource = ResourceMock::init("ResourceForMockGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        $resource = ResourceMock::init("ResourceForMockGrantTest")->finalizeMock();
         
         $user = UserMock::init("Foo", AclUserInterface::class)
                             ->mockGrant($this->once(), $resource, ["Foo", "Bar"], false)
@@ -604,8 +604,8 @@ class UserMockTest extends TestCase
      */
     public function testMockGrant_consecutive(): void
     {
-        $resourceFoo = ResourceMock::init("ResourceFooTestGrant", ImmutableResourceInterface::class)->finalizeMock();
-        $resourceBar = ResourceMock::init("ResourceBarGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        $resourceFoo = ResourceMock::init("ResourceFooTestGrant")->finalizeMock();
+        $resourceBar = ResourceMock::init("ResourceBarGrantTest")->finalizeMock();
         
         $user = UserMock::init("Foo", AclUserInterface::class)
                             ->mockGrant_consecutive(
@@ -640,7 +640,7 @@ class UserMockTest extends TestCase
      */
     public function testMockDeny(): void
     {
-        $resource = ResourceMock::init("ResourceForMockDenyTest", ImmutableResourceInterface::class)->finalizeMock();
+        $resource = ResourceMock::init("ResourceForMockDenyTest")->finalizeMock();
         
         $user = UserMock::init("Foo", AclUserInterface::class)
                             ->mockDeny($this->once(), $resource, ["Foo", "Bar"], false)
@@ -661,8 +661,8 @@ class UserMockTest extends TestCase
      */
     public function testMockDeny_consecutive(): void
     {
-        $resourceFoo = ResourceMock::init("ResourceFooTestGrant", ImmutableResourceInterface::class)->finalizeMock();
-        $resourceBar = ResourceMock::init("ResourceBarGrantTest", ImmutableResourceInterface::class)->finalizeMock();
+        $resourceFoo = ResourceMock::init("ResourceFooTestGrant")->finalizeMock();
+        $resourceBar = ResourceMock::init("ResourceBarGrantTest")->finalizeMock();
         
         $user = UserMock::init("Foo", AclUserInterface::class)
                             ->mockDeny_consecutive(
@@ -690,6 +690,18 @@ class UserMockTest extends TestCase
                 
         $this->assertNull($user->deny($resourceFoo, ["Foo", "Bar"]));
         $user->deny($resourceBar, ["Moz", "Poz"]);
+    }
+    
+    /**
+     * @see \ZoeTest\Component\Security\MockGeneration\User\UserMock::mockGetPermissions()
+     */
+    public function testMockGetPermissions(): void
+    {
+        $permissions = MaskMock::init("PermissionsMask")->finalizeMock();
+        
+        $user = UserMock::init("Foo", AclUserInterface::class)->mockGetPermissions($this->once(), $permissions)->finalizeMock();
+        
+        $this->assertSame($permissions, $user->getPermissions());
     }
     
                     /**_____EXCEPTIONS_____**/

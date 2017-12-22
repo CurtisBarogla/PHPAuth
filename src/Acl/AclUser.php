@@ -176,6 +176,15 @@ class AclUser implements AclUserInterface
     
     /**
      * {@inheritDoc}
+     * @see \Zoe\Component\Security\Acl\AclUserInterface::getPermissions()
+     */
+    public function getPermissions(): Mask
+    {
+        return $this->permissions;
+    }
+    
+    /**
+     * {@inheritDoc}
      * @see \JsonSerializable::jsonSerialize()
      */
     public function jsonSerialize(): void
