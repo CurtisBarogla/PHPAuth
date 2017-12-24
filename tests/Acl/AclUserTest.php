@@ -223,6 +223,20 @@ class AclUserTest extends TestCase
         $this->assertSame($permissions, $user->getPermissions());
     }
     
+    /**
+     * @see \Zoe\Component\Security\Acl\AclUser::__clone()
+     */
+    public function testClone(): void
+    {
+        $permissions = $this->getMockMaskPermission(0);
+        
+        $user = new AclUser($permissions, $this->getMockAuthenticatedUser());
+        
+        $user = clone $user;
+        
+        $this->assertNotSame($permissions, $user->getPermissions());
+    }
+    
                     /**_____EXCEPTIONS_____**/
     
     /**

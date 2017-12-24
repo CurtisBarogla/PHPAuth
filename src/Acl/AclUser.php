@@ -205,6 +205,14 @@ class AclUser implements AclUserInterface
     }
     
     /**
+     * For callback and bindable handling on acl
+     */
+    public function __clone()
+    {
+        $this->permissions = clone $this->permissions;
+    }
+    
+    /**
      * Proceed attribution
      * 
      * @param ResourceInterface $resource
