@@ -231,7 +231,7 @@ class Resource implements ResourceInterface
             if($entity instanceof ResourceAwareInterface)
                 $entity->setResource($this);
             
-                $processors[$processor]->process($entity, $user);
+            $processors[$processor]->process($entity, $user);
         }
         
         $this->processed = true;

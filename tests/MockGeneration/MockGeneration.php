@@ -60,7 +60,7 @@ abstract class MockGeneration extends TestCase
      * @param string $mockId
      *   Mock id
      * @param string $objectName
-     *   Complet object name to mock
+     *   Exact object name to mock
      * @param mixed ...$argsConstructor
      *   Variadic number of arguments to pass to the constructor of the mocked object. Let empty to disable constructor
      */
