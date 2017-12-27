@@ -28,11 +28,10 @@ trait ResourceAwareTrait
      */
     protected $resource;
     
+    
     /**
-     * Get the register resource
-     * 
-     * @return ResourceInterface
-     *   Resource registered
+     * {@inheritdoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceAwareInterface::getResource()
      */
     public function getResource(): ResourceInterface
     {
@@ -40,10 +39,8 @@ trait ResourceAwareTrait
     }
     
     /**
-     * Register the register
-     * 
-     * @param ResourceInterface $resource
-     *   Resource to register
+     * {@inheritdoc}
+     * @see \Zoe\Component\Security\Acl\Resource\ResourceAwareInterface::setResource()
      */
     public function setResource(ResourceInterface $resource): void
     {
