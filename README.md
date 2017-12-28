@@ -1,5 +1,5 @@
-# Security component
+# Authentication component
 
 Far from being finished :)
 
-Security component
+Authentication component
