@@ -22,10 +22,14 @@
 		]
 	},
 	"require" : {
-		"php" : ">= 7.1"
+		"php" : ">= 7.1",
+		"barogla/user" : "dev-master"
 	},
 	"keywords" : [
 		"user",
 		"authentication"
-	]
+	],
+	"require-dev" : {
+		"barogla/internal" : "dev-master"
+	}
 }
