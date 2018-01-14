@@ -31,5 +31,8 @@
 	],
 	"require-dev" : {
 		"barogla/internal" : "dev-master"
+	},
+	"suggest" : {
+		"barogla/password" : "To use password authentication"
 	}
 }
