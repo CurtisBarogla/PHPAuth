@@ -34,5 +34,10 @@
 	},
 	"suggest" : {
 		"barogla/password" : "To use password authentication"
+	},
+	"extra" : {
+		"branch-alias" : {
+			"dev-master" : "2.0-dev"
+		}
 	}
 }
