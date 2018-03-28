@@ -15,6 +15,7 @@ namespace Zoe\Component\Authentication\Strategy;
 use Zoe\Component\User\AuthenticationUserInterface;
 use Zoe\Component\User\Loader\LoadedUserAwareTrait;
 use Zoe\Component\Password\Hash\PasswordHashInterface;
+use Zoe\Component\Password\Password;
 
 /**
  * Authenticate user via its password
@@ -54,7 +55,7 @@ class PasswordAuthenticationStrategy implements AuthenticationStrategyInterface
         if(null === $this->user->getPassword() || null === $user->getPassword())
             return self::SKIP;
         
-        return $this->hash->isValid($user->getPassword(), $this->user->getPassword()) ? self::SUCCESS : self::ERROR;
+        return $this->hash->isValid(new Password($user->getPassword()), $this->user->getPassword()) ? self::SUCCESS : self::ERROR;
     }
 
 }

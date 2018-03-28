@@ -17,6 +17,7 @@ use Zoe\Component\Password\Hash\PasswordHashInterface;
 use Zoe\Component\Authentication\Strategy\PasswordAuthenticationStrategy;
 use Zoe\Component\Authentication\Strategy\AuthenticationStrategyInterface;
 use Zoe\Component\User\AuthenticationUserInterface;
+use Zoe\Component\Password\Password;
 
 /**
  * PasswordAuthenticationStrategy testcase
@@ -34,10 +35,14 @@ class PasswordAuthenticationStrategyTest extends TestCase
      */
     public function testProcess(): void
     {
+        $passwordGiven = new Password("FooUserGiven");
+        
         $hash = $this->getMockBuilder(PasswordHashInterface::class)->getMock();
-        $hash->expects($this->once())->method("isValid")->with("FooUserGiven", "FooUserLoaded")->will($this->returnValue(true));
+        $hash->expects($this->once())->method("isValid")->with($passwordGiven, "FooUserLoaded")->will($this->returnValue(true));
+        
         $loadedUser = $this->getMockBuilder(AuthenticationUserInterface::class)->getMock();
         $loadedUser->expects($this->exactly(2))->method("getPassword")->will($this->returnValue("FooUserLoaded"));
+        
         $user = $this->getMockBuilder(AuthenticationUserInterface::class)->getMock();
         $user->expects($this->exactly(2))->method("getPassword")->will($this->returnValue("FooUserGiven"));
         
@@ -52,10 +57,14 @@ class PasswordAuthenticationStrategyTest extends TestCase
      */
     public function testProcessError(): void
     {
+        $passwordGiven = new Password("FooUserGiven");
+        
         $hash = $this->getMockBuilder(PasswordHashInterface::class)->getMock();
-        $hash->expects($this->once())->method("isValid")->with("FooUserGiven", "FooUserLoaded")->will($this->returnValue(false));
+        $hash->expects($this->once())->method("isValid")->with($passwordGiven, "FooUserLoaded")->will($this->returnValue(false));
+        
         $loadedUser = $this->getMockBuilder(AuthenticationUserInterface::class)->getMock();
         $loadedUser->expects($this->exactly(2))->method("getPassword")->will($this->returnValue("FooUserLoaded"));
+        
         $user = $this->getMockBuilder(AuthenticationUserInterface::class)->getMock();
         $user->expects($this->exactly(2))->method("getPassword")->will($this->returnValue("FooUserGiven"));
         
