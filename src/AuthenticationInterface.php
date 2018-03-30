@@ -15,6 +15,7 @@ namespace Zoe\Component\Authentication;
 use Zoe\Component\User\AuthenticationUserInterface;
 use Zoe\Component\User\AuthenticatedUserInterface;
 use Zoe\Component\Authentication\Exception\AuthenticationFailedException;
+use Zoe\Component\User\UserInterface;
 
 /**
  * Responsible to authenticate user
@@ -39,5 +40,16 @@ interface AuthenticationInterface
      *   When user cannot be authenticated
      */
     public function authenticate(AuthenticationUserInterface $user): AuthenticatedUserInterface;
+    
+    /**
+     * Check if a user is already considered authenticated by the authentication process
+     * 
+     * @param UserInterface $user
+     *   User to check if authenticated
+     * 
+     * @return bool
+     *   True if the user is considered authenticated. False otherwise
+     */
+    public function isAuthenticated(UserInterface $user): bool;
     
 }

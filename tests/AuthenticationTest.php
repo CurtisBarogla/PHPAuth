@@ -20,6 +20,7 @@ use Zoe\Component\User\AuthenticatedUserInterface;
 use Zoe\Component\User\AuthenticationUserInterface;
 use Zoe\Component\User\Exception\UserNotFoundException;
 use Zoe\Component\User\Loader\UserLoaderInterface;
+use Zoe\Component\User\UserInterface;
 
 /**
  * Authentication testcase
@@ -52,6 +53,24 @@ class AuthenticationTest extends TestCase
         
         $this->assertInstanceOf(AuthenticatedUserInterface::class, $user);
         $this->assertSame("Foo", $user->getName());
+    }
+    
+    /**
+     * @see \Zoe\Component\Authentication\Authentication::isAuthenticated()
+     */
+    public function testIsAuthenticated(): void
+    {
+        $user = $this->getMockBuilder(AuthenticatedUserInterface::class)->getMock();
+        $strategy = $this->getMockBuilder(AuthenticationStrategyInterface::class)->getMock();
+        $loader = $this->getMockBuilder(UserLoaderInterface::class)->getMock();
+        
+        $authentication = new Authentication($strategy, $loader);
+        
+        $this->assertTrue($authentication->isAuthenticated($user));
+        
+        $user = $this->getMockBuilder(UserInterface::class)->getMock();
+        
+        $this->assertFalse($authentication->isAuthenticated($user));
     }
     
     /**

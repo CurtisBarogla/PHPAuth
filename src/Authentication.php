@@ -19,6 +19,7 @@ use Zoe\Component\User\Loader\UserLoaderInterface;
 use Zoe\Component\User\Exception\UserNotFoundException;
 use Zoe\Component\Authentication\Exception\AuthenticationFailedException;
 use Zoe\Component\User\AuthenticatedUser;
+use Zoe\Component\User\UserInterface;
 
 /**
  * Native implementation of AuthenticationInterface.
@@ -85,6 +86,17 @@ class Authentication implements AuthenticationInterface
             throw new AuthenticationFailedException(\sprintf("This user '%s' has been not found",
                 $user->getName()));
         }
+    }
+    
+    /**
+     * This implementation only check if user is an instance of AuthenticatedUserInterface. Feel free to elaborate
+     * 
+     * {@inheritDoc}
+     * @see \Zoe\Component\Authentication\AuthenticationInterface::isAuthenticated()
+     */
+    public function isAuthenticated(UserInterface $user): bool
+    {
+        return $user instanceof AuthenticatedUserInterface;
     }
     
     /**
