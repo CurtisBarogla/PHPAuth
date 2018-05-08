@@ -1,5 +1,3 @@
-# Authentication component
+# Authentication Component
 
-Far from being finished :)
-
-Authentication component
+Documentation soon <sup>TM</sup>

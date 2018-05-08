@@ -1,6 +1,6 @@
 {
-	"name" : "barogla/authentication",
-	"description" : "Authentication Component - Zoe",
+	"name" : "ness/authentication",
+	"description" : "Authentication Component - Ness",
 	"type" : "library",
 	"license" : "MIT",
 	"authors" : [{
@@ -14,8 +14,8 @@
 	"minimum-stability" : "stable",
 	"autoload" : {
 		"psr-4" : {
-			"Zoe\\Component\\Authentication\\" : "./src",
-			"ZoeTest\\Component\\Authentication\\" : "./tests"
+			"Ness\\Component\\Authentication\\" : "./src",
+			"NessTest\\Component\\Authentication\\" : "./tests"
 		},
 		"exclude-from-classmap" : [
 			"tests"
@@ -23,21 +23,13 @@
 	},
 	"require" : {
 		"php" : ">= 7.1",
-		"barogla/user" : "dev-master"
+		"ness/user" : "~2.0"
 	},
 	"keywords" : [
 		"user",
-		"authentication"
-	],
-	"require-dev" : {
-		"barogla/internal" : "dev-master"
-	},
-	"suggest" : {
-		"barogla/password" : "To use password authentication"
-	},
-	"extra" : {
-		"branch-alias" : {
-			"dev-master" : "2.0-dev"
-		}
-	}
+		"authentication",
+		"security",
+		"interaction",
+		"generation"
+	]
 }
