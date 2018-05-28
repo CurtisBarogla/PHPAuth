@@ -33,7 +33,7 @@ interface AuthenticationUserInterface extends UserInterface
      * @throws UserCredentialNotFoundException
      *   When no password has been defined for this user
      */
-    public function getPassword(): ?string;
+    public function getPassword(): string;
     
     /**
      * Get a specific credential for the user
