@@ -25,6 +25,9 @@
 		"php" : ">= 7.1",
 		"ness/user" : "~2.0"
 	},
+	"suggest" : {
+		"ness/password" : "2.x; To use PasswordAuthenticationStrategy"
+	},
 	"keywords" : [
 		"user",
 		"authentication",
