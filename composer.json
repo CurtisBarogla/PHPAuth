@@ -14,12 +14,13 @@
 	"minimum-stability" : "stable",
 	"autoload" : {
 		"psr-4" : {
-			"Ness\\Component\\Authentication\\" : "./src",
-			"NessTest\\Component\\Authentication\\" : "./tests"
-		},
-		"exclude-from-classmap" : [
-			"tests"
-		]
+			"Ness\\Component\\Authentication\\" : "./src"
+		}
+	},
+	"autoload-dev" : {
+		"psr-4" : {
+			"NessTest\\Component\\Authentication\\" : "tests"
+		}
 	},
 	"require" : {
 		"php" : ">= 7.1",
