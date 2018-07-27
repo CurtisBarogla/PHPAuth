@@ -35,7 +35,7 @@ class PasswordAuthenticationStrategyTest extends AuthenticationTestCase
      */
     public function testProcess(): void
     {
-        if(!\class_exists("Ness\Component\Password\Hash\PasswordHashInterface"))
+        if(!\interface_exists("Ness\Component\Password\Hash\PasswordHashInterface"))
             $this->markTestSkipped("PasswordHash not found");
         
         $userLoaded = $this->getMockBuilder(AuthenticationUserInterface::class)->getMock();
