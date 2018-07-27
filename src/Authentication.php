@@ -22,7 +22,6 @@ use Ness\Component\Authentication\Exception\AuthenticationFailedException;
 use Ness\Component\Authentication\User\AuthenticatedUser;
 use Ness\Component\Authentication\User\AuthenticationUser;
 use Ness\Component\Authentication\Exception\UserCredentialNotFoundException;
-use Ness\Component\User\Exception\UserAttributeNotFoundException;
 
 /**
  * Basic implementation of AuthenticationInterface based on setted AuthenticationStrategy and UserLoader.
@@ -102,7 +101,7 @@ class Authentication implements AuthenticationInterface
                 }
                 
                 throw new AuthenticationFailedException("This user '{$user->getName()}' cannot be authenticated by Authentication component as given strategy failed", self::STRATEGY_FAILED);
-            } catch (UserCredentialNotFoundException|UserAttributeNotFoundException $e) {
+            } catch (UserCredentialNotFoundException $e) {
                 throw new AuthenticationFailedException("This user '{$user->getName()}' cannot be authenticated by Authentication component as no strategy can handle it", self::STRATEGY_ERROR);
             }
             

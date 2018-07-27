@@ -14,7 +14,6 @@ namespace Ness\Component\Authentication\User;
 
 use Ness\Component\User\User;
 use Ness\Component\User\UserInterface;
-use Ness\Component\User\Exception\UserAttributeNotFoundException;
 use Ness\Component\Authentication\Exception\UserCredentialNotFoundException;
 
 /**
@@ -92,25 +91,26 @@ final class AuthenticationUser extends User implements AuthenticationUserInterfa
      * @throws \TypeError
      *   When given crendentials attribute is not an array
      */
-    public static function initializeFromUser(UserInterface $user): AuthenticationUserInterface
+    public static function initializeFromUser(UserInterface $user, ?array $credentials = null): AuthenticationUserInterface
     {
         $user = new self($user->getName(), $user->getAttributes(), $user->getRoles());
         
-        try {
-            $credentials = $user->getAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER);
+        if(null !== $credentials) {
+            foreach ($credentials as $credential => $value)
+                $user->credentials[$credential] = $value;
+        }
+        
+        if(null !== $credentials = $user->getAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER)) {
             if(!\is_array($credentials))
                 throw new \TypeError(\sprintf("Credentials attribute MUST be an array with each credential indexed by its name. '%s' given",
                     \gettype($credentials)));
-                
             foreach ($credentials as $credential => $value)
                 $user->credentials[$credential] = $value;
             
-            $user->deleteAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER);
-                
-            return $user;
-        } catch (UserAttributeNotFoundException $e) {
-            return $user;
+            $user->deleteAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER);                        
         }
+        
+        return $user;
     }
     
 }

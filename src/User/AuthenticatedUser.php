@@ -13,7 +13,6 @@ declare(strict_types = 1);
 namespace Ness\Component\Authentication\User;
 
 use Ness\Component\User\User;
-use Ness\Component\User\Exception\UserAttributeNotFoundException;
 use Ness\Component\User\UserInterface;
 
 /**
@@ -99,19 +98,17 @@ final class AuthenticatedUser extends User implements AuthenticatedUserInterface
     {
         $user = new self($user->getName(), $user->getAttributes(), $user->getRoles());
         
-        try {
-            $root = $user->getAttribute(self::ROOT_ATTRIBUTE_IDENTIFIER);
-            if(!\is_bool($root))
-                throw new \TypeError(\sprintf("Root attribute MUST a boolean. '%s' given",
-                    \gettype($root)));
-                
-            $user->root = $root;
-            $user->deleteAttribute(self::ROOT_ATTRIBUTE_IDENTIFIER);
+        if(null === $isRoot = $user->getAttribute(self::ROOT_ATTRIBUTE_IDENTIFIER))
+            return $user;
+
+        if(!\is_bool($isRoot))
+            throw new \TypeError(\sprintf("Root attribute MUST a boolean. '%s' given",
+                \gettype($isRoot)));
             
-            return $user;
-        } catch (UserAttributeNotFoundException $e) {
-            return $user;
-        }
+        $user->root = $isRoot;
+        $user->deleteAttribute(self::ROOT_ATTRIBUTE_IDENTIFIER);
+        
+        return $user;
     }
     
 }

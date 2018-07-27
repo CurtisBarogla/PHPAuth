@@ -80,10 +80,10 @@ class AuthenticatedUserTest extends AuthenticationTestCase
     public function testExceptionWhenRootAttributeIsNotABoolean(): void
     {
         $this->expectException(\TypeError::class);
-        $this->expectExceptionMessage("Root attribute MUST a boolean. 'NULL' given");
+        $this->expectExceptionMessage("Root attribute MUST a boolean. 'array' given");
         
         $user = $this->getMockBuilder(UserInterface::class)->getMock();
-        $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticatedUser::ROOT_ATTRIBUTE_IDENTIFIER => null]));
+        $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticatedUser::ROOT_ATTRIBUTE_IDENTIFIER => []]));
         
         AuthenticatedUser::initializeFromUser($user);
     }

@@ -38,15 +38,16 @@ class AuthenticationUserTest extends AuthenticationTestCase
         $user->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
         $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticationUser::CREDENTIAL_ATTRIBUTE_IDENTIFIER => [
             "password"  =>  "Foo",
-            "Bar"       =>  "Bar"
+            "Bar"       =>  "Foo"
         ], "Bar" => "Foo"]));
         $user->expects($this->once())->method("getRoles")->will($this->returnValue(["Foo", "Bar"]));
         
-        $authentication = AuthenticationUser::initializeFromUser($user);
+        $authentication = AuthenticationUser::initializeFromUser($user, ["Foo" => "Bar"]);
         
         $this->assertSame("Foo", $authentication->getName());
         $this->assertSame("Foo", $authentication->getPassword());
-        $this->assertSame("Bar", $authentication->getCredential("Bar"));
+        $this->assertSame("Bar", $authentication->getCredential("Foo"));
+        $this->assertSame("Bar", $authentication->getCredential("Foo"));
         $this->assertSame(["Bar" => "Foo"], $authentication->getAttributes());
         $this->assertSame(["Foo", "Bar"], $authentication->getRoles());
     }
@@ -104,11 +105,11 @@ class AuthenticationUserTest extends AuthenticationTestCase
     public function testExceptionWhenCredentialAttributeIsNotAnArray(): void
     {
         $this->expectException(\TypeError::class);
-        $this->expectExceptionMessage("Credentials attribute MUST be an array with each credential indexed by its name. 'NULL' given");
+        $this->expectExceptionMessage("Credentials attribute MUST be an array with each credential indexed by its name. 'string' given");
         
         $user = $this->getMockBuilder(UserInterface::class)->getMock();
         $user->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
-        $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticationUser::CREDENTIAL_ATTRIBUTE_IDENTIFIER => null, "Bar" => "Foo"]));
+        $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticationUser::CREDENTIAL_ATTRIBUTE_IDENTIFIER => "Foo", "Bar" => "Foo"]));
         $user->expects($this->once())->method("getRoles")->will($this->returnValue(["Foo", "Bar"]));
         
         $authentication = AuthenticationUser::initializeFromUser($user);
