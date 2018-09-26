@@ -55,14 +55,14 @@ class Authentication implements AuthenticationInterface
     public const USER_NOT_FOUND = 1;
     
     /**
-     * Exception code when an attribute or a credential has been not setted into the user
+     * Exception code when a credential is missing
      * 
      * @var int
      */
     public const STRATEGY_ERROR = 2;
     
     /**
-     * Exception when strategy found the attribute or credential when failed the process
+     * Exception when strategy failed to authenticate the user
      * 
      * @var int
      */
@@ -93,20 +93,29 @@ class Authentication implements AuthenticationInterface
             $this->strategy->setLoadedUser($loaded);
             
             try {
+                $authenticated = AuthenticatedUser::initializeFromUser($loaded);
                 if($this->strategy->process(
                     (!$user instanceof AuthenticationUserInterface) 
                         ? AuthenticationUser::initializeFromUser($user) 
                         : $user) === AuthenticationStrategyInterface::SUCCESS) {
-                    return AuthenticatedUser::initializeFromUser($loaded);
+                    return $authenticated;
                 }
                 
-                throw new AuthenticationFailedException("This user '{$user->getName()}' cannot be authenticated by Authentication component as given strategy failed", self::STRATEGY_FAILED);
+                throw new AuthenticationFailedException(
+                    $authenticated, 
+                    "This user '{$user->getName()}' cannot be authenticated by Authentication component as given strategy failed", 
+                    self::STRATEGY_FAILED);
             } catch (UserCredentialNotFoundException $e) {
-                throw new AuthenticationFailedException("This user '{$user->getName()}' cannot be authenticated by Authentication component as no strategy can handle it", self::STRATEGY_ERROR);
+                throw new AuthenticationFailedException(
+                    $authenticated, 
+                    "This user '{$user->getName()}' cannot be authenticated by Authentication component as no strategy can handle it", 
+                    self::STRATEGY_ERROR);
             }
-            
         } catch (UserNotFoundException $e) {
-            throw new AuthenticationFailedException("This user '{$user->getName()}' cannot be authenticated as given UserLoader cannot found one", self::USER_NOT_FOUND);
+            throw new AuthenticationFailedException(
+                AuthenticatedUser::initializeFromUser($user), 
+                "This user '{$user->getName()}' cannot be authenticated as given UserLoader cannot found one", 
+                self::USER_NOT_FOUND);
         }
     }
 

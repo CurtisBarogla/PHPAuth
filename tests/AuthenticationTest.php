@@ -63,7 +63,7 @@ class AuthenticationTest extends AuthenticationTestCase
         $this->expectExceptionMessage("This user 'Foo' cannot be authenticated by Authentication component as no strategy can handle it");
         $this->expectExceptionCode(Authentication::STRATEGY_ERROR);
         
-        $user = new User("Foo");
+        $user = new User("Foo", ["moz" => "poz"], ["ROLE_ADMIN"]);
         $actions = function(MockObject $loader, MockObject $strategy) use ($user): void {
             $authenticationUser = AuthenticationUser::initializeFromUser($user);
             $loader->expects($this->once())->method("loadUser")->with("Foo")->will($this->returnValue($user));
@@ -72,7 +72,19 @@ class AuthenticationTest extends AuthenticationTestCase
         };
         
         $authentication = $this->getInitializedAuthentication($actions);
-        $authentication->authenticate($user);
+        
+        try {
+            $authentication->authenticate($user);
+        } catch (AuthenticationFailedException $e) {
+            $user = $e->getFailedAuthenticatedUser();
+            $this->assertInstanceOf(AuthenticatedUserInterface::class, $user);
+            $this->assertSame("Foo", $user->getName());
+            $this->assertFalse($user->isRoot());
+            $this->assertSame(["ROLE_ADMIN"], $user->getRoles());
+            $this->assertSame(["moz" => "poz"], $user->getAttributes());
+            
+            throw $e;
+        }
     }
     
     /**
@@ -84,7 +96,7 @@ class AuthenticationTest extends AuthenticationTestCase
         $this->expectExceptionMessage("This user 'Foo' cannot be authenticated by Authentication component as given strategy failed");
         $this->expectExceptionCode(Authentication::STRATEGY_FAILED);
         
-        $user = new User("Foo");
+        $user = new User("Foo", ["foo" => "bar"], ["ROLE_MEMBER"]);
         $actions = function(MockObject $loader, MockObject $strategy) use ($user): void {
             $authenticationUser = AuthenticationUser::initializeFromUser($user);
             $loader->expects($this->once())->method("loadUser")->with("Foo")->will($this->returnValue($user));
@@ -93,7 +105,19 @@ class AuthenticationTest extends AuthenticationTestCase
         };
         
         $authentication = $this->getInitializedAuthentication($actions);
-        $authentication->authenticate($user);
+        
+        try {
+            $authentication->authenticate($user);            
+        } catch (AuthenticationFailedException $e) {
+            $user = $e->getFailedAuthenticatedUser();
+            $this->assertInstanceOf(AuthenticatedUserInterface::class, $user);
+            $this->assertSame("Foo", $user->getName());
+            $this->assertFalse($user->isRoot());
+            $this->assertSame(["ROLE_MEMBER"], $user->getRoles());
+            $this->assertSame(["foo" => "bar"], $user->getAttributes());
+            
+            throw $e;
+        }
     }
     
     /**
@@ -105,16 +129,26 @@ class AuthenticationTest extends AuthenticationTestCase
         $this->expectExceptionMessage("This user 'Foo' cannot be authenticated as given UserLoader cannot found one");
         $this->expectExceptionCode(Authentication::USER_NOT_FOUND);
         
-        $user = new User("Foo");
-        $actions = function(MockObject $loader, MockObject $strategy) use ($user): void {
-            $authenticationUser = AuthenticationUser::initializeFromUser($user);
+        $actions = function(MockObject $loader, MockObject $strategy): void {
             $loader->expects($this->once())->method("loadUser")->with("Foo")->will($this->throwException(new UserNotFoundException()));
             $strategy->expects($this->never())->method("process");
             $strategy->expects($this->never())->method("setLoadedUser");
         };
         
         $authentication = $this->getInitializedAuthentication($actions);
-        $authentication->authenticate($user);
+        
+        try {
+            $authentication->authenticate(new User("Foo", ["bar" => "foo"], ["ROLE_ADMIN"]));
+        } catch (AuthenticationFailedException $e) {
+            $user = $e->getFailedAuthenticatedUser();
+            $this->assertInstanceOf(AuthenticatedUserInterface::class, $user);
+            $this->assertSame("Foo", $user->getName());
+            $this->assertFalse($user->isRoot());
+            $this->assertSame(["ROLE_ADMIN"], $user->getRoles());
+            $this->assertSame(["bar" => "foo"], $user->getAttributes());
+            
+            throw $e;
+        }
     }
     
     /**
