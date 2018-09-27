@@ -24,29 +24,15 @@ interface AuthenticationStrategyInterface
 {
     
     /**
-     * Return by a strategy when loaded user and given user cannot be authenticated
-     * 
-     * @var int
-     */
-    public const ERROR = 0;
-    
-    /**
-     * Returned by a strategy considering the user authenticated
-     * 
-     * @var int
-     */
-    public const SUCCESS = 1;
-    
-    /**
      * Process a verification over a loaded user and a given user
      * 
      * @param AuthenticationUserInterface $user
      *   User to compare to a loaded user
      * 
-     * @return int
-     *   One of the const defined into the interface
+     * @return bool
+     *   Return true if the strategy was able to successfuly process the user. False otherwise
      */
-    public function process(AuthenticationUserInterface $user): int;
+    public function process(AuthenticationUserInterface $user): bool;
     
     /**
      * Get currently loaded user given by a loader linked to the strategy.
