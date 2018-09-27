@@ -84,6 +84,8 @@ final class AuthenticationUser extends User implements AuthenticationUserInterfa
      * 
      * @param UserInterface $user
      *   User which to initialize
+     * @param array|null $credentials
+     *   Credentials to inject into the user
      * 
      * @return AuthenticationUserInterface
      *   Authentication user with credentials setted
