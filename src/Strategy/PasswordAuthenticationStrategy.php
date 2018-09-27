@@ -47,9 +47,9 @@ class PasswordAuthenticationStrategy extends AbstractAuthenticationStrategy
      * {@inheritDoc}
      * @see \Ness\Component\Authentication\Strategy\AuthenticationStrategyInterface::process()
      */
-    public function process(AuthenticationUserInterface $user): int
+    public function process(AuthenticationUserInterface $user): bool
     {
-        return $this->password->verify(new Password($user->getPassword()), $this->getLoadedUser()->getPassword()) ? self::SUCCESS : self::ERROR;
+        return $this->password->verify(new Password($user->getPassword()), $this->getLoadedUser()->getPassword());
     }
     
 }

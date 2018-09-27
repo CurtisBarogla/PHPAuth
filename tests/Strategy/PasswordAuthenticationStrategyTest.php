@@ -17,7 +17,6 @@ use Ness\Component\Authentication\User\AuthenticationUserInterface;
 use Ness\Component\Password\Hash\PasswordHashInterface;
 use Ness\Component\Password\Password;
 use Ness\Component\Authentication\Strategy\PasswordAuthenticationStrategy;
-use Ness\Component\Authentication\Strategy\AuthenticationStrategyInterface;
 
 /**
  * PasswordAuthenticationStrategy testcase
@@ -56,8 +55,8 @@ class PasswordAuthenticationStrategyTest extends AuthenticationTestCase
         $this->assertNull($strategy->setLoadedUser($userLoaded));
         $this->assertSame($userLoaded, $strategy->getLoadedUser());
         
-        $this->assertSame(AuthenticationStrategyInterface::SUCCESS, $strategy->process($user));
-        $this->assertSame(AuthenticationStrategyInterface::ERROR, $strategy->process($user));
+        $this->assertSame(true, $strategy->process($user));
+        $this->assertSame(false, $strategy->process($user));
     }
     
 }

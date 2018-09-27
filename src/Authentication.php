@@ -97,7 +97,7 @@ class Authentication implements AuthenticationInterface
                 if($this->strategy->process(
                     (!$user instanceof AuthenticationUserInterface) 
                         ? AuthenticationUser::initializeFromUser($user) 
-                        : $user) === AuthenticationStrategyInterface::SUCCESS) {
+                        : $user) === true) {
                     return $authenticated;
                 }
                 

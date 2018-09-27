@@ -44,7 +44,7 @@ class AuthenticationTest extends AuthenticationTestCase
         $actions = function(MockObject $loader, MockObject $strategy) use ($user): void {
             $authenticationUser = AuthenticationUser::initializeFromUser($user);
             $loader->expects($this->once())->method("loadUser")->with("Foo")->will($this->returnValue($user));
-            $strategy->expects($this->once())->method("process")->with($authenticationUser)->will($this->returnValue(AuthenticationStrategyInterface::SUCCESS));
+            $strategy->expects($this->once())->method("process")->with($authenticationUser)->will($this->returnValue(true));
             $strategy->expects($this->once())->method("setLoadedUser")->with($authenticationUser);
         };
         
@@ -100,7 +100,7 @@ class AuthenticationTest extends AuthenticationTestCase
         $actions = function(MockObject $loader, MockObject $strategy) use ($user): void {
             $authenticationUser = AuthenticationUser::initializeFromUser($user);
             $loader->expects($this->once())->method("loadUser")->with("Foo")->will($this->returnValue($user));
-            $strategy->expects($this->once())->method("process")->with($authenticationUser)->will($this->returnValue(AuthenticationStrategyInterface::ERROR));
+            $strategy->expects($this->once())->method("process")->with($authenticationUser)->will($this->returnValue(false));
             $strategy->expects($this->once())->method("setLoadedUser")->with($authenticationUser);
         };
         
