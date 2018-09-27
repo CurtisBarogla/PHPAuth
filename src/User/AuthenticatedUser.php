@@ -60,7 +60,7 @@ final class AuthenticatedUser extends User implements AuthenticatedUserInterface
     private function __construct(string $name, ?array $attributes, ?iterable $roles = null)
     {
         parent::__construct($name, $attributes, $roles);
-        $this->authenticatedAt = new \DateTime();
+        $this->authenticatedAt = new \DateTimeImmutable();
     }
     
     /**
@@ -92,7 +92,7 @@ final class AuthenticatedUser extends User implements AuthenticatedUserInterface
      *   Authentication user initialized
      * 
      * @throws \TypeError
-     *   When given crendentials attribute is not a boolean
+     *   When given root attribute is not a boolean
      */
     public static function initializeFromUser(UserInterface $user): AuthenticatedUserInterface
     {
