@@ -15,6 +15,7 @@ namespace Ness\Component\Authentication\User;
 use Ness\Component\User\User;
 use Ness\Component\User\UserInterface;
 use Ness\Component\Authentication\Exception\UserCredentialNotFoundException;
+use Ness\Component\Authentication\Exception\ImmutableUserException;
 
 /**
  * Basic implementation of the authentication user.
@@ -43,17 +44,33 @@ final class AuthenticationUser extends User implements AuthenticationUserInterfa
     
     /**
      * Make private
-     * 
-     * @param string $name
-     *   User name
-     * @param array|null $attributes
-     *   User attributes
-     * @param iterable|null $roles
-     *   User roles
      */
-    private function __construct(string $name, ?array $attributes, ?iterable $roles = null)
+    private function __construct()
     {
-        parent::__construct($name, $attributes, $roles);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Ness\Component\User\User::addAttribute()
+     * 
+     * @throws ImmutableUserException
+     *   Authentication user is immutable
+     */
+    public function addAttribute(string $attribute, $value): UserInterface
+    {
+        throw new ImmutableUserException("This user '{$this->getName()}' is in an immutable state. Therefore, no attribute can be setted");  
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \Ness\Component\User\User::deleteAttribute()
+     * 
+     * @throws ImmutableUserException
+     *   Authentication user is immutable
+     */
+    public function deleteAttribute(string $attribute): void
+    {
+        throw new ImmutableUserException("This user '{$this->getName()}' is in an immutable state. Therefore, no attribute can be removed");
     }
     
     /**
@@ -95,11 +112,14 @@ final class AuthenticationUser extends User implements AuthenticationUserInterfa
      */
     public static function initializeFromUser(UserInterface $user, ?array $credentials = null): AuthenticationUserInterface
     {
-        $user = new self($user->getName(), $user->getAttributes(), $user->getRoles());
+        $instance = new self();
+        $instance->name = $user->getName();
+        $instance->attributes = $user->getAttributes();
+        $instance->roles = $user->getRoles();
         
         if(null !== $credentials) {
             foreach ($credentials as $credential => $value)
-                $user->credentials[$credential] = $value;
+                $instance->credentials[$credential] = $value;
         }
         
         if(null !== $credentials = $user->getAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER)) {
@@ -107,12 +127,12 @@ final class AuthenticationUser extends User implements AuthenticationUserInterfa
                 throw new \TypeError(\sprintf("Credentials attribute MUST be an array with each credential indexed by its name. '%s' given",
                     \gettype($credentials)));
             foreach ($credentials as $credential => $value)
-                $user->credentials[$credential] = $value;
+                $instance->credentials[$credential] = $value;
             
-            $user->deleteAttribute(self::CREDENTIAL_ATTRIBUTE_IDENTIFIER);                        
+            unset($instance->attributes[self::CREDENTIAL_ATTRIBUTE_IDENTIFIER]);
         }
         
-        return $user;
+        return $instance;
     }
     
 }

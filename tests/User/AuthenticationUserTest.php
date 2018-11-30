@@ -16,6 +16,7 @@ use NessTest\Component\Authentication\AuthenticationTestCase;
 use Ness\Component\Authentication\User\AuthenticationUser;
 use Ness\Component\User\UserInterface;
 use Ness\Component\Authentication\Exception\UserCredentialNotFoundException;
+use Ness\Component\Authentication\Exception\ImmutableUserException;
 
 /**
  * AuthenticationUser testcase
@@ -40,6 +41,10 @@ class AuthenticationUserTest extends AuthenticationTestCase
             "password"  =>  "Foo",
             "Bar"       =>  "Foo"
         ], "Bar" => "Foo"]));
+        $user->expects($this->once())->method("getAttribute")->with(AuthenticationUser::CREDENTIAL_ATTRIBUTE_IDENTIFIER)->will($this->returnValue([
+            "password"  =>  "Foo",
+            "Bar"       =>  "Foo"
+        ]));
         $user->expects($this->once())->method("getRoles")->will($this->returnValue(["Foo", "Bar"]));
         
         $authentication = AuthenticationUser::initializeFromUser($user, ["Foo" => "Bar"]);
@@ -71,6 +76,34 @@ class AuthenticationUserTest extends AuthenticationTestCase
     
                     /**_____EXCEPTIONS_____**/
 
+    /**
+     * @see \Ness\Component\Authentication\User\AuthenticationUser::addAttribute()
+     */
+    public function testExceptionAddAttributeWhenImmutable(): void
+    {
+        $this->expectException(ImmutableUserException::class);
+        $this->expectExceptionMessage("This user 'FooUser' is in an immutable state. Therefore, no attribute can be setted");
+        
+        $user = $this->getMockBuilder(UserInterface::class)->getMock();
+        $user->expects($this->once())->method("getName")->will($this->returnValue("FooUser"));
+        
+        (AuthenticationUser::initializeFromUser($user))->addAttribute("foo", "bar");
+    }
+    
+    /**
+     * @see \Ness\Component\Authentication\User\AuthenticationUser::deleteAttribute()
+     */
+    public function testExceptionDeleteAttributeWhenImmutable(): void
+    {
+        $this->expectException(ImmutableUserException::class);
+        $this->expectExceptionMessage("This user 'FooUser' is in an immutable state. Therefore, no attribute can be removed");
+        
+        $user = $this->getMockBuilder(UserInterface::class)->getMock();
+        $user->expects($this->once())->method("getName")->will($this->returnValue("FooUser"));
+        
+        (AuthenticationUser::initializeFromUser($user))->deleteAttribute("foo", "bar");
+    }
+    
     /**
      * @see \Ness\Component\Authentication\User\AuthenticationUser::getPassword()
      */
@@ -109,7 +142,7 @@ class AuthenticationUserTest extends AuthenticationTestCase
         
         $user = $this->getMockBuilder(UserInterface::class)->getMock();
         $user->expects($this->once())->method("getName")->will($this->returnValue("Foo"));
-        $user->expects($this->once())->method("getAttributes")->will($this->returnValue([AuthenticationUser::CREDENTIAL_ATTRIBUTE_IDENTIFIER => "Foo", "Bar" => "Foo"]));
+        $user->expects($this->once())->method("getAttribute")->will($this->returnValue("Foo"));
         $user->expects($this->once())->method("getRoles")->will($this->returnValue(["Foo", "Bar"]));
         
         $authentication = AuthenticationUser::initializeFromUser($user);

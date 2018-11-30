@@ -16,7 +16,8 @@ use Ness\Component\User\UserInterface;
 use Ness\Component\Authentication\Exception\UserCredentialNotFoundException;
 
 /**
- * User given to the authentication process
+ * User given to the authentication process.
+ * User into this state MUST be immutable
  * 
  * @author CurtisBarogla <curtis_barogla@outlook.fr>
  *
