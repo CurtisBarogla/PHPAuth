@@ -69,7 +69,7 @@ class Authentication implements AuthenticationInterface
     public const STRATEGY_FAILED = 3;
     
     /**
-     * Initialize authentiation
+     * Initialize authentication process
      * 
      * @param UserLoaderInterface $loader
      *   User loader
